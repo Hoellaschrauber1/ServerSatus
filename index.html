@@ -4,11 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Status App</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+        }
+        .app-name {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .user-section {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+            position: relative;
+        }
+        .icon-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8em;
+        }
+        .dropdown {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            width: 150px;
+            z-index: 1000;
+        }
+        .dropdown button {
+            padding: 10px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+        }
+        .dropdown button:hover {
+            background-color: #f0f0f0;
+        }
+        .hidden {
+            display: none;
+        }
+        .screen {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+        .tab {
+            padding: 10px;
+            background: #ccc;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .tab.active {
+            background: #1a73e8;
+            color: white;
+        }
+        .tab-content {
+            margin-top: 20px;
+        }
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            background: #e9ecef;
+            border-radius: 4px;
+            position: relative;
+        }
+        .message:hover .report-btn {
+            display: inline;
+        }
+        .report-btn {
+            display: none;
+            margin-left: 10px;
+            background: #dc3545;
+        }
+        .report-btn:hover {
+            background: #c82333;
+        }
+        .friend-item, .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .online-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+        .online {
+            background: green;
+        }
+        .offline {
+            background: grey;
+        }
+        .post {
+            background: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .post video {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+        @media (max-width: 600px) {
+            header {
+                padding: 10px;
+            }
+            .app-name {
+                font-size: 1.2em;
+            }
+            .screen {
+                padding: 10px;
+            }
+            .chat-input {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -22,7 +205,7 @@
                 <button id="adminPanelBtn" class="hidden">Admin-Panel</button>
                 <button id="logoutBtn">Abmelden</button>
             </div>
-            <button id="chatFriendsBtn" class="icon-btn hidden">💬</button>
+            <button id="chatFriendsBtn" class="icon-btn hidden">💬<span id="unreadBadge" class="badge hidden">0</span></button>
         </div>
     </header>
     <main>
@@ -60,6 +243,7 @@
                 <input type="text" id="friendSearch" placeholder="Freund suchen...">
                 <div id="friendSuggestions"></div>
                 <div id="friendList"></div>
+                <div id="groupList"></div>
                 <button id="createGroupBtn">Gruppe erstellen</button>
             </div>
         </section>
@@ -76,368 +260,600 @@
             <div id="userManagement"></div>
         </section>
     </main>
-    <script src="app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script>
+        // Firebase-Konfiguration (ersetze mit deinen Firebase-Daten)
+        const firebaseConfig = {
+            apiKey: "DEINE_API_KEY",
+            authDomain: "DEIN_PROJEKT_ID.firebaseapp.com",
+            projectId: "DEIN_PROJEKT_ID",
+            storageBucket: "DEIN_PROJEKT_ID.appspot.com",
+            messagingSenderId: "DEIN_SENDER_ID",
+            appId: "DEINE_APP_ID"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // DOM-Elemente
+        const profileIcon = document.getElementById('profileIcon');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const chatFriendsBtn = document.getElementById('chatFriendsBtn');
+        const loginScreen = document.getElementById('loginScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        const chatFriendsScreen = document.getElementById('chatFriendsScreen');
+        const banScreen = document.getElementById('banScreen');
+        const adminPanel = document.getElementById('adminPanel');
+        const unreadBadge = document.getElementById('unreadBadge');
+
+        // Authentifizierung
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                // Prüfen, ob Benutzer gesperrt ist
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists && userDoc.data().banned) {
+                    showScreen(banScreen);
+                    return;
+                }
+                // Prüfen, ob E-Mail verifiziert ist
+                if (!user.emailVerified) {
+                    alert('Bitte verifiziere deine E-Mail.');
+                    user.sendEmailVerification();
+                    return;
+                }
+                // Benutzerdaten aktualisieren (zuletzt online)
+                await db.collection('users').doc(user.uid).update({
+                    lastOnline: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showScreen(mainScreen);
+                chatFriendsBtn.classList.remove('hidden');
+                profileDropdown.classList.remove('hidden');
+                // Prüfen, ob Benutzer Gründer oder Admin ist
+                if (userDoc.data().role === 'founder' || userDoc.data().role === 'admin') {
+                    document.getElementById('adminPanelBtn').classList.remove('hidden');
+                }
+                // Timeline laden
+                loadTimeline();
+                // Ungelesene Nachrichten zählen
+                updateUnreadCount(user.uid);
+            } else {
+                showScreen(loginScreen);
+                chatFriendsBtn.classList.add('hidden');
+                profileDropdown.classList.add('hidden');
+            }
+        });
+
+        // Bildschirmwechsel
+        function showScreen(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            screen.classList.remove('hidden');
+        }
+
+        // Anmeldung
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                alert('Fehler beim Anmelden: ' + error.message);
+            }
+        });
+
+        // Registrierung
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.sendEmailVerification();
+                // Erster Benutzer wird Gründer
+                const users = await db.collection('users').get();
+                const role = users.empty ? 'founder' : 'user';
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    username: email.split('@')[0],
+                    email: email,
+                    role: role,
+                    banned: false,
+                    lastOnline: firebase.firestore.FieldValue.serverTimestamp(),
+                    profilePic: ''
+                });
+                alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mail.');
+            } catch (error) {
+                alert('Fehler bei der Registrierung: ' + error.message);
+            }
+        });
+
+        // Passwort vergessen
+        document.getElementById('forgotPasswordBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            try {
+                await auth.sendPasswordResetEmail(email);
+                alert('E-Mail zum Zurücksetzen des Passworts gesendet.');
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        });
+
+        // Profil-Dropdown
+        profileIcon.addEventListener('click', () => {
+            profileDropdown.classList.toggle('hidden');
+        });
+
+        // Abmelden
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await auth.signOut();
+            alert('Abgemeldet.');
+        });
+
+        // Einstellungen (Benutzername ändern)
+        document.getElementById('settingsBtn').addEventListener('click', async () => {
+            const newUsername = prompt('Neuer Benutzername:');
+            if (newUsername) {
+                await db.collection('users').doc(auth.currentUser.uid).update({
+                    username: newUsername
+                });
+                alert('Benutzername geändert.');
+            }
+        });
+
+        // Profil ändern (z. B. Profilbild)
+        document.getElementById('profileEditBtn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                const storageRef = storage.ref(`profilePics/${auth.currentUser.uid}`);
+                await storageRef.put(file);
+                const url = await storageRef.getDownloadURL();
+                await db.collection('users').doc(auth.currentUser.uid).update({
+                    profilePic: url
+                });
+                alert('Profilbild aktualisiert.');
+            };
+            input.click();
+        });
+
+        // Video-Upload
+        document.getElementById('videoUploadBtn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'video/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                const storageRef = storage.ref(`videos/${auth.currentUser.uid}/${file.name}`);
+                await storageRef.put(file);
+                const url = await storageRef.getDownloadURL();
+                await db.collection('posts').add({
+                    userId: auth.currentUser.uid,
+                    videoUrl: url,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    likes: 0,
+                    dislikes: 0,
+                    comments: []
+                });
+                alert('Video hochgeladen.');
+            };
+            input.click();
+        });
+
+        // Timeline laden
+        async function loadTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            const posts = await db.collection('posts').orderBy('timestamp', 'desc').get();
+            posts.forEach(async doc => {
+                const post = doc.data();
+                const userDoc = await db.collection('users').doc(post.userId).get();
+                const username = userDoc.data().username;
+                const div = document.createElement('div');
+                div.className = 'post';
+                div.innerHTML = `
+                    <p><strong>${username}</strong> - ${post.timestamp.toDate().toLocaleString()}</p>
+                    <video src="${post.videoUrl}" controls></video>
+                    <div>
+                        <button onclick="likePost('${doc.id}')">Like (${post.likes})</button>
+                        <button onclick="dislikePost('${doc.id}')">Dislike (${post.dislikes})</button>
+                        <button onclick="commentPost('${doc.id}')">Kommentieren</button>
+                    </div>
+                    <div class="comments">${post.comments.map(c => `<p>${c}</p>`).join('')}</div>
+                `;
+                timeline.appendChild(div);
+            });
+        }
+
+        // Like/Dislike/Comment
+        async function likePost(postId) {
+            await db.collection('posts').doc(postId).update({
+                likes: firebase.firestore.FieldValue.increment(1)
+            });
+            loadTimeline();
+        }
+
+        async function dislikePost(postId) {
+            await db.collection('posts').doc(postId).update({
+                dislikes: firebase.firestore.FieldValue.increment(1)
+            });
+            loadTimeline();
+        }
+
+        async function commentPost(postId) {
+            const comment = prompt('Kommentar:');
+            if (comment) {
+                await db.collection('posts').doc(postId).update({
+                    comments: firebase.firestore.FieldValue.arrayUnion(comment)
+                });
+                loadTimeline();
+            }
+        }
+
+        // Chat- und Freundes-Tabs
+        document.getElementById('chatTab').addEventListener('click', () => {
+            document.getElementById('chatSection').classList.remove('hidden');
+            document.getElementById('friendsSection').classList.add('hidden');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('chatTab').classList.add('active');
+            loadChats();
+        });
+
+        document.getElementById('friendsTab').addEventListener('click', () => {
+            document.getElementById('friendsSection').classList.remove('hidden');
+            document.getElementById('chatSection').classList.add('hidden');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('friendsTab').classList.add('active');
+            loadFriends();
+            loadGroups();
+        });
+
+        // Chats laden
+        async function loadChats() {
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = '';
+            const chats = await db.collection('chats').where('members', 'array-contains', auth.currentUser.uid).get();
+            chats.forEach(doc => {
+                const div = document.createElement('div');
+                div.textContent = `Chat: ${doc.id}`;
+                div.onclick = () => loadChatMessages(doc.id);
+                chatList.appendChild(div);
+            });
+        }
+
+        // Nachrichten laden
+        async function loadChatMessages(chatId) {
+            document.getElementById('chatMessages').classList.remove('hidden');
+            const messages = document.getElementById('messages');
+            messages.innerHTML = '';
+            const chatRef = db.collection('chats').doc(chatId);
+            chatRef.collection('messages').orderBy('timestamp').onSnapshot(snapshot => {
+                messages.innerHTML = '';
+                snapshot.forEach(async doc => {
+                    const msg = doc.data();
+                    const userDoc = await db.collection('users').doc(msg.sender).get();
+                    const div = document.createElement('div');
+                    div.className = 'message';
+                    div.innerHTML = `
+                        <strong>${userDoc.data().username}</strong>: ${msg.message}
+                        <button class="report-btn" onclick="reportMessage('${chatId}', '${doc.id}')">Melden</button>
+                    `;
+                    messages.appendChild(div);
+                });
+            });
+        }
+
+        // Nachricht senden
+        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+            const message = document.getElementById('messageInput').value;
+            if (message) {
+                const chatId = document.getElementById('chatMessages').dataset.chatId;
+                await db.collection('chats').doc(chatId).collection('messages').add({
+                    sender: auth.currentUser.uid,
+                    message: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('messageInput').value = '';
+            }
+        });
+
+        // Bild senden
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const storageRef = storage.ref(`chatImages/${auth.currentUser.uid}/${file.name}`);
+            await storageRef.put(file);
+            const url = await storageRef.getDownloadURL();
+            const chatId = document.getElementById('chatMessages').dataset.chatId;
+            await db.collection('chats').doc(chatId).collection('messages').add({
+                sender: auth.currentUser.uid,
+                message: `<img src="${url}" style="max-width: 200px;">`,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+
+        // Nachricht melden
+        async function reportMessage(chatId, messageId) {
+            const reason = prompt('Grund für die Meldung:');
+            if (reason) {
+                await db.collection('reports').add({
+                    chatId: chatId,
+                    messageId: messageId,
+                    reason: reason,
+                    reporter: auth.currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('Nachricht gemeldet.');
+            }
+        }
+
+        // Ungelesene Nachrichten zählen
+        async function updateUnreadCount(userId) {
+            const chats = await db.collection('chats').where('members', 'array-contains', userId).get();
+            let unreadCount = 0;
+            for (const chat of chats.docs) {
+                const messages = await db.collection('chats').doc(chat.id).collection('messages').where('timestamp', '>', chat.data().lastRead?.[userId] || 0).get();
+                unreadCount += messages.size;
+            }
+            unreadBadge.textContent = unreadCount;
+            unreadBadge.classList.toggle('hidden', unreadCount === 0);
+        }
+
+        // Freundes-Suche
+        document.getElementById('friendSearch').addEventListener('input', async (e) => {
+            const query = e.target.value;
+            const suggestions = document.getElementById('friendSuggestions');
+            suggestions.innerHTML = '';
+            if (query.length === 0) return;
+            const users = await db.collection('users').where('username', '>=', query).where('username', '<=', query + '\uf8ff').limit(5).get();
+            users.forEach(async doc => {
+                if (doc.id !== auth.currentUser.uid) {
+                    const user = doc.data();
+                    const onlineStatus = user.lastOnline && (Date.now() - user.lastOnline.toDate().getTime()) < 5 * 60 * 1000 ? 'online' : 'offline';
+                    const div = document.createElement('div');
+                    div.className = 'friend-item';
+                    div.innerHTML = `
+                        ${user.username} (Zuletzt online: ${onlineStatus === 'online' ? 'Jetzt' : user.lastOnline?.toDate().toLocaleString() || 'Unbekannt'})
+                        <span class="online-status ${onlineStatus}"></span>
+                        <button onclick="sendFriendRequest('${doc.id}')">Anfragen</button>
+                    `;
+                    suggestions.appendChild(div);
+                }
+            });
+        });
+
+        // Freundschaftsanfrage senden
+        async function sendFriendRequest(userId) {
+            const existingRequest = await db.collection('friendRequests')
+                .where('from', '==', auth.currentUser.uid)
+                .where('to', '==', userId)
+                .where('status', '==', 'pending')
+                .get();
+            if (!existingRequest.empty) {
+                alert('Anfrage bereits gesendet.');
+                return;
+            }
+            await db.collection('friendRequests').add({
+                from: auth.currentUser.uid,
+                to: userId,
+                status: 'pending',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert('Freundschaftsanfrage gesendet.');
+        }
+
+        // Freunde laden
+        async function loadFriends() {
+            const friendList = document.getElementById('friendList');
+            friendList.innerHTML = '<h3>Freunde</h3>';
+            const requests = await db.collection('friendRequests')
+                .where('to', '==', auth.currentUser.uid)
+                .where('status', '==', 'accepted')
+                .get();
+            requests.forEach(async doc => {
+                const userId = doc.data().from;
+                const userDoc = await db.collection('users').doc(userId).get();
+                const user = userDoc.data();
+                const onlineStatus = user.lastOnline && (Date.now() - user.lastOnline.toDate().getTime()) < 5 * 60 * 1000 ? 'online' : 'offline';
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.innerHTML = `
+                    ${user.username}
+                    <span class="online-status ${onlineStatus}"></span>
+                    <button onclick="removeFriend('${doc.id}')">Entfernen</button>
+                `;
+                friendList.appendChild(div);
+            });
+        }
+
+        // Freund entfernen
+        async function removeFriend(requestId) {
+            await db.collection('friendRequests').doc(requestId).delete();
+            loadFriends();
+        }
+
+        // Gruppe erstellen
+        document.getElementById('createGroupBtn').addEventListener('click', async () => {
+            const groupName = prompt('Gruppenname:');
+            if (groupName) {
+                const groupRef = await db.collection('groups').add({
+                    name: groupName,
+                    creator: auth.currentUser.uid,
+                    members: [auth.currentUser.uid],
+                    admins: [auth.currentUser.uid],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('Gruppe erstellt: ' + groupName);
+                loadGroups();
+            }
+        });
+
+        // Gruppen laden
+        async function loadGroups() {
+            const groupList = document.getElementById('groupList');
+            groupList.innerHTML = '<h3>Gruppen</h3>';
+            const groups = await db.collection('groups').where('members', 'array-contains', auth.currentUser.uid).get();
+            groups.forEach(async doc => {
+                const group = doc.data();
+                const div = document.createElement('div');
+                div.className = 'group-item';
+                div.innerHTML = `
+                    ${group.name}
+                    ${group.creator === auth.currentUser.uid ? `
+                        <button onclick="manageGroup('${doc.id}')">Verwalten</button>
+                    ` : ''}
+                    <button onclick="leaveGroup('${doc.id}')">Verlassen</button>
+                `;
+                groupList.appendChild(div);
+            });
+        }
+
+        // Gruppe verlassen
+        async function leaveGroup(groupId) {
+            await db.collection('groups').doc(groupId).update({
+                members: firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid),
+                admins: firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
+            });
+            loadGroups();
+        }
+
+        // Gruppe verwalten
+        async function manageGroup(groupId) {
+            const groupDoc = await db.collection('groups').doc(groupId).get();
+            const group = groupDoc.data();
+            const action = prompt('Aktion: kick <username>, addAdmin <username>, delete');
+            if (action.startsWith('kick ')) {
+                const username = action.split(' ')[1];
+                const userDoc = await db.collection('users').where('username', '==', username).get();
+                if (!userDoc.empty) {
+                    const userId = userDoc.docs[0].id;
+                    await db.collection('groups').doc(groupId).update({
+                        members: firebase.firestore.FieldValue.arrayRemove(userId),
+                        admins: firebase.firestore.FieldValue.arrayRemove(userId)
+                    });
+                    alert('Benutzer gekickt.');
+                }
+            } else if (action.startsWith('addAdmin ')) {
+                const username = action.split(' ')[1];
+                const userDoc = await db.collection('users').where('username', '==', username).get();
+                if (!userDoc.empty) {
+                    const userId = userDoc.docs[0].id;
+                    await db.collection('groups').doc(groupId).update({
+                        admins: firebase.firestore.FieldValue.arrayUnion(userId)
+                    });
+                    alert('Admin hinzugefügt.');
+                }
+            } else if (action === 'delete') {
+                await db.collection('groups').doc(groupId).delete();
+                alert('Gruppe gelöscht.');
+            }
+            loadGroups();
+        }
+
+        // Admin-Panel
+        document.getElementById('adminPanelBtn').addEventListener('click', async () => {
+            showScreen(adminPanel);
+            const reportsList = document.getElementById('reportsList');
+            const unbanRequestsList = document.getElementById('unbanRequestsList');
+            const userManagement = document.getElementById('userManagement');
+            reportsList.innerHTML = '<h3>Meldungen</h3>';
+            unbanRequestsList.innerHTML = '<h3>Entbannungsanträge</h3>';
+            userManagement.innerHTML = '<h3>Benutzerverwaltung</h3>';
+
+            // Meldungen laden
+            const reports = await db.collection('reports').get();
+            reports.forEach(doc => {
+                const report = doc.data();
+                const div = document.createElement('div');
+                div.textContent = `Meldung: ${report.reason} (von ${report.reporter})`;
+                reportsList.appendChild(div);
+            });
+
+            // Entbannungsanträge laden
+            const unbanRequests = await db.collection('unbanRequests').get();
+            unbanRequests.forEach(doc => {
+                const request = doc.data();
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    Antrag von ${request.userId}: ${request.reason}
+                    <button onclick="approveUnban('${request.userId}')">Entbannen</button>
+                `;
+                unbanRequestsList.appendChild(div);
+            });
+
+            // Benutzerverwaltung
+            const users = await db.collection('users').get();
+            users.forEach(doc => {
+                const user = doc.data();
+                if (user.role !== 'founder') { // Gründer kann nicht gebannt werden
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        ${user.username} (${user.email})
+                        ${user.banned ? '<button onclick="approveUnban(\'' + doc.id + '\')">Entbannen</button>' : '<button onclick="banUser(\'' + doc.id + '\')">Bannen</button>'}
+                        <button onclick="makeAdmin('${doc.id}')">Zum Admin machen</button>
+                        ${!user.emailVerified ? `<button onclick="verifyUser('${doc.id}')">Verifizieren</button>` : ''}
+                    `;
+                    userManagement.appendChild(div);
+                }
+            });
+        });
+
+        // Benutzer bannen
+        async function banUser(userId) {
+            await db.collection('users').doc(userId).update({
+                banned: true
+            });
+            alert('Benutzer gebannt.');
+        }
+
+        // Benutzer entbannen
+        async function approveUnban(userId) {
+            await db.collection('users').doc(userId).update({
+                banned: false
+            });
+            alert('Benutzer entbannt.');
+        }
+
+        // Admin ernennen
+        async function makeAdmin(userId) {
+            await db.collection('users').doc(userId).update({
+                role: 'admin'
+            });
+            alert('Benutzer zum Admin ernannt.');
+        }
+
+        // Benutzer manuell verifizieren
+        async function verifyUser(userId) {
+            await db.collection('users').doc(userId).update({
+                emailVerified: true
+            });
+            alert('Benutzer verifiziert.');
+        }
+
+        // Entbannungsantrag
+        document.getElementById('submitUnbanRequest').addEventListener('click', async () => {
+            const reason = document.getElementById('unbanRequest').value;
+            if (reason) {
+                await db.collection('unbanRequests').add({
+                    userId: auth.currentUser.uid,
+                    reason: reason,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('Entbannungsantrag gesendet.');
+            }
+        });
+
+        // Emoji- und GIF-Buttons (Platzhalter)
+        document.getElementById('emojiBtn').addEventListener('click', () => {
+            alert('Emoji-Auswahl: Noch nicht implementiert. Verwende z. B. Emoji-Mart.');
+        });
+
+        document.getElementById('gifBtn').addEventListener('click', () => {
+            alert('GIF-Auswahl: Noch nicht implementiert. Verwende z. B. GIPHY API.');
+        });
+    </script>
 </body>
 </html>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f4f4f4;
-}
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #1a73e8;
-    color: white;
-}
-.app-name {
-    font-size: 1.5em;
-    font-weight: bold;
-}
-.user-section {
-    position: relative;
-}
-.icon-btn {
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    color: white;
-    cursor: pointer;
-    margin-left: 10px;
-}
-.dropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    width: 150px;
-}
-.dropdown button {
-    padding: 10px;
-    border: none;
-    background: none;
-    text-align: left;
-    cursor: pointer;
-}
-.dropdown button:hover {
-    background-color: #f0f0f0;
-}
-.hidden {
-    display: none;
-}
-.screen {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-}
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-button {
-    padding: 10px 20px;
-    background-color: #1a73e8;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #1557b0;
-}
-.tabs {
-    display: flex;
-    gap: 10px;
-}
-.tab {
-    padding: 10px;
-    background: #ccc;
-    cursor: pointer;
-}
-.tab.active {
-    background: #1a73e8;
-    color: white;
-}
-.tab-content {
-    margin-top: 20px;
-}
-.chat-input {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-#messages {
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 4px;
-}
-@media (max-width: 600px) {
-    header {
-        padding: 10px;
-    }
-    .app-name {
-        font-size: 1.2em;
-    }
-    .screen {
-        padding: 10px;
-    }
-}
-// Firebase-Konfiguration (ersetze mit deinen Firebase-Projekt-Daten)
-const firebaseConfig = {
-    apiKey: "DEINE_API_KEY",
-    authDomain: "DEIN_PROJEKT_ID.firebaseapp.com",
-    projectId: "DEIN_PROJEKT_ID",
-    storageBucket: "DEIN_PROJEKT_ID.appspot.com",
-    messagingSenderId: "DEIN_SENDER_ID",
-    appId: "DEINE_APP_ID"
-};
-
-// Firebase initialisieren
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-// DOM-Elemente
-const profileIcon = document.getElementById('profileIcon');
-const profileDropdown = document.getElementById('profileDropdown');
-const chatFriendsBtn = document.getElementById('chatFriendsBtn');
-const loginScreen = document.getElementById('loginScreen');
-const mainScreen = document.getElementById('mainScreen');
-const chatFriendsScreen = document.getElementById('chatFriendsScreen');
-const banScreen = document.getElementById('banScreen');
-const adminPanel = document.getElementById('adminPanel');
-
-// Authentifizierung
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        // Prüfen, ob Benutzer gesperrt ist
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists && userDoc.data().banned) {
-            showScreen(banScreen);
-            return;
-        }
-        // Prüfen, ob E-Mail verifiziert ist
-        if (!user.emailVerified) {
-            alert('Bitte verifiziere deine E-Mail.');
-            user.sendEmailVerification();
-            return;
-        }
-        showScreen(mainScreen);
-        chatFriendsBtn.classList.remove('hidden');
-        profileDropdown.classList.remove('hidden');
-        // Prüfen, ob Benutzer Gründer oder Admin ist
-        if (userDoc.data().role === 'founder' || userDoc.data().role === 'admin') {
-            document.getElementById('adminPanelBtn').classList.remove('hidden');
-        }
-    } else {
-        showScreen(loginScreen);
-        chatFriendsBtn.classList.add('hidden');
-        profileDropdown.classList.add('hidden');
-    }
-});
-
-// Bildschirmwechsel
-function showScreen(screen) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    screen.classList.remove('hidden');
-}
-
-// Anmeldung
-document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-        alert('Fehler beim Anmelden: ' + error.message);
-    }
-});
-
-// Registrierung
-document.getElementById('registerBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await userCredential.user.sendEmailVerification();
-        // Erster Benutzer wird Gründer
-        const users = await db.collection('users').get();
-        const role = users.empty ? 'founder' : 'user';
-        await db.collection('users').doc(userCredential.user.uid).set({
-            username: email.split('@')[0],
-            email: email,
-            role: role,
-            banned: false,
-            lastOnline: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mail.');
-    } catch (error) {
-        alert('Fehler bei der Registrierung: ' + error.message);
-    }
-});
-
-// Passwort vergessen
-document.getElementById('forgotPasswordBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value;
-    try _
-
-{
-        await auth.sendPasswordResetEmail(email);
-        alert('E-Mail zum Zurücksetzen des Passworts gesendet.');
-    } catch (error) {
-        alert('Fehler: ' + error.message);
-    }
-});
-
-// Profil-Dropdown
-profileIcon.addEventListener('click', () => {
-    profileDropdown.classList.toggle('hidden');
-});
-
-// Einstellungen (Benutzername ändern, Passwort ändern)
-document.getElementById('settingsBtn').addEventListener('click', async () => {
-    const newUsername = prompt('Neuer Benutzername:');
-    if (newUsername) {
-        await db.collection('users').doc(auth.currentUser.uid).update({
-            username: newUsername
-        });
-        alert('Benutzername geändert.');
-    }
-});
-
-// Video-Upload
-document.getElementById('videoUploadBtn').addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'video/*';
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        const storageRef = storage.ref(`videos/${auth.currentUser.uid}/${file.name}`);
-        await storageRef.put(file);
-        const url = await storageRef.getDownloadURL();
-        await db.collection('posts').add({
-            userId: auth.currentUser.uid,
-            videoUrl: url,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            likes: 0,
-            dislikes: 0,
-            comments: []
-        });
-        alert('Video hochgeladen.');
-    };
-    input.click();
-});
-
-// Chat- und Freundeslogik
-document.getElementById('chatTab').addEventListener('click', () => {
-    document.getElementById('chatSection').classList.remove('hidden');
-    document.getElementById('friendsSection').classList.add('hidden');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('chatTab').classList.add('active');
-});
-
-document.getElementById('friendsTab').addEventListener('click', () => {
-    document.getElementById('friendsSection').classList.remove('hidden');
-    document.getElementById('chatSection').classList.add('hidden');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('friendsTab').classList.add('active');
-});
-
-// Freundes-Suche
-document.getElementById('friendSearch').addEventListener('input', async (e) => {
-    const query = e.target.value;
-    if (query.length === 0) return;
-    const users = await db.collection('users').where('username', '>=', query).limit(5).get();
-    const suggestions = document.getElementById('friendSuggestions');
-    suggestions.innerHTML = '';
-    users.forEach(doc => {
-        const user = doc.data();
-        if (doc.id !== auth.currentUser.uid) {
-            const div = document.createElement('div');
-            div.textContent = `${user.username} ${user.lastOnline ? '(Zuletzt online: ' + user.lastOnline.toDate().toLocaleString() + ')' : ''}`;
-            const addBtn = document.createElement('button');
-            addBtn.textContent = 'Anfragen';
-            addBtn.onclick = () => sendFriendRequest(doc.id);
-            div.appendChild(addBtn);
-            suggestions.appendChild(div);
-        }
-    });
-});
-
-// Freundschaftsanfrage senden
-async function sendFriendRequest(userId) {
-    await db.collection('friendRequests').add({
-        from: auth.currentUser.uid,
-        to: userId,
-        status: 'pending',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    alert('Freundschaftsanfrage gesendet.');
-}
-
-// Gruppen erstellen
-document.getElementById('createGroupBtn').addEventListener('click', async () => {
-    const groupName = prompt('Gruppenname:');
-    if (groupName) {
-        const groupRef = await db.collection('groups').add({
-            name: groupName,
-            creator: auth.currentUser.uid,
-            members: [auth.currentUser.uid],
-            admins: [auth.currentUser.uid]
-        });
-        alert('Gruppe erstellt: ' + groupName);
-    }
-});
-
-// Chat-Nachrichten
-document.getElementById('sendMessageBtn').addEventListener('click', async () => {
-    const message = document.getElementById('messageInput').value;
-    if (message) {
-        await db.collection('chats').add({
-            sender: auth.currentUser.uid,
-            message: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById('messageInput').value = '';
-    }
-});
-
-// Admin-Panel (Meldungen, Entbannungsanträge)
-document.getElementById('adminPanelBtn').addEventListener('click', async () => {
-    showScreen(adminPanel);
-    const reports = await db.collection('reports').get();
-    const reportsList = document.getElementById('reportsList');
-    reportsList.innerHTML = '';
-    reports.forEach(doc => {
-        const report = doc.data();
-        const div = document.createElement('div');
-        div.textContent = `Meldung: ${report.reason} (von ${report.reporter})`;
-        reportsList.appendChild(div);
-    });
-});
-
-// Entbannungsantrag
-document.getElementById('submitUnbanRequest').addEventListener('click', async () => {
-    const reason = document.getElementById('unbanRequest').value;
-    if (reason) {
-        await db.collection('unbanRequests').add({
-            userId: auth.currentUser.uid,
-            reason: reason,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert('Entbannungsantrag gesendet.');
-    }
-});
