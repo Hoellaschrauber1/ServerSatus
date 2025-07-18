@@ -3,143 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortnite Server Status</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        /* Using Inter font */
-        body {
-            font-family: 'Inter', sans-serif;
-            /* Making the body background transparent for overlay effect */
-            background-color: transparent;
-        }
-        /* Simple animation for the status light */
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.7;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
-        }
-        .pulse-anim {
-            animation: pulse 2s infinite;
-        }
-        /* Adding a text shadow for better readability on any background */
-        .text-shadow {
-            text-shadow: 0px 0px 8px rgba(0, 0, 0, 0.8);
-        }
-    </style>
+    <title>Fortnite Status App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
 </head>
-<body class="text-white flex items-center justify-center h-screen">
-
-    <!-- Main container for the overlay, now with a transparent background -->
-    <div id="status-container" class="bg-transparent p-8 rounded-2xl w-full max-w-md text-center">
-        
-        <!-- Status Indicator with increased background opacity for better contrast -->
-        <div id="status-indicator" class="flex items-center justify-center space-x-4 p-6 bg-gray-900/75 rounded-lg backdrop-blur-sm">
-            <div id="status-light" class="w-6 h-6 rounded-full bg-gray-500 transition-colors duration-500"></div>
-            <p id="status-text" class="text-2xl font-semibold text-shadow">Lade Status...</p>
+<body>
+    <header>
+        <div class="app-name">Fortnite Status</div>
+        <div class="user-section">
+            <button id="profileIcon" class="icon-btn">👤</button>
+            <div id="profileDropdown" class="dropdown hidden">
+                <button id="settingsBtn">Einstellungen</button>
+                <button id="profileEditBtn">Profil ändern</button>
+                <button id="videoUploadBtn">Video hochladen</button>
+                <button id="adminPanelBtn" class="hidden">Admin-Panel</button>
+                <button id="logoutBtn">Abmelden</button>
+            </div>
+            <button id="chatFriendsBtn" class="icon-btn hidden">💬</button>
         </div>
-
-    </div>
-
-    <script>
-        // DOM elements
-        const statusLight = document.getElementById('status-light');
-        const statusText = document.getElementById('status-text');
-        const statusIndicator = document.getElementById('status-indicator');
-
-        // The new API endpoint for Epic Games status
-        const apiUrl = 'https://status.epicgames.com/api/v2/components.json';
-
-        /**
-         * Fetches and updates the server status on the page.
-         */
-        async function fetchStatus() {
-            try {
-                // Fetch data from the API
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-                }
-                const data = await response.json();
-
-                // Find the specific component for Fortnite (case-insensitive)
-                const fortniteComponent = data.components.find(component => component.name.toLowerCase() === 'fortnite');
-
-                if (fortniteComponent) {
-                    // Extract status information from the Fortnite component
-                    const serverStatus = fortniteComponent.status;
-                    updateUI(serverStatus);
-                } else {
-                    throw new Error('Fortnite-Komponente nicht in der API-Antwort gefunden.');
-                }
-
-            } catch (error) {
-                // Handle errors during the fetch process
-                console.error("Fehler beim Abrufen des Serverstatus:", error);
-                updateUI('error');
-            }
-        }
-
-        /**
-         * Updates the UI elements based on the server status.
-         * @param {string} status - The current server status (e.g., 'operational', 'degraded_performance').
-         */
-        function updateUI(status) {
-            // Remove previous status classes
-            statusLight.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-gray-500', 'pulse-anim');
-            statusText.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400', 'text-blue-400');
-
-            // Set text and colors based on the new status values
-            switch (status) {
-                case 'operational':
-                    statusLight.classList.add('bg-green-500', 'pulse-anim');
-                    statusText.textContent = 'Online';
-                    statusText.classList.add('text-green-400');
-                    break;
-                case 'degraded_performance':
-                    statusLight.classList.add('bg-yellow-500');
-                    statusText.textContent = 'Leistungsprobleme';
-                    statusText.classList.add('text-yellow-400');
-                    break;
-                case 'partial_outage':
-                    statusLight.classList.add('bg-yellow-500');
-                    statusText.textContent = 'Teilweiser Ausfall';
-                    statusText.classList.add('text-yellow-400');
-                    break;
-                case 'major_outage':
-                    statusLight.classList.add('bg-red-500');
-                    statusText.textContent = 'Schwerer Ausfall';
-                    statusText.classList.add('text-red-400');
-                    break;
-                case 'under_maintenance':
-                    statusLight.classList.add('bg-red-500'); // Changed to red
-                    statusText.textContent = 'Offline'; // Changed text
-                    statusText.classList.add('text-red-400'); // Changed to red
-                    break;
-                default: // Error or unknown status
-                    statusLight.classList.add('bg-gray-500');
-                    statusText.textContent = 'Fehler';
-                    console.warn('Unbekannter Status empfangen:', status); // Log unknown status
-                    break;
-            }
-        }
-
-        // --- Initial Load and Interval ---
-
-        // Fetch the status immediately when the page loads
-        fetchStatus();
-
-        // Set an interval to automatically refresh the status every 10 seconds (10,000 milliseconds)
-        setInterval(fetchStatus, 10000);
-    </script>
-
+    </header>
+    <main>
+        <section id="loginScreen" class="screen">
+            <h2>Anmelden</h2>
+            <input type="email" id="loginEmail" placeholder="E-Mail">
+            <input type="password" id="loginPassword" placeholder="Passwort">
+            <button id="loginBtn">Anmelden</button>
+            <button id="registerBtn">Registrieren</button>
+            <button id="forgotPasswordBtn">Passwort vergessen</button>
+        </section>
+        <section id="mainScreen" class="screen hidden">
+            <h2>Timeline</h2>
+            <div id="timeline"></div>
+        </section>
+        <section id="chatFriendsScreen" class="screen hidden">
+            <div class="tabs">
+                <button id="chatTab" class="tab active">Chats</button>
+                <button id="friendsTab" class="tab">Freunde</button>
+            </div>
+            <div id="chatSection" class="tab-content">
+                <div id="chatList"></div>
+                <div id="chatMessages" class="hidden">
+                    <div id="messages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Nachricht...">
+                        <button id="sendMessageBtn">Senden</button>
+                        <button id="emojiBtn">😊</button>
+                        <button id="gifBtn">GIF</button>
+                        <input type="file" id="imageInput" accept="image/*">
+                    </div>
+                </div>
+            </div>
+            <div id="friendsSection" class="tab-content hidden">
+                <input type="text" id="friendSearch" placeholder="Freund suchen...">
+                <div id="friendSuggestions"></div>
+                <div id="friendList"></div>
+                <button id="createGroupBtn">Gruppe erstellen</button>
+            </div>
+        </section>
+        <section id="banScreen" class="screen hidden">
+            <h2>Gesperrt</h2>
+            <p>Du wurdest gesperrt. Stelle einen Entbannungsantrag:</p>
+            <textarea id="unbanRequest" placeholder="Grund für Entbannung"></textarea>
+            <button id="submitUnbanRequest">Antrag senden</button>
+        </section>
+        <section id="adminPanel" class="screen hidden">
+            <h2>Admin-Panel</h2>
+            <div id="reportsList"></div>
+            <div id="unbanRequestsList"></div>
+            <div id="userManagement"></div>
+        </section>
+    </main>
+    <script src="app.js"></script>
 </body>
 </html>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #1a73e8;
+    color: white;
+}
+.app-name {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.user-section {
+    position: relative;
+}
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+}
+.dropdown button {
+    padding: 10px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+.dropdown button:hover {
+    background-color: #f0f0f0;
+}
+.hidden {
+    display: none;
+}
+.screen {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+}
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+button {
+    padding: 10px 20px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #1557b0;
+}
+.tabs {
+    display: flex;
+    gap: 10px;
+}
+.tab {
+    padding: 10px;
+    background: #ccc;
+    cursor: pointer;
+}
+.tab.active {
+    background: #1a73e8;
+    color: white;
+}
+.tab-content {
+    margin-top: 20px;
+}
+.chat-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+#messages {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+}
+@media (max-width: 600px) {
+    header {
+        padding: 10px;
+    }
+    .app-name {
+        font-size: 1.2em;
+    }
+    .screen {
+        padding: 10px;
+    }
+}
+// Firebase-Konfiguration (ersetze mit deinen Firebase-Projekt-Daten)
+const firebaseConfig = {
+    apiKey: "DEINE_API_KEY",
+    authDomain: "DEIN_PROJEKT_ID.firebaseapp.com",
+    projectId: "DEIN_PROJEKT_ID",
+    storageBucket: "DEIN_PROJEKT_ID.appspot.com",
+    messagingSenderId: "DEIN_SENDER_ID",
+    appId: "DEINE_APP_ID"
+};
+
+// Firebase initialisieren
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// DOM-Elemente
+const profileIcon = document.getElementById('profileIcon');
+const profileDropdown = document.getElementById('profileDropdown');
+const chatFriendsBtn = document.getElementById('chatFriendsBtn');
+const loginScreen = document.getElementById('loginScreen');
+const mainScreen = document.getElementById('mainScreen');
+const chatFriendsScreen = document.getElementById('chatFriendsScreen');
+const banScreen = document.getElementById('banScreen');
+const adminPanel = document.getElementById('adminPanel');
+
+// Authentifizierung
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        // Prüfen, ob Benutzer gesperrt ist
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().banned) {
+            showScreen(banScreen);
+            return;
+        }
+        // Prüfen, ob E-Mail verifiziert ist
+        if (!user.emailVerified) {
+            alert('Bitte verifiziere deine E-Mail.');
+            user.sendEmailVerification();
+            return;
+        }
+        showScreen(mainScreen);
+        chatFriendsBtn.classList.remove('hidden');
+        profileDropdown.classList.remove('hidden');
+        // Prüfen, ob Benutzer Gründer oder Admin ist
+        if (userDoc.data().role === 'founder' || userDoc.data().role === 'admin') {
+            document.getElementById('adminPanelBtn').classList.remove('hidden');
+        }
+    } else {
+        showScreen(loginScreen);
+        chatFriendsBtn.classList.add('hidden');
+        profileDropdown.classList.add('hidden');
+    }
+});
+
+// Bildschirmwechsel
+function showScreen(screen) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    screen.classList.remove('hidden');
+}
+
+// Anmeldung
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+        alert('Fehler beim Anmelden: ' + error.message);
+    }
+});
+
+// Registrierung
+document.getElementById('registerBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        await userCredential.user.sendEmailVerification();
+        // Erster Benutzer wird Gründer
+        const users = await db.collection('users').get();
+        const role = users.empty ? 'founder' : 'user';
+        await db.collection('users').doc(userCredential.user.uid).set({
+            username: email.split('@')[0],
+            email: email,
+            role: role,
+            banned: false,
+            lastOnline: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mail.');
+    } catch (error) {
+        alert('Fehler bei der Registrierung: ' + error.message);
+    }
+});
+
+// Passwort vergessen
+document.getElementById('forgotPasswordBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    try _
+
+{
+        await auth.sendPasswordResetEmail(email);
+        alert('E-Mail zum Zurücksetzen des Passworts gesendet.');
+    } catch (error) {
+        alert('Fehler: ' + error.message);
+    }
+});
+
+// Profil-Dropdown
+profileIcon.addEventListener('click', () => {
+    profileDropdown.classList.toggle('hidden');
+});
+
+// Einstellungen (Benutzername ändern, Passwort ändern)
+document.getElementById('settingsBtn').addEventListener('click', async () => {
+    const newUsername = prompt('Neuer Benutzername:');
+    if (newUsername) {
+        await db.collection('users').doc(auth.currentUser.uid).update({
+            username: newUsername
+        });
+        alert('Benutzername geändert.');
+    }
+});
+
+// Video-Upload
+document.getElementById('videoUploadBtn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        const storageRef = storage.ref(`videos/${auth.currentUser.uid}/${file.name}`);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        await db.collection('posts').add({
+            userId: auth.currentUser.uid,
+            videoUrl: url,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            likes: 0,
+            dislikes: 0,
+            comments: []
+        });
+        alert('Video hochgeladen.');
+    };
+    input.click();
+});
+
+// Chat- und Freundeslogik
+document.getElementById('chatTab').addEventListener('click', () => {
+    document.getElementById('chatSection').classList.remove('hidden');
+    document.getElementById('friendsSection').classList.add('hidden');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('chatTab').classList.add('active');
+});
+
+document.getElementById('friendsTab').addEventListener('click', () => {
+    document.getElementById('friendsSection').classList.remove('hidden');
+    document.getElementById('chatSection').classList.add('hidden');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('friendsTab').classList.add('active');
+});
+
+// Freundes-Suche
+document.getElementById('friendSearch').addEventListener('input', async (e) => {
+    const query = e.target.value;
+    if (query.length === 0) return;
+    const users = await db.collection('users').where('username', '>=', query).limit(5).get();
+    const suggestions = document.getElementById('friendSuggestions');
+    suggestions.innerHTML = '';
+    users.forEach(doc => {
+        const user = doc.data();
+        if (doc.id !== auth.currentUser.uid) {
+            const div = document.createElement('div');
+            div.textContent = `${user.username} ${user.lastOnline ? '(Zuletzt online: ' + user.lastOnline.toDate().toLocaleString() + ')' : ''}`;
+            const addBtn = document.createElement('button');
+            addBtn.textContent = 'Anfragen';
+            addBtn.onclick = () => sendFriendRequest(doc.id);
+            div.appendChild(addBtn);
+            suggestions.appendChild(div);
+        }
+    });
+});
+
+// Freundschaftsanfrage senden
+async function sendFriendRequest(userId) {
+    await db.collection('friendRequests').add({
+        from: auth.currentUser.uid,
+        to: userId,
+        status: 'pending',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('Freundschaftsanfrage gesendet.');
+}
+
+// Gruppen erstellen
+document.getElementById('createGroupBtn').addEventListener('click', async () => {
+    const groupName = prompt('Gruppenname:');
+    if (groupName) {
+        const groupRef = await db.collection('groups').add({
+            name: groupName,
+            creator: auth.currentUser.uid,
+            members: [auth.currentUser.uid],
+            admins: [auth.currentUser.uid]
+        });
+        alert('Gruppe erstellt: ' + groupName);
+    }
+});
+
+// Chat-Nachrichten
+document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+    const message = document.getElementById('messageInput').value;
+    if (message) {
+        await db.collection('chats').add({
+            sender: auth.currentUser.uid,
+            message: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('messageInput').value = '';
+    }
+});
+
+// Admin-Panel (Meldungen, Entbannungsanträge)
+document.getElementById('adminPanelBtn').addEventListener('click', async () => {
+    showScreen(adminPanel);
+    const reports = await db.collection('reports').get();
+    const reportsList = document.getElementById('reportsList');
+    reportsList.innerHTML = '';
+    reports.forEach(doc => {
+        const report = doc.data();
+        const div = document.createElement('div');
+        div.textContent = `Meldung: ${report.reason} (von ${report.reporter})`;
+        reportsList.appendChild(div);
+    });
+});
+
+// Entbannungsantrag
+document.getElementById('submitUnbanRequest').addEventListener('click', async () => {
+    const reason = document.getElementById('unbanRequest').value;
+    if (reason) {
+        await db.collection('unbanRequests').add({
+            userId: auth.currentUser.uid,
+            reason: reason,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Entbannungsantrag gesendet.');
+    }
+});
