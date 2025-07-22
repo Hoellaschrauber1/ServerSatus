@@ -236,22 +236,24 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script>
         // Deine Firebase Konfiguration
-        // !!! WICHTIG: Ersetze die Platzhalter mit deinen echten Firebase-Konfigurationsdaten !!!
-        // Diese findest du in deinem Firebase-Projekt unter "Projekteinstellungen" -> "Allgemein" -> "Deine Apps"
+        // ACHTUNG: Diese Daten sind jetzt hartcodiert. Für Produktion sollten diese aus Sicherheitsgründen
+        // nicht direkt im Frontend sichtbar sein oder über Umgebungsvariablen geladen werden.
         const firebaseConfig = {
-            apiKey: "DEINE_API_KEY",
-            authDomain: "DEINE_AUTH_DOMAIN",
-            projectId: "DEINE_PROJECT_ID",
-            storageBucket: "DEINE_STORAGE_BUCKET",
-            messagingSenderId: "DEINE_MESSAGING_SENDER_ID",
-            appId: "DEINE_APP_ID",
-            measurementId: "DEINE_MEASUREMENT_ID" // Optional, falls du Google Analytics nutzt
+            apiKey: "AIzaSyB3Fqc0P3TmSb80GupZrXONZiejStgk6TE",
+            authDomain: "social-media-1711a.firebaseapp.com",
+            projectId: "social-media-1711a",
+            storageBucket: "social-media-1711a.firebasestorage.app",
+            messagingSenderId: "228987477362",
+            appId: "1:228987477362:web:0aa477a08b4d14572e51eb",
+            measurementId: "G-SNQC7S4CJB"
         };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore(); // Firestore für Datenbankoperationen
+        const db = firebase.firestore();
+        // Optional: Wenn du Analytics nutzen möchtest
+        // const analytics = firebase.analytics();
 
         // HTML-Elemente abrufen
         const authSection = document.getElementById('auth-section');
