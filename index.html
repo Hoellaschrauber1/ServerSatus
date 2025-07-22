@@ -25,7 +25,7 @@
         /* Header-Stile */
         .app-header {
             width: 100%;
-            padding: 15px 25px;
+            padding: 15px 25px; /* Standard-Padding für größere Bildschirme */
             background: rgba(255, 255, 255, 0.05); /* Leichter Glas-Effekt Hintergrund */
             backdrop-filter: blur(10px); /* Glas-Effekt Unschärfe */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -287,29 +287,26 @@
         /* Responsives Design für kleinere Bildschirme */
         @media (max-width: 768px) {
             .app-header {
-                /* flex-direction: column;  <-- DIESE ZEILE ENTFERNT */
-                padding: 10px 15px;
+                padding: 10px 10px; /* Padding auf 10px reduziert */
                 border-radius: 0 0 10px 10px;
-                /* NEU: Flexbox-Verhalten für kleinere Bildschirme */
-                flex-wrap: nowrap; /* Verhindert das Umbrechen auf neue Zeile */
-                justify-content: space-between; /* Stellt sicher, dass Name links, Icons rechts bleiben */
+                flex-wrap: nowrap;
+                justify-content: space-between;
             }
 
             .app-name {
-                margin-bottom: 0; /* Kein zusätzlicher Abstand mehr */
-                font-size: 1.2em; /* Schriftgröße für Titel reduzieren */
-                flex-grow: 1; /* Nimmt den verfügbaren Platz ein */
-                min-width: 0; /* Ermöglicht das Schrumpfen, wenn Icons viel Platz brauchen */
+                margin-bottom: 0;
+                font-size: 1.2em;
+                flex-grow: 1;
+                min-width: 0;
             }
 
             .user-controls {
-                /* width: 100%; <-- DIESE ZEILE ENTFERNT */
                 justify-content: flex-end;
-                flex-shrink: 0; /* Verhindert, dass die Icons schrumpfen */
+                flex-shrink: 0;
             }
 
             .app-content {
-                margin-top: 80px; /* Header ist jetzt kleiner, weniger Margin nötig */
+                margin-top: 80px;
                 padding: 10px;
             }
 
@@ -319,14 +316,14 @@
             }
 
             .profile-icon-container, .chat-icon-button {
-                width: 30px; /* Icons kleiner machen */
+                width: 30px;
                 height: 30px;
             }
             .profile-icon-container i, .chat-icon-button i {
-                font-size: 18px; /* Icon-Größe anpassen */
+                font-size: 18px;
             }
             .chat-icon-button {
-                margin-right: 5px; /* Abstand zwischen Icons reduzieren */
+                margin-right: 5px;
             }
         }
     </style>
