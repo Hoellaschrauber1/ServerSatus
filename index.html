@@ -53,7 +53,7 @@
         }
 
         .profile-icon-container {
-            position: relative;
+            position: relative; /* Wichtig für die Positionierung des Dropdowns */
             cursor: pointer;
             /* Container für das Icon */
             display: flex; /* Stellt sicher, dass das Icon zentriert wird */
@@ -76,6 +76,52 @@
         .profile-icon-container:hover {
             transform: scale(1.1); /* Zoom-Effekt beim Hover */
             box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
+        }
+
+        /* NEU: Dropdown-Menü Stile */
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px); /* Unterhalb des Icons, mit etwas Abstand */
+            right: 0; /* Rechtsbündig unter dem Icon */
+            background: rgba(255, 255, 255, 0.1); /* Glas-Effekt */
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px; /* Abgerundete Ecken */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            min-width: 200px;
+            padding: 10px 0;
+            z-index: 1001; /* Über dem Header */
+            display: none; /* Standardmäßig ausgeblendet */
+            flex-direction: column;
+            overflow: hidden; /* Für abgerundete Ecken der Items */
+        }
+
+        .dropdown-menu.show {
+            display: flex; /* Anzeigen, wenn die Klasse 'show' hinzugefügt wird */
+        }
+
+        .dropdown-menu button {
+            background: none; /* Keine eigene Hintergrundfarbe */
+            border: none;
+            color: #e0e0e0;
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+            width: 100%; /* Button nimmt volle Breite ein */
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Abstand zwischen Icon und Text */
+        }
+
+        .dropdown-menu button:hover {
+            background: rgba(0, 191, 255, 0.2); /* Leichter blauer Hover-Effekt */
+            color: #fff;
+        }
+
+        .dropdown-menu button i {
+            font-size: 1.2em; /* Icon-Größe im Menü */
         }
 
         /* Hauptinhaltsbereich */
@@ -211,8 +257,15 @@
     <header class="app-header">
         <div class="app-name">Fortnite Status App</div>
         <div class="user-controls">
-            <div class="profile-icon-container">
-                <i class="fas fa-user"></i> </div>
+            <div class="profile-icon-container" id="profile-icon-container">
+                <i class="fas fa-user"></i>
+                <div class="dropdown-menu" id="profile-dropdown">
+                    <button id="settings-button"><i class="fas fa-cog"></i> Einstellungen</button>
+                    <button id="profile-edit-button"><i class="fas fa-user-edit"></i> Profil ändern</button>
+                    <button id="upload-video-button"><i class="fas fa-video"></i> Videos hochladen</button>
+                    <button id="admin-panel-button" style="display: none;"><i class="fas fa-tools"></i> Admin Panel</button> <hr style="border-color: rgba(255,255,255,0.1);"> <button id="logout-button-dropdown"><i class="fas fa-sign-out-alt"></i> Abmelden</button>
+                </div>
+            </div>
             </div>
     </header>
 
@@ -238,15 +291,56 @@
 
         <section id="app-dashboard" style="display: none;">
             <h2 id="welcome-message">Willkommen, Gast!</h2>
-            <p>Du bist angemeldet! Hier ist dein Dashboard.</p>
-            <button id="logout-button" class="glass-button">Abmelden</button>
+            <p>Du bist angemeldet! Dies ist dein Dashboard. Mehr Funktionen folgen!</p>
+            </section>
+
+        <section id="settings-section" class="glass-effect" style="display: none;">
+            <h2>Einstellungen</h2>
+            <p>Hier kannst du deinen Benutzernamen und dein Passwort ändern.</p>
+            <button class="glass-button back-to-dashboard">Zurück zum Dashboard</button>
         </section>
+
+        <section id="profile-edit-section" class="glass-effect" style="display: none;">
+            <h2>Profil ändern</h2>
+            <p>Hier kannst du dein Profilbild und andere Details ändern.</p>
+            <button class="glass-button back-to-dashboard">Zurück zum Dashboard</button>
+        </section>
+
+        <section id="upload-video-section" class="glass-effect" style="display: none;">
+            <h2>Videos hochladen</h2>
+            <p>Hier kannst du deine Videos teilen.</p>
+            <button class="glass-button back-to-dashboard">Zurück zum Dashboard</button>
+        </section>
+
+        <section id="admin-panel-section" class="glass-effect" style="display: none;">
+            <h2>Admin Panel</h2>
+            <p>Verwalte hier Benutzer, Meldungen und Entbannungsanträge.</p>
+            <button class="glass-button back-to-dashboard">Zurück zum Dashboard</button>
+        </section>
+
+
+        <section id="chats-friends-section" class="glass-effect" style="display: none;">
+            <div class="tabs">
+                <button class="tab-button active" id="show-chats">Chats</button>
+                <button class="tab-button" id="show-friends">Freunde</button>
+            </div>
+            <div id="chats-content" class="tab-content">
+                <h3>Deine Chats</h3>
+                <p>Hier siehst du deine Chat-Nachrichten.</p>
+                </div>
+            <div id="friends-content" class="tab-content" style="display: none;">
+                <h3>Deine Freunde</h3>
+                <p>Hier kannst du Freunde hinzufügen und verwalten.</p>
+                </div>
+            <button class="glass-button back-to-dashboard">Zurück zum Dashboard</button>
+        </section>
+
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script> <script>
         // Deine Firebase Konfiguration
         const firebaseConfig = {
             apiKey: "AIzaSyB3Fqc0P3TmSb80GupZrXONZiejStgk6TE",
@@ -262,6 +356,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const storage = firebase.storage(); // Für Bilder/Videos
 
         // HTML-Elemente abrufen
         const authSection = document.getElementById('auth-section');
@@ -271,14 +366,44 @@
         const showRegisterLink = document.getElementById('show-register');
         const showLoginLink = document.getElementById('show-login');
         const forgotPasswordLink = document.getElementById('forgot-password');
-        const logoutButton = document.getElementById('logout-button');
+
+        // NEU: Elemente für das Dropdown-Menü und die neuen Sektionen
+        const profileIconContainer = document.getElementById('profile-icon-container');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const logoutButtonDropdown = document.getElementById('logout-button-dropdown');
+        const settingsButton = document.getElementById('settings-button');
+        const profileEditButton = document.getElementById('profile-edit-button');
+        const uploadVideoButton = document.getElementById('upload-video-button');
+        const adminPanelButton = document.getElementById('admin-panel-button');
+
+        const settingsSection = document.getElementById('settings-section');
+        const profileEditSection = document.getElementById('profile-edit-section');
+        const uploadVideoSection = document.getElementById('upload-video-section');
+        const adminPanelSection = document.getElementById('admin-panel-section');
+        const chatsFriendsSection = document.getElementById('chats-friends-section'); // NEU: Für Chats & Freunde
+
         const welcomeMessage = document.getElementById('welcome-message');
 
-        // Funktion zum Umschalten zwischen Anmelde- und Registrierungsformularen
+        // Hilfsfunktion zum Wechseln der Sektionen
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('main .glass-effect');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.style.display = 'block'; // Oder 'flex' je nach Layout
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            // Dropdown schließen, wenn eine Option gewählt wird
+            profileDropdown.classList.remove('show');
+        }
+
+
+        // Event-Listener für Formular-Umschaltung
         showRegisterLink.addEventListener('click', (e) => {
             e.preventDefault();
             loginForm.style.display = 'none';
-            registerForm.style.display = 'flex'; // 'flex' damit die Spaltenanordnung erhalten bleibt
+            registerForm.style.display = 'flex';
         });
 
         showLoginLink.addEventListener('click', (e) => {
@@ -318,19 +443,14 @@
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
-                // E-Mail-Verifizierung senden
                 await user.sendEmailVerification();
                 alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mails zur Verifizierung.');
 
-                // Benutzerdaten in Firestore speichern
-                // Initialer Benutzername ist der Teil der E-Mail vor dem '@'
                 const initialUsername = email.split('@')[0];
                 let userRole = 'user';
 
-                // Überprüfen, ob dies der erste Benutzer ist (für Gründer-Status)
-                // Wichtig: Wir holen die Anzahl der DOKUMENTE, nicht der Benutzer in Auth
                 const userCountSnapshot = await db.collection('users').get();
-                if (userCountSnapshot.empty) { // Wenn die Collection leer ist, ist dies der erste Benutzer
+                if (userCountSnapshot.empty) {
                     userRole = 'founder';
                     console.log('Erster Benutzer registriert und als Gründer festgelegt.');
                 }
@@ -342,8 +462,6 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-
-                // Zurück zum Login-Formular
                 showLoginLink.click();
 
             } catch (error) {
@@ -365,8 +483,8 @@
             }
         });
 
-        // Abmelden-Logik
-        logoutButton.addEventListener('click', async () => {
+        // NEU: Abmelden-Logik vom Dropdown-Menü
+        logoutButtonDropdown.addEventListener('click', async () => {
             try {
                 await auth.signOut();
                 alert('Erfolgreich abgemeldet!');
@@ -376,21 +494,61 @@
             }
         });
 
+        // NEU: Event-Listener für Profil-Icon Klick (Dropdown umschalten)
+        profileIconContainer.addEventListener('click', (e) => {
+            // Verhindern, dass der Klick nach oben zum Dokument bubbelt und das Dropdown sofort wieder schließt
+            e.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+
+        // NEU: Dropdown schließen, wenn irgendwo anders geklickt wird
+        document.addEventListener('click', (e) => {
+            if (!profileIconContainer.contains(e.target) && profileDropdown.classList.contains('show')) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+
+        // NEU: Event-Listener für Dropdown-Menü-Buttons
+        settingsButton.addEventListener('click', () => showSection('settings-section'));
+        profileEditButton.addEventListener('click', () => showSection('profile-edit-section'));
+        uploadVideoButton.addEventListener('click', () => showSection('upload-video-section'));
+        adminPanelButton.addEventListener('click', () => showSection('admin-panel-section'));
+
+        // NEU: "Zurück zum Dashboard" Buttons für die neuen Sektionen
+        document.querySelectorAll('.back-to-dashboard').forEach(button => {
+            button.addEventListener('click', () => showSection('app-dashboard'));
+        });
+
+
         // Überwachen des Authentifizierungsstatus
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // Benutzer ist angemeldet
-                authSection.style.display = 'none';
-                appDashboard.style.display = 'block';
+                showSection('app-dashboard'); // Zeigt das Dashboard an
+                // authSection.style.display = 'none'; // Wird durch showSection Funktion gehandhabt
+                // appDashboard.style.display = 'block'; // Wird durch showSection Funktion gehandhabt
 
-                // Holen des Benutzernamens aus Firestore
-                // Sicherstellen, dass das userDoc existiert, bevor auf data() zugegriffen wird
+                // Holen des Benutzernamens und der Rolle aus Firestore
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                let usernameToShow = user.email.split('@')[0]; // Standard ist E-Mail-Teil
-                if (userDoc.exists && userDoc.data().username) {
-                    usernameToShow = userDoc.data().username;
+                let usernameToShow = user.email.split('@')[0];
+                let userRole = 'user'; // Standardrolle
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.username) {
+                        usernameToShow = userData.username;
+                    }
+                    if (userData.role) {
+                        userRole = userData.role;
+                    }
                 }
                 welcomeMessage.textContent = `Willkommen, ${usernameToShow}!`;
+
+                // Zeige Admin Panel Button nur für Admins/Gründer
+                if (userRole === 'admin' || userRole === 'founder') {
+                    adminPanelButton.style.display = 'flex'; // 'flex' für Icon+Text
+                } else {
+                    adminPanelButton.style.display = 'none';
+                }
 
                 // Logik für den "Chats & Freunde" Button
                 let chatFriendButton = document.getElementById('chat-friend-button');
@@ -400,19 +558,23 @@
                     chatFriendButton.textContent = 'Chats & Freunde';
                     chatFriendButton.classList.add('glass-button');
                     chatFriendButton.style.marginRight = '10px'; // Abstand zum Profil-Icon
-                    // Füge den Button vor dem Profil-Icon-Container ein
-                    document.querySelector('.user-controls').insertBefore(chatFriendButton, document.querySelector('.profile-icon-container'));
+                    document.querySelector('.user-controls').insertBefore(chatFriendButton, profileIconContainer); // Vor dem Profil-Icon einfügen
 
                     chatFriendButton.addEventListener('click', () => {
-                        alert('Chats & Freunde Bereich wird geöffnet!'); // Später die tatsächliche Navigation
+                        showSection('chats-friends-section'); // Zeigt die Chats & Freunde Sektion an
                     });
                 }
 
 
             } else {
                 // Benutzer ist abgemeldet
-                authSection.style.display = 'block';
-                appDashboard.style.display = 'none';
+                showSection('auth-section'); // Zeigt die Anmeldesektion an
+                // authSection.style.display = 'block'; // Wird durch showSection Funktion gehandhabt
+                // appDashboard.style.display = 'none'; // Wird durch showSection Funktion gehandhabt
+
+                // Dropdown und Admin Panel Button verstecken, wenn abgemeldet
+                profileDropdown.classList.remove('show');
+                adminPanelButton.style.display = 'none';
 
                 // Entferne den "Chats & Freunde" Button, falls vorhanden
                 const chatFriendButton = document.getElementById('chat-friend-button');
@@ -425,13 +587,25 @@
             }
         });
 
-        // Zukünftige Funktionen (Platzhalter)
-        // Event-Listener für Profil-Icon Klick (Dropdown)
-        document.querySelector('.profile-icon-container').addEventListener('click', () => {
-            // Hier kommt die Logik für das Dropdown-Menü
-            alert('Profil-Dropdown wird geöffnet! (Diese Funktion kommt bald)'); // Beispiel
+        // NEU: Logik für Chats & Freunde Tabs
+        const showChatsButton = document.getElementById('show-chats');
+        const showFriendsButton = document.getElementById('show-friends');
+        const chatsContent = document.getElementById('chats-content');
+        const friendsContent = document.getElementById('friends-content');
+
+        showChatsButton.addEventListener('click', () => {
+            showChatsButton.classList.add('active');
+            showFriendsButton.classList.remove('active');
+            chatsContent.style.display = 'block';
+            friendsContent.style.display = 'none';
         });
 
+        showFriendsButton.addEventListener('click', () => {
+            showFriendsButton.classList.add('active');
+            showChatsButton.classList.remove('active');
+            friendsContent.style.display = 'block';
+            chatsContent.style.display = 'none';
+        });
 
     </script>
 </body>
