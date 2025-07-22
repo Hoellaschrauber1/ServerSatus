@@ -4,8 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Status App</title>
-    <link rel="stylesheet" href="style.css">
-    </head>
+
+    <style>
+        /* Grundlegende Stile */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fortnite-ähnliche Schriftart */
+            background: linear-gradient(135deg, #1a1a2e, #16213e); /* Verlaufshintergrund */
+            color: #e0e0e0; /* Helle Textfarbe */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Mindesthöhe des Viewports */
+            align-items: center; /* Zentriert Inhalte horizontal */
+            justify-content: flex-start; /* Inhalte oben starten */
+        }
+
+        /* Header-Stile */
+        .app-header {
+            width: 100%;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05); /* Leichter Glas-Effekt Hintergrund */
+            backdrop-filter: blur(10px); /* Glas-Effekt Unschärfe */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 15px 15px; /* Abgerundete Ecken unten */
+            position: fixed; /* Header bleibt oben */
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Stellt sicher, dass der Header oben bleibt */
+        }
+
+        .app-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00bfff; /* Ein lebhaftes Blau */
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.7); /* Leucht-Effekt */
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-icon-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .profile-icon {
+            width: 45px; /* Etwas größer für bessere Sichtbarkeit */
+            height: 45px;
+            border-radius: 50%; /* Rundes Profilbild */
+            border: 2px solid #00bfff; /* Blauer Rahmen */
+            transition: transform 0.2s ease-in-out; /* Animation für Hover */
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.1); /* Zoom-Effekt beim Hover */
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
+        }
+
+        /* Hauptinhaltsbereich */
+        .app-content {
+            flex-grow: 1; /* Nimmt den verbleibenden Platz ein */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+            margin-top: 100px; /* Platz für den fixierten Header */
+            box-sizing: border-box; /* Padding wird in die Breite/Höhe einberechnet */
+        }
+
+        /* Allgemeine Glas-Effekt-Klasse */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08); /* Hintergrund mit leichter Transparenz */
+            backdrop-filter: blur(15px); /* Starke Unschärfe für den Glas-Effekt */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Heller Rand */
+            border-radius: 20px; /* Abgerundete Ecken */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Tiefer Schatten */
+            padding: 40px;
+            margin: 20px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Formular-Stile */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Abstand zwischen den Elementen */
+            margin-top: 25px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] { /* Falls wir später Textfelder brauchen */
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px; /* Abgerundete Eingabefelder */
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="text"]::placeholder {
+            color: rgba(224, 224, 224, 0.7);
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Leuchten beim Fokus */
+        }
+
+        /* Button-Stile mit Glas-Effekt und Hover */
+        .glass-button {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8)); /* Farbverlauf */
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px; /* Abgerundete Ecken */
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-button:hover {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 1), rgba(0, 128, 255, 1));
+            transform: translateY(-2px); /* Leichter Hoch-Effekt */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        a {
+            color: #00bfff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: #0099e6;
+            text-decoration: underline;
+        }
+
+        h2 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+        }
+
+        /* Responsives Design für kleinere Bildschirme */
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                padding: 10px 15px;
+                border-radius: 0 0 10px 10px;
+            }
+
+            .app-name {
+                margin-bottom: 10px;
+                font-size: 1.5em;
+            }
+
+            .app-content {
+                margin-top: 120px; /* Mehr Platz für den Header bei kleineren Bildschirmen */
+                padding: 10px;
+            }
+
+            .glass-effect {
+                padding: 25px;
+                margin: 10px;
+            }
+
+            .profile-icon {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
 <body>
     <header class="app-header">
         <div class="app-name">Fortnite Status App</div>
@@ -35,194 +223,203 @@
                 <p><a href="#" id="show-login">Zurück zum Anmelden</a></p>
             </form>
         </section>
+
+        <section id="app-dashboard" style="display: none;">
+            <h2 id="welcome-message">Willkommen, Gast!</h2>
+            <p>Du bist angemeldet! Hier ist dein Dashboard.</p>
+            <button id="logout-button" class="glass-button">Abmelden</button>
+        </section>
     </main>
 
-    <script src="script.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        // Deine Firebase Konfiguration
+        // !!! WICHTIG: Ersetze die Platzhalter mit deinen echten Firebase-Konfigurationsdaten !!!
+        // Diese findest du in deinem Firebase-Projekt unter "Projekteinstellungen" -> "Allgemein" -> "Deine Apps"
+        const firebaseConfig = {
+            apiKey: "DEINE_API_KEY",
+            authDomain: "DEINE_AUTH_DOMAIN",
+            projectId: "DEINE_PROJECT_ID",
+            storageBucket: "DEINE_STORAGE_BUCKET",
+            messagingSenderId: "DEINE_MESSAGING_SENDER_ID",
+            appId: "DEINE_APP_ID",
+            measurementId: "DEINE_MEASUREMENT_ID" // Optional, falls du Google Analytics nutzt
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore(); // Firestore für Datenbankoperationen
+
+        // HTML-Elemente abrufen
+        const authSection = document.getElementById('auth-section');
+        const appDashboard = document.getElementById('app-dashboard');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+        const forgotPasswordLink = document.getElementById('forgot-password');
+        const logoutButton = document.getElementById('logout-button');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        // Funktion zum Umschalten zwischen Anmelde- und Registrierungsformularen
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex'; // 'flex' damit die Spaltenanordnung erhalten bleibt
+        });
+
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'flex';
+        });
+
+        // Anmelde-Logik
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginForm['login-email'].value;
+            const password = loginForm['login-password'].value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                alert('Erfolgreich angemeldet!');
+                // UI aktualisieren, wenn angemeldet
+            } catch (error) {
+                alert('Fehler beim Anmelden: ' + error.message);
+            }
+        });
+
+        // Registrierungs-Logik
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = registerForm['register-email'].value;
+            const password = registerForm['register-password'].value;
+            const passwordConfirm = registerForm['register-password-confirm'].value;
+
+            if (password !== passwordConfirm) {
+                alert('Passwörter stimmen nicht überein!');
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // E-Mail-Verifizierung senden
+                await userCredential.user.sendEmailVerification();
+                alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mails zur Verifizierung.');
+
+                // Optional: Benutzerdaten in Firestore speichern
+                // Wir speichern hier nur eine leere Rolle, die später als "founder" aktualisiert werden könnte
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    username: email.split('@')[0], // Standard-Benutzername aus E-Mail
+                    role: 'user', // Standardrolle
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Überprüfen, ob dies der erste Benutzer ist (für Gründer-Status)
+                const userCountSnapshot = await db.collection('users').get();
+                if (userCountSnapshot.size === 1) { // Wenn nur dieser eine Benutzer existiert
+                    await db.collection('users').doc(userCredential.user.uid).update({
+                        role: 'founder'
+                    });
+                    console.log('Erster Benutzer registriert und als Gründer festgelegt.');
+                }
+
+                // Zurück zum Login-Formular
+                showLoginLink.click();
+
+            } catch (error) {
+                alert('Fehler bei der Registrierung: ' + error.message);
+            }
+        });
+
+        // Passwort vergessen Logik
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = prompt('Bitte gib deine E-Mail-Adresse ein, um das Passwort zurückzusetzen:');
+            if (email) {
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    alert('Eine E-Mail zum Zurücksetzen des Passworts wurde an ' + email + ' gesendet.');
+                } catch (error) {
+                    alert('Fehler beim Zurücksetzen des Passworts: ' + error.message);
+                }
+            }
+        });
+
+        // Abmelden-Logik
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                alert('Erfolgreich abgemeldet!');
+                // UI aktualisieren, wenn abgemeldet
+            } catch (error) {
+                alert('Fehler beim Abmelden: ' + error.message);
+            }
+        });
+
+        // Überwachen des Authentifizierungsstatus
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Benutzer ist angemeldet
+                authSection.style.display = 'none';
+                appDashboard.style.display = 'block'; // Oder 'flex', je nach Layout
+
+                // Holen des Benutzernamens aus Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const username = userDoc.exists ? userDoc.data().username : user.email.split('@')[0];
+                welcomeMessage.textContent = `Willkommen, ${username}!`;
+
+                // Logik für den "Chats & Freunde" Button und Dropdown-Menü
+                // (Diese Teile werden wir in zukünftigen Schritten detaillierter ausarbeiten)
+
+                // Beispiel: Zeige den "Chats & Freunde" Button an
+                let chatFriendButton = document.getElementById('chat-friend-button');
+                if (!chatFriendButton) { // Wenn der Button noch nicht existiert
+                    chatFriendButton = document.createElement('button');
+                    chatFriendButton.id = 'chat-friend-button';
+                    chatFriendButton.textContent = 'Chats & Freunde';
+                    chatFriendButton.classList.add('glass-button');
+                    chatFriendButton.style.marginRight = '10px'; // Abstand zum Profil-Icon
+                    document.querySelector('.user-controls').insertBefore(chatFriendButton, document.querySelector('.profile-icon-container'));
+
+                    chatFriendButton.addEventListener('click', () => {
+                        alert('Chats & Freunde Bereich wird geöffnet!'); // Später die tatsächliche Navigation
+                    });
+                }
+
+
+            } else {
+                // Benutzer ist abgemeldet
+                authSection.style.display = 'block'; // Oder 'flex'
+                appDashboard.style.display = 'none';
+
+                // Entferne den "Chats & Freunde" Button, falls vorhanden
+                const chatFriendButton = document.getElementById('chat-friend-button');
+                if (chatFriendButton) {
+                    chatFriendButton.remove();
+                }
+
+                // Standard Willkommensnachricht
+                welcomeMessage.textContent = 'Willkommen, Gast!';
+            }
+        });
+
+        // Zukünftige Funktionen (Platzhalter)
+        function toggleProfileDropdown() {
+            // Logik zum Öffnen/Schließen des Dropdowns
+        }
+
+        // Event-Listener für Profil-Icon Klick (Dropdown)
+        document.querySelector('.profile-icon-container').addEventListener('click', () => {
+            // Hier kommt die Logik für das Dropdown-Menü
+            alert('Profil-Dropdown wird geöffnet!'); // Beispiel
+        });
+
+
+    </script>
 </body>
 </html>
-/* Grundlegende Stile */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fortnite-ähnliche Schriftart */
-    background: linear-gradient(135deg, #1a1a2e, #16213e); /* Verlaufshintergrund */
-    color: #e0e0e0; /* Helle Textfarbe */
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Mindesthöhe des Viewports */
-    align-items: center; /* Zentriert Inhalte horizontal */
-    justify-content: flex-start; /* Inhalte oben starten */
-}
-
-/* Header-Stile */
-.app-header {
-    width: 100%;
-    padding: 15px 25px;
-    background: rgba(255, 255, 255, 0.05); /* Leichter Glas-Effekt Hintergrund */
-    backdrop-filter: blur(10px); /* Glas-Effekt Unschärfe */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-    border-radius: 0 0 15px 15px; /* Abgerundete Ecken unten */
-    position: fixed; /* Header bleibt oben */
-    top: 0;
-    left: 0;
-    z-index: 1000; /* Stellt sicher, dass der Header oben bleibt */
-}
-
-.app-name {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #00bfff; /* Ein lebhaftes Blau */
-    text-shadow: 0 0 8px rgba(0, 191, 255, 0.7); /* Leucht-Effekt */
-}
-
-.user-controls {
-    display: flex;
-    align-items: center;
-}
-
-.profile-icon-container {
-    position: relative;
-    cursor: pointer;
-}
-
-.profile-icon {
-    width: 45px; /* Etwas größer für bessere Sichtbarkeit */
-    height: 45px;
-    border-radius: 50%; /* Rundes Profilbild */
-    border: 2px solid #00bfff; /* Blauer Rahmen */
-    transition: transform 0.2s ease-in-out; /* Animation für Hover */
-}
-
-.profile-icon:hover {
-    transform: scale(1.1); /* Zoom-Effekt beim Hover */
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
-}
-
-/* Hauptinhaltsbereich */
-.app-content {
-    flex-grow: 1; /* Nimmt den verbleibenden Platz ein */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    width: 100%;
-    margin-top: 100px; /* Platz für den fixierten Header */
-    box-sizing: border-box; /* Padding wird in die Breite/Höhe einberechnet */
-}
-
-/* Allgemeine Glas-Effekt-Klasse */
-.glass-effect {
-    background: rgba(255, 255, 255, 0.08); /* Hintergrund mit leichter Transparenz */
-    backdrop-filter: blur(15px); /* Starke Unschärfe für den Glas-Effekt */
-    border: 1px solid rgba(255, 255, 255, 0.15); /* Heller Rand */
-    border-radius: 20px; /* Abgerundete Ecken */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Tiefer Schatten */
-    padding: 40px;
-    margin: 20px;
-    max-width: 500px;
-    width: 100%;
-    text-align: center;
-}
-
-/* Formular-Stile */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Abstand zwischen den Elementen */
-    margin-top: 25px;
-}
-
-input[type="email"],
-input[type="password"],
-input[type="text"] { /* Falls wir später Textfelder brauchen */
-    padding: 12px 18px;
-    border: none;
-    border-radius: 10px; /* Abgerundete Eingabefelder */
-    background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-input[type="email"]::placeholder,
-input[type="password"]::placeholder,
-input[type="text"]::placeholder {
-    color: rgba(224, 224, 224, 0.7);
-}
-
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="text"]:focus {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Leuchten beim Fokus */
-}
-
-/* Button-Stile mit Glas-Effekt und Hover */
-.glass-button {
-    background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8)); /* Farbverlauf */
-    border: none;
-    padding: 15px 25px;
-    border-radius: 10px; /* Abgerundete Ecken */
-    color: white;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.glass-button:hover {
-    background: linear-gradient(135deg, rgba(0, 191, 255, 1), rgba(0, 128, 255, 1));
-    transform: translateY(-2px); /* Leichter Hoch-Effekt */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
-
-a {
-    color: #00bfff;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-a:hover {
-    color: #0099e6;
-    text-decoration: underline;
-}
-
-h2 {
-    color: #e0e0e0;
-    margin-bottom: 20px;
-    text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
-}
-
-/* Responsives Design für kleinere Bildschirme */
-@media (max-width: 768px) {
-    .app-header {
-        flex-direction: column;
-        padding: 10px 15px;
-        border-radius: 0 0 10px 10px;
-    }
-
-    .app-name {
-        margin-bottom: 10px;
-        font-size: 1.5em;
-    }
-
-    .app-content {
-        margin-top: 120px; /* Mehr Platz für den Header bei kleineren Bildschirmen */
-        padding: 10px;
-    }
-
-    .glass-effect {
-        padding: 25px;
-        margin: 10px;
-    }
-
-    .profile-icon {
-        width: 35px;
-        height: 35px;
-    }
-}
