@@ -78,7 +78,7 @@
             box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
         }
 
-        /* NEU: Dropdown-Menü Stile */
+        /* Dropdown-Menü Stile */
         .dropdown-menu {
             position: absolute;
             top: calc(100% + 10px); /* Unterhalb des Icons, mit etwas Abstand */
@@ -123,6 +123,31 @@
         .dropdown-menu button i {
             font-size: 1.2em; /* Icon-Größe im Menü */
         }
+
+        /* NEU: Stil für den Chat-Icon-Button */
+        .chat-icon-button {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8));
+            border: none;
+            width: 45px; /* Gleiche Größe wie Profil-Icon */
+            height: 45px;
+            border-radius: 50%; /* Rund */
+            color: white;
+            font-size: 1.5em; /* Größe des Icons */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-right: 10px; /* Abstand zum Profil-Icon */
+        }
+
+        .chat-icon-button:hover {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 1), rgba(0, 128, 255, 1));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
 
         /* Hauptinhaltsbereich */
         .app-content {
@@ -220,6 +245,42 @@
             text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
         }
 
+        /* NEU: Tab-Navigation Stile */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent; /* Für den aktiven Indikator */
+        }
+
+        .tab-button:hover {
+            color: #00bfff;
+        }
+
+        .tab-button.active {
+            color: #00bfff;
+            border-bottom: 3px solid #00bfff;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            padding: 20px 0;
+            text-align: left; /* Inhalt linksbündig */
+        }
+
+
         /* Responsives Design für kleinere Bildschirme */
         @media (max-width: 768px) {
             .app-header {
@@ -243,11 +304,11 @@
                 margin: 10px;
             }
 
-            .profile-icon-container { /* Anpassung für Container bei kleineren Bildschirmen */
+            .profile-icon-container, .chat-icon-button { /* Anpassung für Container bei kleineren Bildschirmen */
                 width: 35px;
                 height: 35px;
             }
-            .profile-icon-container i { /* Icon-Größe anpassen */
+            .profile-icon-container i, .chat-icon-button i { /* Icon-Größe anpassen */
                 font-size: 20px;
             }
         }
@@ -292,7 +353,7 @@
         <section id="app-dashboard" style="display: none;">
             <h2 id="welcome-message">Willkommen, Gast!</h2>
             <p>Du bist angemeldet! Dies ist dein Dashboard. Mehr Funktionen folgen!</p>
-            </section>
+        </section>
 
         <section id="settings-section" class="glass-effect" style="display: none;">
             <h2>Einstellungen</h2>
@@ -340,7 +401,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script> <script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script>
         // Deine Firebase Konfiguration
         const firebaseConfig = {
             apiKey: "AIzaSyB3Fqc0P3TmSb80GupZrXONZiejStgk6TE",
@@ -356,7 +418,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage(); // Für Bilder/Videos
+        const storage = firebase.storage();
 
         // HTML-Elemente abrufen
         const authSection = document.getElementById('auth-section');
@@ -367,7 +429,7 @@
         const showLoginLink = document.getElementById('show-login');
         const forgotPasswordLink = document.getElementById('forgot-password');
 
-        // NEU: Elemente für das Dropdown-Menü und die neuen Sektionen
+        // Elemente für das Dropdown-Menü und die neuen Sektionen
         const profileIconContainer = document.getElementById('profile-icon-container');
         const profileDropdown = document.getElementById('profile-dropdown');
         const logoutButtonDropdown = document.getElementById('logout-button-dropdown');
@@ -380,7 +442,7 @@
         const profileEditSection = document.getElementById('profile-edit-section');
         const uploadVideoSection = document.getElementById('upload-video-section');
         const adminPanelSection = document.getElementById('admin-panel-section');
-        const chatsFriendsSection = document.getElementById('chats-friends-section'); // NEU: Für Chats & Freunde
+        const chatsFriendsSection = document.getElementById('chats-friends-section');
 
         const welcomeMessage = document.getElementById('welcome-message');
 
@@ -483,7 +545,7 @@
             }
         });
 
-        // NEU: Abmelden-Logik vom Dropdown-Menü
+        // Abmelden-Logik vom Dropdown-Menü
         logoutButtonDropdown.addEventListener('click', async () => {
             try {
                 await auth.signOut();
@@ -494,27 +556,28 @@
             }
         });
 
-        // NEU: Event-Listener für Profil-Icon Klick (Dropdown umschalten)
+        // Event-Listener für Profil-Icon Klick (Dropdown umschalten)
         profileIconContainer.addEventListener('click', (e) => {
             // Verhindern, dass der Klick nach oben zum Dokument bubbelt und das Dropdown sofort wieder schließt
             e.stopPropagation();
             profileDropdown.classList.toggle('show');
         });
 
-        // NEU: Dropdown schließen, wenn irgendwo anders geklickt wird
+        // Dropdown schließen, wenn irgendwo anders geklickt wird
         document.addEventListener('click', (e) => {
-            if (!profileIconContainer.contains(e.target) && profileDropdown.classList.contains('show')) {
+            // Überprüfen, ob der Klick außerhalb des Profil-Icon-Containers und des Dropdowns erfolgte
+            if (!profileIconContainer.contains(e.target) && !profileDropdown.contains(e.target) && profileDropdown.classList.contains('show')) {
                 profileDropdown.classList.remove('show');
             }
         });
 
-        // NEU: Event-Listener für Dropdown-Menü-Buttons
+        // Event-Listener für Dropdown-Menü-Buttons
         settingsButton.addEventListener('click', () => showSection('settings-section'));
         profileEditButton.addEventListener('click', () => showSection('profile-edit-section'));
         uploadVideoButton.addEventListener('click', () => showSection('upload-video-section'));
         adminPanelButton.addEventListener('click', () => showSection('admin-panel-section'));
 
-        // NEU: "Zurück zum Dashboard" Buttons für die neuen Sektionen
+        // "Zurück zum Dashboard" Buttons für die neuen Sektionen
         document.querySelectorAll('.back-to-dashboard').forEach(button => {
             button.addEventListener('click', () => showSection('app-dashboard'));
         });
@@ -524,14 +587,12 @@
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // Benutzer ist angemeldet
-                showSection('app-dashboard'); // Zeigt das Dashboard an
-                // authSection.style.display = 'none'; // Wird durch showSection Funktion gehandhabt
-                // appDashboard.style.display = 'block'; // Wird durch showSection Funktion gehandhabt
+                showSection('app-dashboard');
 
                 // Holen des Benutzernamens und der Rolle aus Firestore
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 let usernameToShow = user.email.split('@')[0];
-                let userRole = 'user'; // Standardrolle
+                let userRole = 'user';
                 if (userDoc.exists) {
                     const userData = userDoc.data();
                     if (userData.username) {
@@ -545,41 +606,38 @@
 
                 // Zeige Admin Panel Button nur für Admins/Gründer
                 if (userRole === 'admin' || userRole === 'founder') {
-                    adminPanelButton.style.display = 'flex'; // 'flex' für Icon+Text
+                    adminPanelButton.style.display = 'flex';
                 } else {
                     adminPanelButton.style.display = 'none';
                 }
 
-                // Logik für den "Chats & Freunde" Button
-                let chatFriendButton = document.getElementById('chat-friend-button');
-                if (!chatFriendButton) { // Wenn der Button noch nicht existiert
-                    chatFriendButton = document.createElement('button');
-                    chatFriendButton.id = 'chat-friend-button';
-                    chatFriendButton.textContent = 'Chats & Freunde';
-                    chatFriendButton.classList.add('glass-button');
-                    chatFriendButton.style.marginRight = '10px'; // Abstand zum Profil-Icon
-                    document.querySelector('.user-controls').insertBefore(chatFriendButton, profileIconContainer); // Vor dem Profil-Icon einfügen
+                // Logik für den "Chats & Freunde" Button (jetzt Icon)
+                let chatIconButton = document.getElementById('chat-icon-button');
+                if (!chatIconButton) { // Wenn der Button noch nicht existiert
+                    chatIconButton = document.createElement('button');
+                    chatIconButton.id = 'chat-icon-button';
+                    chatIconButton.classList.add('chat-icon-button'); // Neue Klasse für Styling
+                    chatIconButton.innerHTML = '<i class="fas fa-comments"></i>'; // Font Awesome Icon
+                    document.querySelector('.user-controls').insertBefore(chatIconButton, profileIconContainer);
 
-                    chatFriendButton.addEventListener('click', () => {
-                        showSection('chats-friends-section'); // Zeigt die Chats & Freunde Sektion an
+                    chatIconButton.addEventListener('click', () => {
+                        showSection('chats-friends-section');
                     });
                 }
 
 
             } else {
                 // Benutzer ist abgemeldet
-                showSection('auth-section'); // Zeigt die Anmeldesektion an
-                // authSection.style.display = 'block'; // Wird durch showSection Funktion gehandhabt
-                // appDashboard.style.display = 'none'; // Wird durch showSection Funktion gehandhabt
+                showSection('auth-section');
 
                 // Dropdown und Admin Panel Button verstecken, wenn abgemeldet
                 profileDropdown.classList.remove('show');
                 adminPanelButton.style.display = 'none';
 
-                // Entferne den "Chats & Freunde" Button, falls vorhanden
-                const chatFriendButton = document.getElementById('chat-friend-button');
-                if (chatFriendButton) {
-                    chatFriendButton.remove();
+                // Entferne den Chat-Icon-Button, falls vorhanden
+                const chatIconButton = document.getElementById('chat-icon-button');
+                if (chatIconButton) {
+                    chatIconButton.remove();
                 }
 
                 // Standard Willkommensnachricht zurücksetzen
@@ -587,7 +645,7 @@
             }
         });
 
-        // NEU: Logik für Chats & Freunde Tabs
+        // Logik für Chats & Freunde Tabs
         const showChatsButton = document.getElementById('show-chats');
         const showFriendsButton = document.getElementById('show-friends');
         const chatsContent = document.getElementById('chats-content');
