@@ -30,7 +30,7 @@
             backdrop-filter: blur(10px); /* Glas-Effekt Unschärfe */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Wichtig: Elemente an den Enden verteilen */
             align-items: center;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
             border-radius: 0 0 15px 15px; /* Abgerundete Ecken unten */
@@ -45,63 +45,68 @@
             font-weight: bold;
             color: #00bfff; /* Ein lebhaftes Blau */
             text-shadow: 0 0 8px rgba(0, 191, 255, 0.7); /* Leucht-Effekt */
+            /* NEU: Positionierung für kleine Bildschirme */
+            text-align: left; /* Text linksbündig */
+            width: auto; /* Breite an Inhalt anpassen */
         }
 
         .user-controls {
             display: flex;
             align-items: center;
+            /* NEU: Positionierung für kleine Bildschirme */
+            justify-content: flex-end; /* Icons rechtsbündig */
+            width: auto; /* Breite an Inhalt anpassen */
         }
 
         .profile-icon-container {
             position: relative; /* Wichtig für die Positionierung des Dropdowns */
             cursor: pointer;
-            /* Container für das Icon */
-            display: flex; /* Stellt sicher, dass das Icon zentriert wird */
+            display: flex;
             justify-content: center;
             align-items: center;
-            width: 45px; /* Größe wie zuvor das Bild */
+            width: 45px;
             height: 45px;
-            border-radius: 50%; /* Rund wie zuvor */
-            border: 2px solid #00bfff; /* Blauer Rahmen wie zuvor */
-            transition: all 0.2s ease-in-out; /* Transition für Hover-Effekt */
-            overflow: hidden; /* Sicherstellen, dass nichts überläuft */
+            border-radius: 50%;
+            border: 2px solid #00bfff;
+            transition: all 0.2s ease-in-out;
+            overflow: hidden;
         }
 
         /* Stile für das Font Awesome Icon selbst */
         .profile-icon-container i {
-            color: #e0e0e0; /* Farbe des Icons */
-            font-size: 28px; /* Größe des Icons anpassen */
+            color: #e0e0e0;
+            font-size: 28px;
         }
 
         .profile-icon-container:hover {
-            transform: scale(1.1); /* Zoom-Effekt beim Hover */
-            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
         }
 
         /* Dropdown-Menü Stile */
         .dropdown-menu {
             position: absolute;
-            top: calc(100% + 10px); /* Unterhalb des Icons, mit etwas Abstand */
-            right: 0; /* Rechtsbündig unter dem Icon */
-            background: rgba(255, 255, 255, 0.1); /* Glas-Effekt */
+            top: calc(100% + 10px);
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px; /* Abgerundete Ecken */
+            border-radius: 15px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
             min-width: 200px;
             padding: 10px 0;
-            z-index: 1001; /* Über dem Header */
-            display: none; /* Standardmäßig ausgeblendet */
+            z-index: 1001;
+            display: none;
             flex-direction: column;
-            overflow: hidden; /* Für abgerundete Ecken der Items */
+            overflow: hidden;
         }
 
         .dropdown-menu.show {
-            display: flex; /* Anzeigen, wenn die Klasse 'show' hinzugefügt wird */
+            display: flex;
         }
 
         .dropdown-menu button {
-            background: none; /* Keine eigene Hintergrundfarbe */
+            background: none;
             border: none;
             color: #e0e0e0;
             padding: 12px 20px;
@@ -109,30 +114,30 @@
             font-size: 1em;
             cursor: pointer;
             transition: background 0.2s ease, color 0.2s ease;
-            width: 100%; /* Button nimmt volle Breite ein */
+            width: 100%;
             display: flex;
             align-items: center;
-            gap: 10px; /* Abstand zwischen Icon und Text */
+            gap: 10px;
         }
 
         .dropdown-menu button:hover {
-            background: rgba(0, 191, 255, 0.2); /* Leichter blauer Hover-Effekt */
+            background: rgba(0, 191, 255, 0.2);
             color: #fff;
         }
 
         .dropdown-menu button i {
-            font-size: 1.2em; /* Icon-Größe im Menü */
+            font-size: 1.2em;
         }
 
-        /* NEU: Stil für den Chat-Icon-Button */
+        /* Stil für den Chat-Icon-Button */
         .chat-icon-button {
             background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8));
             border: none;
-            width: 45px; /* Gleiche Größe wie Profil-Icon */
+            width: 45px;
             height: 45px;
-            border-radius: 50%; /* Rund */
+            border-radius: 50%;
             color: white;
-            font-size: 1.5em; /* Größe des Icons */
+            font-size: 1.5em;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -148,26 +153,25 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
-
         /* Hauptinhaltsbereich */
         .app-content {
-            flex-grow: 1; /* Nimmt den verbleibenden Platz ein */
+            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
             width: 100%;
             margin-top: 100px; /* Platz für den fixierten Header */
-            box-sizing: border-box; /* Padding wird in die Breite/Höhe einberechnet */
+            box-sizing: border-box;
         }
 
         /* Allgemeine Glas-Effekt-Klasse */
         .glass-effect {
-            background: rgba(255, 255, 255, 0.08); /* Hintergrund mit leichter Transparenz */
-            backdrop-filter: blur(15px); /* Starke Unschärfe für den Glas-Effekt */
-            border: 1px solid rgba(255, 255, 255, 0.15); /* Heller Rand */
-            border-radius: 20px; /* Abgerundete Ecken */
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Tiefer Schatten */
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             padding: 40px;
             margin: 20px;
             max-width: 500px;
@@ -179,16 +183,16 @@
         form {
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Abstand zwischen den Elementen */
+            gap: 15px;
             margin-top: 25px;
         }
 
         input[type="email"],
         input[type="password"],
-        input[type="text"] { /* Falls wir später Textfelder brauchen */
+        input[type="text"] {
             padding: 12px 18px;
             border: none;
-            border-radius: 10px; /* Abgerundete Eingabefelder */
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.1);
             color: #e0e0e0;
             outline: none;
@@ -205,15 +209,15 @@
         input[type="password"]:focus,
         input[type="text"]:focus {
             background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Leuchten beim Fokus */
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
         }
 
         /* Button-Stile mit Glas-Effekt und Hover */
         .glass-button {
-            background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8)); /* Farbverlauf */
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.8), rgba(0, 128, 255, 0.8));
             border: none;
             padding: 15px 25px;
-            border-radius: 10px; /* Abgerundete Ecken */
+            border-radius: 10px;
             color: white;
             font-size: 1.1em;
             font-weight: bold;
@@ -224,7 +228,7 @@
 
         .glass-button:hover {
             background: linear-gradient(135deg, rgba(0, 191, 255, 1), rgba(0, 128, 255, 1));
-            transform: translateY(-2px); /* Leichter Hoch-Effekt */
+            transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
@@ -245,7 +249,7 @@
             text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
         }
 
-        /* NEU: Tab-Navigation Stile */
+        /* Tab-Navigation Stile */
         .tabs {
             display: flex;
             justify-content: center;
@@ -262,7 +266,7 @@
             font-size: 1.1em;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-bottom: 3px solid transparent; /* Für den aktiven Indikator */
+            border-bottom: 3px solid transparent;
         }
 
         .tab-button:hover {
@@ -277,14 +281,15 @@
 
         .tab-content {
             padding: 20px 0;
-            text-align: left; /* Inhalt linksbündig */
+            text-align: left;
         }
 
 
         /* Responsives Design für kleinere Bildschirme */
         @media (max-width: 768px) {
             .app-header {
-                flex-direction: column;
+                flex-direction: column; /* Elemente untereinander anordnen */
+                align-items: flex-start; /* Links oben ausrichten */
                 padding: 10px 15px;
                 border-radius: 0 0 10px 10px;
             }
@@ -292,10 +297,16 @@
             .app-name {
                 margin-bottom: 10px;
                 font-size: 1.5em;
+                width: 100%; /* Volle Breite, damit es linksbündig bleibt */
+            }
+
+            .user-controls {
+                width: 100%; /* Volle Breite, damit Icons rechtsbündig bleiben */
+                justify-content: flex-end; /* Icons rechtsbündig halten */
             }
 
             .app-content {
-                margin-top: 120px; /* Mehr Platz für den Header bei kleineren Bildschirmen */
+                margin-top: 120px;
                 padding: 10px;
             }
 
@@ -304,11 +315,11 @@
                 margin: 10px;
             }
 
-            .profile-icon-container, .chat-icon-button { /* Anpassung für Container bei kleineren Bildschirmen */
+            .profile-icon-container, .chat-icon-button {
                 width: 35px;
                 height: 35px;
             }
-            .profile-icon-container i, .chat-icon-button i { /* Icon-Größe anpassen */
+            .profile-icon-container i, .chat-icon-button i {
                 font-size: 20px;
             }
         }
@@ -324,7 +335,9 @@
                     <button id="settings-button"><i class="fas fa-cog"></i> Einstellungen</button>
                     <button id="profile-edit-button"><i class="fas fa-user-edit"></i> Profil ändern</button>
                     <button id="upload-video-button"><i class="fas fa-video"></i> Videos hochladen</button>
-                    <button id="admin-panel-button" style="display: none;"><i class="fas fa-tools"></i> Admin Panel</button> <hr style="border-color: rgba(255,255,255,0.1);"> <button id="logout-button-dropdown"><i class="fas fa-sign-out-alt"></i> Abmelden</button>
+                    <button id="admin-panel-button" style="display: none;"><i class="fas fa-tools"></i> Admin Panel</button>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <button id="logout-button-dropdown"><i class="fas fa-sign-out-alt"></i> Abmelden</button>
                 </div>
             </div>
             </div>
@@ -402,6 +415,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
     <script>
         // Deine Firebase Konfiguration
         const firebaseConfig = {
@@ -558,8 +572,7 @@
 
         // Event-Listener für Profil-Icon Klick (Dropdown umschalten)
         profileIconContainer.addEventListener('click', (e) => {
-            // Verhindern, dass der Klick nach oben zum Dokument bubbelt und das Dropdown sofort wieder schließt
-            e.stopPropagation();
+            e.stopPropagation(); // Verhindert, dass der Klick nach oben zum Dokument bubbelt
             profileDropdown.classList.toggle('show');
         });
 
@@ -618,6 +631,7 @@
                     chatIconButton.id = 'chat-icon-button';
                     chatIconButton.classList.add('chat-icon-button'); // Neue Klasse für Styling
                     chatIconButton.innerHTML = '<i class="fas fa-comments"></i>'; // Font Awesome Icon
+                    // Füge den Button VOR dem Profil-Icon-Container ein, damit er links davon ist
                     document.querySelector('.user-controls').insertBefore(chatIconButton, profileIconContainer);
 
                     chatIconButton.addEventListener('click', () => {
