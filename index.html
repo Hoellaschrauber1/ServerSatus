@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Status App</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         /* Grundlegende Stile */
         body {
@@ -53,17 +55,25 @@
         .profile-icon-container {
             position: relative;
             cursor: pointer;
-        }
-
-        .profile-icon {
-            width: 45px; /* Etwas größer für bessere Sichtbarkeit */
+            /* Container für das Icon */
+            display: flex; /* Stellt sicher, dass das Icon zentriert wird */
+            justify-content: center;
+            align-items: center;
+            width: 45px; /* Größe wie zuvor das Bild */
             height: 45px;
-            border-radius: 50%; /* Rundes Profilbild */
-            border: 2px solid #00bfff; /* Blauer Rahmen */
-            transition: transform 0.2s ease-in-out; /* Animation für Hover */
+            border-radius: 50%; /* Rund wie zuvor */
+            border: 2px solid #00bfff; /* Blauer Rahmen wie zuvor */
+            transition: all 0.2s ease-in-out; /* Transition für Hover-Effekt */
+            overflow: hidden; /* Sicherstellen, dass nichts überläuft */
         }
 
-        .profile-icon:hover {
+        /* Stile für das Font Awesome Icon selbst */
+        .profile-icon-container i {
+            color: #e0e0e0; /* Farbe des Icons */
+            font-size: 28px; /* Größe des Icons anpassen */
+        }
+
+        .profile-icon-container:hover {
             transform: scale(1.1); /* Zoom-Effekt beim Hover */
             box-shadow: 0 0 15px rgba(0, 191, 255, 0.8); /* Leuchten beim Hover */
         }
@@ -187,9 +197,12 @@
                 margin: 10px;
             }
 
-            .profile-icon {
+            .profile-icon-container { /* Anpassung für Container bei kleineren Bildschirmen */
                 width: 35px;
                 height: 35px;
+            }
+            .profile-icon-container i { /* Icon-Größe anpassen */
+                font-size: 20px;
             }
         }
     </style>
@@ -199,8 +212,7 @@
         <div class="app-name">Fortnite Status App</div>
         <div class="user-controls">
             <div class="profile-icon-container">
-                <img src="https://via.placeholder.com/40" alt="Profil-Icon" class="profile-icon">
-                </div>
+                <i class="fas fa-user"></i> </div>
             </div>
     </header>
 
@@ -236,8 +248,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script>
         // Deine Firebase Konfiguration
-        // ACHTUNG: Diese Daten sind jetzt hartcodiert. Für Produktion sollten diese aus Sicherheitsgründen
-        // nicht direkt im Frontend sichtbar sein oder über Umgebungsvariablen geladen werden.
         const firebaseConfig = {
             apiKey: "AIzaSyB3Fqc0P3TmSb80GupZrXONZiejStgk6TE",
             authDomain: "social-media-1711a.firebaseapp.com",
@@ -252,8 +262,6 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        // Optional: Wenn du Analytics nutzen möchtest
-        // const analytics = firebase.analytics();
 
         // HTML-Elemente abrufen
         const authSection = document.getElementById('auth-section');
@@ -288,7 +296,7 @@
             try {
                 await auth.signInWithEmailAndPassword(email, password);
                 alert('Erfolgreich angemeldet!');
-                // UI aktualisieren, wenn angemeldet
+                // UI wird durch onAuthStateChanged aktualisiert
             } catch (error) {
                 alert('Fehler beim Anmelden: ' + error.message);
             }
@@ -308,27 +316,32 @@
 
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
                 // E-Mail-Verifizierung senden
-                await userCredential.user.sendEmailVerification();
+                await user.sendEmailVerification();
                 alert('Registrierung erfolgreich! Bitte überprüfe deine E-Mails zur Verifizierung.');
 
-                // Optional: Benutzerdaten in Firestore speichern
-                // Wir speichern hier nur eine leere Rolle, die später als "founder" aktualisiert werden könnte
-                await db.collection('users').doc(userCredential.user.uid).set({
+                // Benutzerdaten in Firestore speichern
+                // Initialer Benutzername ist der Teil der E-Mail vor dem '@'
+                const initialUsername = email.split('@')[0];
+                let userRole = 'user';
+
+                // Überprüfen, ob dies der erste Benutzer ist (für Gründer-Status)
+                // Wichtig: Wir holen die Anzahl der DOKUMENTE, nicht der Benutzer in Auth
+                const userCountSnapshot = await db.collection('users').get();
+                if (userCountSnapshot.empty) { // Wenn die Collection leer ist, ist dies der erste Benutzer
+                    userRole = 'founder';
+                    console.log('Erster Benutzer registriert und als Gründer festgelegt.');
+                }
+
+                await db.collection('users').doc(user.uid).set({
                     email: email,
-                    username: email.split('@')[0], // Standard-Benutzername aus E-Mail
-                    role: 'user', // Standardrolle
+                    username: initialUsername,
+                    role: userRole,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Überprüfen, ob dies der erste Benutzer ist (für Gründer-Status)
-                const userCountSnapshot = await db.collection('users').get();
-                if (userCountSnapshot.size === 1) { // Wenn nur dieser eine Benutzer existiert
-                    await db.collection('users').doc(userCredential.user.uid).update({
-                        role: 'founder'
-                    });
-                    console.log('Erster Benutzer registriert und als Gründer festgelegt.');
-                }
 
                 // Zurück zum Login-Formular
                 showLoginLink.click();
@@ -357,7 +370,7 @@
             try {
                 await auth.signOut();
                 alert('Erfolgreich abgemeldet!');
-                // UI aktualisieren, wenn abgemeldet
+                // UI wird durch onAuthStateChanged aktualisiert
             } catch (error) {
                 alert('Fehler beim Abmelden: ' + error.message);
             }
@@ -368,17 +381,18 @@
             if (user) {
                 // Benutzer ist angemeldet
                 authSection.style.display = 'none';
-                appDashboard.style.display = 'block'; // Oder 'flex', je nach Layout
+                appDashboard.style.display = 'block';
 
                 // Holen des Benutzernamens aus Firestore
+                // Sicherstellen, dass das userDoc existiert, bevor auf data() zugegriffen wird
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                const username = userDoc.exists ? userDoc.data().username : user.email.split('@')[0];
-                welcomeMessage.textContent = `Willkommen, ${username}!`;
+                let usernameToShow = user.email.split('@')[0]; // Standard ist E-Mail-Teil
+                if (userDoc.exists && userDoc.data().username) {
+                    usernameToShow = userDoc.data().username;
+                }
+                welcomeMessage.textContent = `Willkommen, ${usernameToShow}!`;
 
-                // Logik für den "Chats & Freunde" Button und Dropdown-Menü
-                // (Diese Teile werden wir in zukünftigen Schritten detaillierter ausarbeiten)
-
-                // Beispiel: Zeige den "Chats & Freunde" Button an
+                // Logik für den "Chats & Freunde" Button
                 let chatFriendButton = document.getElementById('chat-friend-button');
                 if (!chatFriendButton) { // Wenn der Button noch nicht existiert
                     chatFriendButton = document.createElement('button');
@@ -386,6 +400,7 @@
                     chatFriendButton.textContent = 'Chats & Freunde';
                     chatFriendButton.classList.add('glass-button');
                     chatFriendButton.style.marginRight = '10px'; // Abstand zum Profil-Icon
+                    // Füge den Button vor dem Profil-Icon-Container ein
                     document.querySelector('.user-controls').insertBefore(chatFriendButton, document.querySelector('.profile-icon-container'));
 
                     chatFriendButton.addEventListener('click', () => {
@@ -396,7 +411,7 @@
 
             } else {
                 // Benutzer ist abgemeldet
-                authSection.style.display = 'block'; // Oder 'flex'
+                authSection.style.display = 'block';
                 appDashboard.style.display = 'none';
 
                 // Entferne den "Chats & Freunde" Button, falls vorhanden
@@ -405,20 +420,16 @@
                     chatFriendButton.remove();
                 }
 
-                // Standard Willkommensnachricht
+                // Standard Willkommensnachricht zurücksetzen
                 welcomeMessage.textContent = 'Willkommen, Gast!';
             }
         });
 
         // Zukünftige Funktionen (Platzhalter)
-        function toggleProfileDropdown() {
-            // Logik zum Öffnen/Schließen des Dropdowns
-        }
-
         // Event-Listener für Profil-Icon Klick (Dropdown)
         document.querySelector('.profile-icon-container').addEventListener('click', () => {
             // Hier kommt die Logik für das Dropdown-Menü
-            alert('Profil-Dropdown wird geöffnet!'); // Beispiel
+            alert('Profil-Dropdown wird geöffnet! (Diese Funktion kommt bald)'); // Beispiel
         });
 
 
