@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Status & Community Hub</title>
     
+    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Google Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Tone.js for sound effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
+    <!-- Emoji Picker Library -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
     <style>
@@ -83,18 +87,24 @@
 
     <div class="stars"></div>
 
+    <!-- Main Application Container -->
     <div id="app-container" class="w-full h-full flex flex-col hidden">
         
+        <!-- Header -->
         <header class="w-full p-4 flex justify-between items-center">
             <h1 id="header-title" class="text-xl font-bold text-white">Fortnite Status</h1>
             <div id="header-actions" class="flex items-center gap-4">
-                </div>
+                <!-- Logged in actions will be injected here -->
+            </div>
         </header>
 
+        <!-- Main Content Area -->
         <main id="main-content" class="flex-grow flex flex-col p-4 overflow-y-auto">
-            </main>
+            <!-- Content is rendered dynamically by JS -->
+        </main>
     </div>
     
+    <!-- Maintenance Screen -->
     <div id="maintenance-screen" class="w-full h-full items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-2xl p-8 md:p-12 text-center shadow-2xl">
             <i data-lucide="wrench" class="w-16 h-16 mx-auto text-blue-400 mb-6"></i>
@@ -106,8 +116,10 @@
     </div>
 
 
+    <!-- Modals -->
     <div id="modal-backdrop" class="hidden fixed inset-0 bg-black/50 z-40"></div>
     
+    <!-- Auth Modal -->
     <div id="auth-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4 modal-enter">
         <div class="glass-card w-full max-w-md p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
@@ -118,6 +130,7 @@
         </div>
     </div>
 
+    <!-- Chats & Friends Modal -->
     <div id="chats-friends-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4 modal-enter">
         <div class="glass-card w-full max-w-2xl h-[70vh] flex flex-col p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
@@ -134,6 +147,7 @@
         </div>
     </div>
     
+    <!-- Other Modals (Notes, Settings, Profile Pic, Admin, Video Player) will use this generic structure -->
     <div id="generic-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4 modal-enter">
         <div class="glass-card w-full max-w-4xl h-auto max-h-[90vh] flex flex-col p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-700">
@@ -149,16 +163,19 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-black/70 z-[100] flex flex-col items-center justify-center hidden">
         <div class="loader"></div>
         <p id="loading-text" class="text-white mt-4 text-lg">Lade...</p>
     </div>
 
+    <!-- Custom Toast Notification -->
     <div id="toast" class="hidden fixed bottom-5 right-5 glass-card p-4 rounded-lg shadow-lg z-[101] flex items-center gap-3">
         <i id="toast-icon" data-lucide="check-circle" class="text-green-400"></i>
         <p id="toast-message"></p>
     </div>
 
+    <!-- Message Context Menu -->
     <div id="message-context-menu" class="hidden absolute z-[60] glass-card p-1 rounded-lg">
         <button id="delete-context-btn" class="flex items-center gap-2 text-sm text-red-400 hover:bg-red-500/20 px-3 py-1 rounded-md w-full">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -170,15 +187,23 @@
         </button>
     </div>
 
+    <!-- Emoji & GIF Picker Popover -->
     <div id="chat-picker-popover" class="hidden fixed z-[60] glass-card p-2 rounded-lg w-full max-w-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        </div>
+        <!-- Content will be injected by JS -->
+    </div>
 
+    <!-- Mention Popover -->
     <div id="mention-popover" class="hidden absolute z-[60] glass-card p-1 rounded-lg w-64 max-h-48 overflow-y-auto">
-        </div>
+        <!-- Mention suggestions will be injected here -->
+    </div>
     
+    <!-- Reaction Picker Popover -->
     <div id="reaction-picker-popover" class="hidden absolute z-[60] glass-card p-2 rounded-full flex gap-1 shadow-lg">
-        </div>
+        <!-- Reactions will be injected here by JS -->
+    </div>
 
+
+    <!-- Firebase SDKs -->
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -212,7 +237,7 @@
             console.error("Firebase initialization failed:", e);
         }
         
-        const appId = 'fortnite-social-app';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'fortnite-social-app';
 
         // --- GIPHY API KEY ---
         const GIPHY_API_KEY = 'BAE8RypYNwugJzhT1oMmqbWMHujifiuf';
@@ -1906,142 +1931,142 @@
                 const collectionPath = type === 'group' ? `groups/${chatId}/messages` : `directMessages/${chatId}/messages`;
                 const chatRoomRef = doc(db, type === 'group' ? 'groups' : 'directMessages', chatId);
 
-                // Ensure the chat document exists for DMs before listening
-                if (type === 'direct') {
-                    try {
-                        await setDoc(chatRoomRef, { members: chatId.split('_') }, { merge: true });
-                    } catch (e) {
-                        console.error("Error ensuring DM document exists:", e);
-                        // Don't block opening the chat, sending the first message will create it.
-                    }
-                }
-
-                const messagesContainer = document.getElementById('chat-messages');
-                const messagesQuery = query(collection(db, collectionPath), orderBy('timestamp', 'desc'));
+                const messagesQuery = query(collection(db, collectionPath), orderBy('timestamp', 'asc'));
+                
+                // --- CHAT RENDERING LOGIC ---
                 unsubscribeChatListener = onSnapshot(messagesQuery, (snapshot) => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === "added") {
-                            const msg = {id: change.doc.id, ...change.doc.data()};
-                            
-                            // Browser Notification Logic
-                            if (msg.senderId !== currentUser.uid && document.hidden && currentUserProfile.browserNotificationsEnabled && Notification.permission === 'granted') {
-                                showBrowserNotification(msg.senderName, msg.text || '[Bild/GIF gesendet]');
-                            }
+                    const messagesContainer = document.getElementById('chat-messages');
+                    if (!messagesContainer) return;
 
-                            const messageEl = document.createElement('div');
-                            const isSender = msg.senderId === currentUser.uid;
-                            const isGroupOwner = type === 'group' && contextData && contextData.ownerId === currentUser.uid;
-                            
-                            messageEl.className = `w-full flex flex-col group relative py-2 ${isSender ? 'items-end' : 'items-start'}`;
-                            
-                            let readReceipt = '';
-                            if (isSender && !msg.isDeleted) {
-                                if (msg.readBy && msg.readBy.length > 1) {
-                                    readReceipt = `<i data-lucide="check-check" class="w-4 h-4 text-blue-400"></i>`;
-                                } else {
-                                    readReceipt = `<i data-lucide="check" class="w-4 h-4 text-gray-500"></i>`;
-                                }
-                            }
+                    const messageElements = []; // Build elements in an array first
 
-                            const canDelete = (isSender || isGroupOwner) && !msg.isDeleted;
-                            
-                            let messageContentHTML = '';
-                            if (msg.isDeleted) {
-                                messageContentHTML = `<p class="text-gray-500 italic">Diese Nachricht wurde gelöscht.</p>`;
-                            } else if (msg.type === 'gif' || msg.type === 'image') {
-                                messageContentHTML = `<a href="${msg.content}" target="_blank" rel="noopener noreferrer"><img src="${msg.content}" alt="Gesendetes Bild" class="rounded-lg max-w-xs h-auto mt-1 cursor-pointer hover:opacity-80"></a>`;
-                            } else if (msg.type === 'audio') {
-                                messageContentHTML = `<audio controls src="${msg.content}" class="max-w-full"></audio>`;
-                            } else { 
-                                const linkedText = linkify(msg.text || '');
-                                messageContentHTML = `<p class="text-white break-words">${linkedText}</p>`;
-                            }
+                    if (snapshot.empty) {
+                        messagesContainer.innerHTML = `<div class="text-center text-gray-500 p-8">Beginne eine neue Konversation!</div>`;
+                        return;
+                    }
 
-                            let reactionsHTML = '';
-                            if (msg.reactions && Object.keys(msg.reactions).length > 0) {
-                                let hasReactions = false;
-                                let content = '';
-                                for (const [emoji, uids] of Object.entries(msg.reactions)) {
-                                    if (uids.length > 0) {
-                                        hasReactions = true;
-                                        content += `<div class="glass-card px-2 py-0.5 rounded-full text-xs flex items-center gap-1"><span>${emoji}</span><span>${uids.length}</span></div>`;
-                                    }
-                                }
-                                if(hasReactions) {
-                                    reactionsHTML = `<div class="flex gap-1 mt-1.5 ${isSender ? 'justify-end' : 'justify-start'}">${content}</div>`;
-                                }
-                            }
-                            
-                            const timestampHTML = !msg.isDeleted ? `
-                                <div class="flex items-center justify-end gap-1 mt-1">
-                                    <p class="text-xs text-gray-400">${new Date(msg.timestamp?.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                                    ${readReceipt}
-                                </div>` : '';
-
-                            const senderNameHTML = !isSender && type === 'group' && !msg.isDeleted
-                                ? `<p class="text-xs font-bold text-blue-300">${msg.senderName}</p>`
-                                : '';
-                            
-                            const messageBoxClass = isSender 
-                                ? (msg.type === 'gif' || msg.type === 'image' ? 'bg-transparent' : 'bg-blue-700')
-                                : (msg.isDeleted ? 'bg-slate-800/50' : (msg.type === 'gif' || msg.type === 'image' ? 'bg-transparent' : 'bg-slate-700'));
-
-                            messageEl.innerHTML = `
-                                <div class="flex items-center gap-2 ${isSender ? 'flex-row-reverse' : 'flex-row'} w-full">
-                                    ${!isSender ? `<button data-message-id="${msg.id}" class="reaction-btn self-end mb-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white transition-opacity"><i data-lucide="smile-plus"></i></button>` : ''}
-                                    
-                                    <div class="flex-shrink-1 max-w-[85%]">
-                                        <div class="px-3 py-2 rounded-lg ${messageBoxClass}">
-                                            ${senderNameHTML}
-                                            ${messageContentHTML}
-                                            ${timestampHTML}
-                                        </div>
-                                        ${reactionsHTML}
-                                    </div>
-
-                                    ${isSender ? `<button data-message-id="${msg.id}" class="reaction-btn self-end mb-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white transition-opacity"><i data-lucide="smile-plus"></i></button>` : ''}
-                                </div>
-                            `;
-                            
-                            if (canDelete) {
-                                const messageBox = messageEl.querySelector('.max-w-\\[85\\%\\]');
-                                const handlePressStart = (e) => {
-                                    const targetElement = e.currentTarget;
-                                    clearTimeout(longPressTimer);
-                                    longPressTimer = setTimeout(() => {
-                                        showMessageContextMenu(targetElement, chatId, msg.id, type, msg.senderId);
-                                    }, 500);
-                                };
-                                const handlePressEnd = () => clearTimeout(longPressTimer);
-
-                                messageBox.addEventListener('mousedown', handlePressStart);
-                                messageBox.addEventListener('mouseup', handlePressEnd);
-                                messageBox.addEventListener('mouseleave', handlePressEnd);
-                                messageBox.addEventListener('touchstart', (e) => {
-                                    e.preventDefault();
-                                    handlePressStart(e);
-                                });
-                                messageBox.addEventListener('touchend', handlePressEnd);
-                            }
-
-                            messagesContainer.insertBefore(messageEl, messagesContainer.firstChild);
-
-                            if (!isSender && !msg.isDeleted && (!msg.readBy || !msg.readBy.includes(currentUser.uid))) {
-                                updateDoc(change.doc.ref, { readBy: arrayUnion(currentUser.uid) });
+                    snapshot.docs.forEach(doc => {
+                        const msg = {id: doc.id, ...doc.data()};
+                        const isSender = msg.senderId === currentUser.uid;
+                        
+                        const messageEl = document.createElement('div');
+                        messageEl.className = `w-full flex flex-col group relative py-2 ${isSender ? 'items-end' : 'items-start'}`;
+                        
+                        let readReceipt = '';
+                        if (isSender && !msg.isDeleted) {
+                            if (msg.readBy && msg.readBy.length > 1) {
+                                readReceipt = `<i data-lucide="check-check" class="w-4 h-4 text-blue-400"></i>`;
+                            } else {
+                                readReceipt = `<i data-lucide="check" class="w-4 h-4 text-gray-500"></i>`;
                             }
                         }
+                        
+                        let messageContentHTML = '';
+                        if (msg.isDeleted) {
+                            messageContentHTML = `<p class="text-gray-500 italic">Diese Nachricht wurde gelöscht.</p>`;
+                        } else if (msg.type === 'gif' || msg.type === 'image') {
+                            messageContentHTML = `<a href="${msg.content}" target="_blank" rel="noopener noreferrer"><img src="${msg.content}" alt="Gesendetes Bild" class="rounded-lg max-w-xs h-auto mt-1 cursor-pointer hover:opacity-80"></a>`;
+                        } else if (msg.type === 'audio') {
+                            messageContentHTML = `<audio controls src="${msg.content}" class="max-w-full"></audio>`;
+                        } else { 
+                            const linkedText = linkify(msg.text || '');
+                            messageContentHTML = `<p class="text-white break-words">${linkedText}</p>`;
+                        }
+
+                        let reactionsHTML = '';
+                        if (msg.reactions && Object.keys(msg.reactions).length > 0) {
+                            let hasReactions = false;
+                            let content = '';
+                            for (const [emoji, uids] of Object.entries(msg.reactions)) {
+                                if (uids.length > 0) {
+                                    hasReactions = true;
+                                    content += `<div class="glass-card px-2 py-0.5 rounded-full text-xs flex items-center gap-1"><span>${emoji}</span><span>${uids.length}</span></div>`;
+                                }
+                            }
+                            if(hasReactions) {
+                                reactionsHTML = `<div class="flex gap-1 mt-1.5 ${isSender ? 'justify-end' : 'justify-start'}">${content}</div>`;
+                            }
+                        }
+                        
+                        const timestampHTML = !msg.isDeleted && msg.timestamp && typeof msg.timestamp.toDate === 'function' ? `
+                            <div class="flex items-center justify-end gap-1 mt-1">
+                                <p class="text-xs text-gray-400">${msg.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                ${readReceipt}
+                            </div>` : '';
+
+                        const senderNameHTML = !isSender && type === 'group' && !msg.isDeleted
+                            ? `<p class="text-xs font-bold text-blue-300">${msg.senderName}</p>`
+                            : '';
+                        
+                        const messageBoxClass = isSender 
+                            ? (msg.type === 'gif' || msg.type === 'image' ? 'bg-transparent' : 'bg-blue-700')
+                            : (msg.isDeleted ? 'bg-slate-800/50' : (msg.type === 'gif' || msg.type === 'image' ? 'bg-transparent' : 'bg-slate-700'));
+
+                        messageEl.innerHTML = `
+                            <div class="flex items-center gap-2 ${isSender ? 'flex-row-reverse' : 'flex-row'} w-full">
+                                ${!isSender ? `<button data-message-id="${msg.id}" class="reaction-btn self-end mb-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white transition-opacity"><i data-lucide="smile-plus"></i></button>` : ''}
+                                
+                                <div class="flex-shrink-1 max-w-[85%]" data-sender-id="${msg.senderId}">
+                                    <div class="px-3 py-2 rounded-lg ${messageBoxClass}">
+                                        ${senderNameHTML}
+                                        ${messageContentHTML}
+                                        ${timestampHTML}
+                                    </div>
+                                    ${reactionsHTML}
+                                </div>
+
+                                ${isSender ? `<button data-message-id="${msg.id}" class="reaction-btn self-end mb-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white transition-opacity"><i data-lucide="smile-plus"></i></button>` : ''}
+                            </div>
+                        `;
+                        
+                        messageElements.push(messageEl);
+
+                        if (!isSender && !msg.isDeleted && (!msg.readBy || !msg.readBy.includes(currentUser.uid))) {
+                            updateDoc(doc.ref, { readBy: arrayUnion(currentUser.uid) });
+                        }
+                    });
+                    
+                    messagesContainer.innerHTML = ''; // Clear old content
+                    messageElements.forEach(el => messagesContainer.appendChild(el)); // Append in correct order
+                    
+                    lucide.createIcons();
+
+                    messagesContainer.querySelectorAll('.reaction-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => showReactionPicker(e.currentTarget, btn.dataset.messageId));
+                    });
+                    
+                    messagesContainer.querySelectorAll('.max-w-\\[85\\%\\]').forEach(messageBox => {
+                        const isSender = messageBox.dataset.senderId === currentUser.uid;
+                        const isGroupOwner = activeChatGroupData && activeChatGroupData.ownerId === currentUser.uid;
+                        const canDelete = isSender || isGroupOwner;
+
+                        if (!canDelete) return;
+
+                        const msgId = messageBox.parentElement.querySelector('.reaction-btn')?.dataset.messageId;
+                        if (!msgId) return;
+
+                        const handlePressStart = (e) => {
+                            const targetElement = e.currentTarget;
+                            clearTimeout(longPressTimer);
+                            longPressTimer = setTimeout(() => {
+                                showMessageContextMenu(targetElement, chatId, msgId, type, messageBox.dataset.senderId);
+                            }, 500);
+                        };
+                        const handlePressEnd = () => clearTimeout(longPressTimer);
+
+                        messageBox.addEventListener('mousedown', handlePressStart);
+                        messageBox.addEventListener('mouseup', handlePressEnd);
+                        messageBox.addEventListener('mouseleave', handlePressEnd);
+                        messageBox.addEventListener('touchstart', (e) => { e.preventDefault(); handlePressStart(e); });
+                        messageBox.addEventListener('touchend', handlePressEnd);
                     });
 
-                    lucide.createIcons();
-                    messagesContainer.querySelectorAll('.reaction-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            showReactionPicker(e.currentTarget, btn.dataset.messageId);
-                        });
-                    });
+
                 }, (error) => {
                     console.error("Error listening to messages:", error);
                     modalContent.innerHTML = `<div class="text-center p-4"><p class="text-red-400">Fehler beim Laden der Nachrichten.</p><p class="text-gray-400 mt-2 text-sm">Dies liegt wahrscheinlich an den Firestore-Sicherheitsregeln. Sie müssen Mitglied eines Chats sein, um Nachrichten lesen zu können.</p></div>`;
                 });
+
 
                 const typingIndicator = document.getElementById('typing-indicator');
                 unsubscribeTypingListener = onSnapshot(chatRoomRef, (docSnap) => {
@@ -2072,7 +2097,6 @@
                     if (text) {
                         chatInput.value = '';
                         
-                        // Step 1: Create the message data object
                         const messageData = {
                             text,
                             type: 'text',
@@ -2082,36 +2106,34 @@
                             readBy: [currentUser.uid]
                         };
 
-                        // Step 2: Save the message
                         try {
+                            // For DMs, ensure the parent chat document exists before adding a message.
+                            if (type === 'direct') {
+                                const chatDocSnap = await getDoc(chatRoomRef);
+                                if (!chatDocSnap.exists()) {
+                                    await setDoc(chatRoomRef, { members: chatId.split('_') });
+                                }
+                            }
+
                             await addDoc(collection(db, collectionPath), messageData);
+
+                            // Update unread counts for other members
+                            const chatDocSnapAfterSend = await getDoc(chatRoomRef);
+                            if (chatDocSnapAfterSend.exists()) {
+                                const members = chatDocSnapAfterSend.data().members;
+                                const batch = writeBatch(db);
+                                members.forEach(memberId => {
+                                    if (memberId !== currentUser.uid) {
+                                        const userRef = doc(db, 'users', memberId);
+                                        batch.update(userRef, { unreadChats: arrayUnion(chatId) });
+                                    }
+                                });
+                                await batch.commit();
+                            }
                         } catch (error) {
                             console.error("Error sending message:", error);
                             showToast("Nachricht konnte nicht gesendet werden.", "error");
-                            chatInput.value = text; // Restore text on failure
-                            return; // Stop execution if message fails to save
-                        }
-
-                        // Step 3: Update unread counts for other members (best-effort)
-                        try {
-                            const chatDocSnap = await getDoc(chatRoomRef);
-                            let membersToNotify = [];
-                            if (type === 'direct') {
-                                membersToNotify = chatId.split('_');
-                            } else if (chatDocSnap.exists()) {
-                                membersToNotify = chatDocSnap.data().members || [];
-                            }
-
-                            const batch = writeBatch(db);
-                            membersToNotify.forEach(memberId => {
-                                if (memberId !== currentUser.uid) {
-                                    const userRef = doc(db, 'users', memberId);
-                                    batch.update(userRef, { unreadChats: arrayUnion(chatId) });
-                                }
-                            });
-                            await batch.commit();
-                        } catch (error) {
-                            console.warn("Could not update unread counts for other users. This might be due to security rules. The message was sent successfully.", error);
+                            chatInput.value = text;
                         }
                     }
                 });
@@ -2168,7 +2190,8 @@
                     text: "Diese Nachricht wurde gelöscht.",
                     content: null,
                     type: 'text',
-                    isDeleted: true
+                    isDeleted: true,
+                    reactions: {}
                 });
             } catch (error) {
                 console.error("Error 'deleting' message:", error);
