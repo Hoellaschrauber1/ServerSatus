@@ -53,6 +53,11 @@
             gap: 1rem; /* Space between buttons */
             margin-bottom: 1.5rem; /* mb-6 */
         }
+        /* Styling for the main navigation bar to allow wrapping */
+        .main-nav {
+            flex-wrap: wrap;
+            gap: 0.5rem; /* Adjust gap for wrapped items */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -64,10 +69,16 @@
         </header>
 
         <!-- Navigation -->
-        <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2">
-            <button id="show-jam-tracks" class="nav-button active px-4 py-2 font-semibold rounded-md mr-2">Jam Tracks</button>
-            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md mr-2">Bilder (Kosmetik)</button>
+        <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2 main-nav">
+            <button id="show-jam-tracks" class="nav-button active px-4 py-2 font-semibold rounded-md">Jam Tracks</button>
+            <button id="show-outfits" class="nav-button px-4 py-2 font-semibold rounded-md">Outfits</button>
+            <button id="show-emotes" class="nav-button px-4 py-2 font-semibold rounded-md">Emotes</button>
+            <button id="show-pickaxes" class="nav-button px-4 py-2 font-semibold rounded-md">Spitzhacken</button>
+            <button id="show-gliders" class="nav-button px-4 py-2 font-semibold rounded-md">Hängegleiter</button>
+            <button id="show-wraps" class="nav-button px-4 py-2 font-semibold rounded-md">Lackierungen</button>
+            <button id="show-backblings" class="nav-button px-4 py-2 font-semibold rounded-md">Rücken-Accessoires</button>
             <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md">Ladebildschirme</button>
+            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md">Andere Kosmetik</button>
         </nav>
         
         <!-- Search and Filter -->
@@ -127,24 +138,32 @@
         const errorText = document.getElementById('error-text');
         const searchInput = document.getElementById('search-input');
         const jamTracksBtn = document.getElementById('show-jam-tracks');
-        const cosmeticsBtn = document.getElementById('show-cosmetics');
+        const cosmeticsBtn = document.getElementById('show-cosmetics'); // Now "Andere Kosmetik"
         const lobbyBackgroundsBtn = document.getElementById('show-lobby-backgrounds');
         const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
-        const filterNewBtn = document.getElementById('filter-new-btn'); // New button reference
+        const filterNewBtn = document.getElementById('filter-new-btn');
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
         const notificationMessage = document.getElementById('notification-message');
         const notificationCloseBtn = document.getElementById('notification-close');
         const appVersionDisplay = document.getElementById('app-version');
 
+        // New category buttons
+        const outfitsBtn = document.getElementById('show-outfits');
+        const emotesBtn = document.getElementById('show-emotes');
+        const pickaxesBtn = document.getElementById('show-pickaxes');
+        const glidersBtn = document.getElementById('show-gliders');
+        const wrapsBtn = document.getElementById('show-wraps');
+        const backblingsBtn = document.getElementById('show-backblings');
+
 
         // --- State Management ---
-        let currentView = 'jam'; // 'jam', 'cosmetics', or 'lobbyBackgrounds'
+        let currentView = 'jam'; // 'jam', 'cosmetics', 'lobbyBackgrounds', 'outfits', 'emotes', 'pickaxes', 'gliders', 'wraps', 'backblings'
         let allJamTracks = [];
-        let allCosmetics = [];
+        let allCosmeticsData = []; // Stores ALL cosmetic data from the API
         let allLobbyBackgrounds = [];
         let loadingScreenViewMode = 'detailed'; // Default to 'detailed'
-        let showNewItemsOnly = false; // New filter state
+        let showNewItemsOnly = false; // Filter state for "Neu"
         let currentAudio = {
             button: null,
             trackId: null
@@ -388,8 +407,13 @@
         });
 
         function togglePlay(trackId, audioUrl, button) {
-            if (currentAudio.trackId && currentAudio.trackId !== trackId) {
+            if (currentAudio.trackId && currentAudio.audioUrl && currentAudio.trackId !== trackId) {
+                // Pause the currently playing audio if a different track is selected
                 audioPlayer.pause();
+                // Reset the previous button's icon and text
+                if (currentAudio.button) {
+                    currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
+                }
             }
 
             if (audioPlayer.src !== audioUrl) {
@@ -399,7 +423,7 @@
             if (audioPlayer.paused || audioPlayer.currentTime === 0) {
                 audioPlayer.play().catch(e => console.error("Audio Play Error:", e));
                 button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">Pause</span>`;
-                currentAudio = { button, trackId };
+                currentAudio = { button, trackId, audioUrl };
             } else {
                 audioPlayer.pause();
             }
@@ -408,7 +432,7 @@
         audioPlayer.onpause = () => {
              if (currentAudio.button) {
                 currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
-                currentAudio = { button: null, trackId: null };
+                currentAudio = { button: null, trackId: null, audioUrl: null };
             }
         };
         
@@ -418,15 +442,25 @@
 
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
+            let filteredData = [];
+            let dataToFilter = [];
+
             if (currentView === 'jam') {
-                const filteredTracks = allJamTracks.filter(track => track.name.toLowerCase().includes(searchTerm));
-                renderJamTracks(filteredTracks);
-            } else if (currentView === 'cosmetics') {
-                const filteredCosmetics = allCosmetics.filter(item => item.name.toLowerCase().includes(searchTerm));
-                renderCosmetics(filteredCosmetics);
+                dataToFilter = allJamTracks;
             } else if (currentView === 'lobbyBackgrounds') {
-                const filteredBackgrounds = allLobbyBackgrounds.filter(item => item.name.toLowerCase().includes(searchTerm));
-                renderLobbyBackgrounds(filteredBackgrounds);
+                dataToFilter = allLobbyBackgrounds;
+            } else { // All other cosmetic types use allCosmeticsData
+                dataToFilter = getFilteredCosmeticsByType(currentView);
+            }
+            
+            filteredData = dataToFilter.filter(item => item.name.toLowerCase().includes(searchTerm));
+
+            if (currentView === 'jam') {
+                renderJamTracks(filteredData);
+            } else if (currentView === 'lobbyBackgrounds') {
+                renderLobbyBackgrounds(filteredData);
+            } else {
+                renderCosmetics(filteredData);
             }
         });
 
@@ -452,6 +486,40 @@
             updateFilterNewButtonText(); // Update filter new button text and style
         }
 
+        /**
+         * Fetches all cosmetic data if not already loaded.
+         */
+        async function ensureAllCosmeticsLoaded() {
+            if (allCosmeticsData.length === 0) {
+                const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+                const data = await fetchData(url);
+                if (data) {
+                    allCosmeticsData = data;
+                }
+            }
+        }
+
+        /**
+         * Filters allCosmeticsData by type and applies the "new" filter.
+         * @param {string} typeValue - The 'value' of the cosmetic type (e.g., 'outfit', 'emote').
+         * @returns {Array} - Filtered array of cosmetics.
+         */
+        function getFilteredCosmeticsByType(typeValue) {
+            let filtered = [];
+            if (typeValue === 'cosmetics') { // "Andere Kosmetik"
+                const excludedTypes = ['music', 'loading_screen', 'outfit', 'emote', 'pickaxe', 'glider', 'wrap', 'backpack'];
+                filtered = allCosmeticsData.filter(item => item.type && !excludedTypes.includes(item.type.value));
+            } else {
+                filtered = allCosmeticsData.filter(item => item.type && item.type.value === typeValue);
+            }
+
+            if (showNewItemsOnly) {
+                filtered = filtered.filter(item => isItemNew(item));
+            }
+            return filtered;
+        }
+
+
         async function loadJamTracks() {
             const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
             const data = await fetchData(url);
@@ -465,17 +533,10 @@
             }
         }
 
-        async function loadCosmetics() {
-            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
-            const cosmetics = await fetchData(url);
-            if (cosmetics) {
-                let filteredData = cosmetics.filter(item => item.type && item.type.value !== 'music' && item.type.value !== 'loading_screen');
-                if (showNewItemsOnly) {
-                    filteredData = filteredData.filter(item => isItemNew(item));
-                }
-                allCosmetics = filteredData;
-                renderCosmetics(allCosmetics);
-            }
+        async function loadCosmeticsCategory(categoryType) {
+            await ensureAllCosmeticsLoaded();
+            const filteredData = getFilteredCosmeticsByType(categoryType);
+            renderCosmetics(filteredData);
         }
 
         async function loadLobbyBackgrounds() {
@@ -523,6 +584,56 @@
             }
         }
 
+        // Event Listeners for new category buttons
+        outfitsBtn.addEventListener('click', () => {
+            if (currentView === 'outfit') return;
+            currentView = 'outfit';
+            updateNavButtons('show-outfits');
+            searchInput.value = '';
+            loadCosmeticsCategory('outfit');
+        });
+
+        emotesBtn.addEventListener('click', () => {
+            if (currentView === 'emote') return;
+            currentView = 'emote';
+            updateNavButtons('show-emotes');
+            searchInput.value = '';
+            loadCosmeticsCategory('emote');
+        });
+
+        pickaxesBtn.addEventListener('click', () => {
+            if (currentView === 'pickaxe') return;
+            currentView = 'pickaxe';
+            updateNavButtons('show-pickaxes');
+            searchInput.value = '';
+            loadCosmeticsCategory('pickaxe');
+        });
+
+        glidersBtn.addEventListener('click', () => {
+            if (currentView === 'glider') return;
+            currentView = 'glider';
+            updateNavButtons('show-gliders');
+            searchInput.value = '';
+            loadCosmeticsCategory('glider');
+        });
+
+        wrapsBtn.addEventListener('click', () => {
+            if (currentView === 'wrap') return;
+            currentView = 'wrap';
+            updateNavButtons('show-wraps');
+            searchInput.value = '';
+            loadCosmeticsCategory('wrap');
+        });
+
+        backblingsBtn.addEventListener('click', () => {
+            if (currentView === 'backpack') return;
+            currentView = 'backpack';
+            updateNavButtons('show-backblings');
+            searchInput.value = '';
+            loadCosmeticsCategory('backpack');
+        });
+
+
         jamTracksBtn.addEventListener('click', () => {
             if (currentView === 'jam') return;
             currentView = 'jam';
@@ -536,7 +647,7 @@
             currentView = 'cosmetics';
             updateNavButtons('show-cosmetics');
             searchInput.value = '';
-            loadCosmetics();
+            loadCosmeticsCategory('cosmetics'); // This will load "other" cosmetics
         });
 
         lobbyBackgroundsBtn.addEventListener('click', () => {
@@ -560,18 +671,19 @@
             // Re-load content based on current view to apply the new filter
             if (currentView === 'jam') {
                 loadJamTracks();
-            } else if (currentView === 'cosmetics') {
-                loadCosmetics();
             } else if (currentView === 'lobbyBackgrounds') {
                 loadLobbyBackgrounds();
+            } else { // All other cosmetic types
+                loadCosmeticsCategory(currentView);
             }
         });
 
         // --- Initial Load ---
-        function initializeApp() {
+        async function initializeApp() {
+            await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
-            appVersionDisplay.textContent = 'V1.6'; // Set the version text
+            appVersionDisplay.textContent = 'V2.0'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
         }
