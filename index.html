@@ -713,7 +713,7 @@
             if (!analyser || !canvas) return;
 
             const ctx = canvas.getContext('2d');
-            const bufferLength = analyser.frequencyBinCount;
+            const bufferLength = analyser.frequencyBinBincount;
             const dataArray = new Uint8Array(bufferLength);
 
             animationFrameId = requestAnimationFrame(() => drawVisualization(canvas));
@@ -760,7 +760,7 @@
                 return;
             }
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+            grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'; /* Adjusted for more columns on larger screens */
             
             tracks.forEach(track => {
                 const hasAudio = track.audio && track.audio.preview && track.audio.full;
@@ -811,7 +811,7 @@
                 return;
             }
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4'; /* Adjusted for more columns on larger screens */
 
             cosmetics.forEach(item => {
                 // Prioritize icon, then smallIcon, then featured for card images (reverted to V2.21 logic)
@@ -862,7 +862,7 @@
                 return;
             }
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4'; /* Adjusted for more columns on larger screens */
 
             backgrounds.forEach(item => {
                 // For loading screens, prioritize full_background, then featured, then icon
@@ -1397,7 +1397,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.26'; // Set the version text
+            appVersionDisplay.textContent = 'V2.27'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
