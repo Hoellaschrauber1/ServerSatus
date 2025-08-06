@@ -828,7 +828,7 @@
                 card.dataset.itemType = 'cosmetic'; // Store item type for modal lookup
                 card.innerHTML = `
                     <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                         ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                         <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                              <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
@@ -895,7 +895,7 @@
                 } else { // 'detailed' view
                     card.innerHTML = `
                         <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                             ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
@@ -1397,7 +1397,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.25'; // Set the version text
+            appVersionDisplay.textContent = 'V2.26'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
