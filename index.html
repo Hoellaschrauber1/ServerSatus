@@ -191,14 +191,14 @@
 
         <!-- Navigation -->
         <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2 main-nav">
-            <button id="show-jam-tracks" class="nav-button active px-4 py-2 font-semibold rounded-md">Jam Tracks</button>
-            <button id="show-outfits" class="nav-button px-4 py-2 font-semibold rounded-md">Outfits</button>
+            <button id="show-outfits" class="nav-button active px-4 py-2 font-semibold rounded-md">Outfits</button>
             <button id="show-emotes" class="nav-button px-4 py-2 font-semibold rounded-md">Emotes</button>
             <button id="show-pickaxes" class="nav-button px-4 py-2 font-semibold rounded-md">Spitzhacken</button>
             <button id="show-gliders" class="nav-button px-4 py-2 font-semibold rounded-md">Hängegleiter</button>
             <button id="show-wraps" class="nav-button px-4 py-2 font-semibold rounded-md">Lackierungen</button>
             <button id="show-backblings" class="nav-button px-4 py-2 font-semibold rounded-md">Rücken-Accessoires</button>
             <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md">Ladebildschirme</button>
+            <button id="show-jam-tracks" class="nav-button px-4 py-2 font-semibold rounded-md">Jam Tracks</button>
             <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md">Andere Kosmetik</button>
         </nav>
         
@@ -355,7 +355,7 @@
 
 
         // --- State Management ---
-        let currentView = 'jam'; // 'jam', 'cosmetics', 'lobbyBackgrounds', 'outfits', 'emotes', 'pickaxes', 'gliders', 'wraps', 'backblings'
+        let currentView = 'outfit'; // Changed initial view to 'outfit'
         let allJamTracks = [];
         let allCosmeticsData = []; // Stores ALL cosmetic data from the API
         let allLobbyBackgrounds = [];
@@ -802,7 +802,7 @@
                     currentFilterSetId = setValue; // Set the filter
                     hideItemDetailsModal(); // Close the modal
                     
-                    // Manually activate the 'Andere Kosmetik' button without resetting other filters
+                    // Manually activate the 'Andere Kosmetik' button
                     document.querySelectorAll('.nav-button').forEach(button => {
                         button.classList.remove('active', 'bg-cyan-500');
                     });
@@ -1132,8 +1132,8 @@
 
 
         jamTracksBtn.addEventListener('click', () => {
-            if (currentView === 'jam') return;
-            currentView = 'jam';
+            if (currentView === 'music') return; // Changed to 'music' to match API type
+            currentView = 'music';
             updateNavButtons('show-jam-tracks');
             loadJamTracks();
         });
@@ -1146,8 +1146,8 @@
         });
 
         lobbyBackgroundsBtn.addEventListener('click', () => {
-            if (currentView === 'lobbyBackgrounds') return;
-            currentView = 'lobbyBackgrounds';
+            if (currentView === 'loading_screen') return; // Changed to 'loading_screen' to match API type
+            currentView = 'loading_screen';
             updateNavButtons('show-lobby-backgrounds');
             loadLobbyBackgrounds();
         });
@@ -1166,9 +1166,9 @@
             currentFilterSetId = null; 
             
             // Re-load content based on current view to apply the new filter
-            if (currentView === 'jam') {
+            if (currentView === 'music') { // Changed to 'music'
                 loadJamTracks();
-            } else if (currentView === 'lobbyBackgrounds') {
+            } else if (currentView === 'loading_screen') { // Changed to 'loading_screen'
                 loadLobbyBackgrounds();
             } else { // All other cosmetic types
                 loadCosmeticsCategory(currentView);
@@ -1194,9 +1194,9 @@
         // --- Initial Load ---
         async function initializeApp() {
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
-            updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
-            loadJamTracks();
-            appVersionDisplay.textContent = 'V2.9'; // Set the version text
+            updateNavButtons('show-outfits'); // Set Outfits as active initially
+            loadCosmeticsCategory('outfit'); // Load Outfits initially
+            appVersionDisplay.textContent = 'V2.10'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
