@@ -33,6 +33,26 @@
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        /* Styling for the version display */
+        .version-display {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            font-size: 0.875rem; /* text-sm */
+            color: #9ca3af; /* gray-400 */
+            background-color: #1f2937; /* gray-800 */
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* Styling for the toggle button container */
+        .filter-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem; /* Space between buttons */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -46,12 +66,19 @@
         <!-- Navigation -->
         <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2">
             <button id="show-jam-tracks" class="nav-button active px-4 py-2 font-semibold rounded-md mr-2">Jam Tracks</button>
-            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md">Bilder (Kosmetik)</button>
+            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md mr-2">Bilder (Kosmetik)</button>
+            <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md">Ladebildschirme</button>
         </nav>
         
         <!-- Search and Filter -->
         <div class="mb-8">
             <input type="text" id="search-input" placeholder="Suche nach Name..." class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
+        </div>
+
+        <!-- New container for the toggle and new filter buttons -->
+        <div class="filter-buttons-container">
+            <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md">Ansicht umschalten: Details</button>
+            <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600">Neu</button>
         </div>
 
         <!-- Content Area -->
@@ -89,6 +116,8 @@
         </div>
     </div>
 
+    <!-- Version Display -->
+    <div id="app-version" class="version-display"></div>
 
     <script>
         // --- DOM Elements ---
@@ -99,16 +128,23 @@
         const searchInput = document.getElementById('search-input');
         const jamTracksBtn = document.getElementById('show-jam-tracks');
         const cosmeticsBtn = document.getElementById('show-cosmetics');
+        const lobbyBackgroundsBtn = document.getElementById('show-lobby-backgrounds');
+        const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
+        const filterNewBtn = document.getElementById('filter-new-btn'); // New button reference
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
         const notificationMessage = document.getElementById('notification-message');
         const notificationCloseBtn = document.getElementById('notification-close');
+        const appVersionDisplay = document.getElementById('app-version');
 
 
         // --- State Management ---
-        let currentView = 'jam'; // 'jam' or 'cosmetics'
+        let currentView = 'jam'; // 'jam', 'cosmetics', or 'lobbyBackgrounds'
         let allJamTracks = [];
         let allCosmetics = [];
+        let allLobbyBackgrounds = [];
+        let loadingScreenViewMode = 'detailed'; // Default to 'detailed'
+        let showNewItemsOnly = false; // New filter state
         let currentAudio = {
             button: null,
             trackId: null
@@ -174,6 +210,19 @@
                 console.error('Download failed:', e);
                 showNotification('Download fehlgeschlagen. Möglicherweise blockiert Ihr Browser dies oder es gibt ein CORS-Problem.');
             }
+        }
+
+        /**
+         * Checks if an item was added recently (e.g., in the last 7 days).
+         * @param {object} item - The item object from the API.
+         * @returns {boolean} - True if the item is considered new, false otherwise.
+         */
+        function isItemNew(item) {
+            if (!item.added) return false;
+            const addedDate = new Date(item.added);
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // Set to 7 days ago
+            return addedDate >= sevenDaysAgo;
         }
 
         // --- Rendering Functions ---
@@ -259,6 +308,59 @@
             contentArea.appendChild(grid);
         }
 
+        /**
+         * Renders a grid of Lobby Backgrounds (now Ladebildschirme).
+         * This function renders based on the loadingScreenViewMode.
+         * @param {Array} backgrounds - An array of lobby background objects.
+         */
+        function renderLobbyBackgrounds(backgrounds) {
+            contentArea.innerHTML = '';
+            if (!backgrounds || backgrounds.length === 0) {
+                contentArea.innerHTML = `<p class="text-center text-gray-500">Keine Ladebildschirme gefunden.</p>`;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+
+            backgrounds.forEach(item => {
+                const imageUrl = item.images.icon || item.images.smallIcon || item.images.featured;
+                if (!imageUrl) return;
+
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group';
+                
+                if (loadingScreenViewMode === 'imageOnly') {
+                    card.innerHTML = `
+                        <div class="relative">
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else { // 'detailed' view
+                    card.innerHTML = `
+                        <div class="relative">
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
+                            <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+            contentArea.appendChild(grid);
+        }
+
         // --- Event Handling ---
         contentArea.addEventListener('click', function(e) {
             const playBtn = e.target.closest('.play-pause-btn');
@@ -319,20 +421,46 @@
             if (currentView === 'jam') {
                 const filteredTracks = allJamTracks.filter(track => track.name.toLowerCase().includes(searchTerm));
                 renderJamTracks(filteredTracks);
-            } else {
+            } else if (currentView === 'cosmetics') {
                 const filteredCosmetics = allCosmetics.filter(item => item.name.toLowerCase().includes(searchTerm));
                 renderCosmetics(filteredCosmetics);
+            } else if (currentView === 'lobbyBackgrounds') {
+                const filteredBackgrounds = allLobbyBackgrounds.filter(item => item.name.toLowerCase().includes(searchTerm));
+                renderLobbyBackgrounds(filteredBackgrounds);
             }
         });
 
         // --- Page Initialization and Navigation ---
+        function updateNavButtons(activeButtonId) {
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active', 'bg-cyan-500');
+            });
+            document.getElementById(activeButtonId).classList.add('active', 'bg-cyan-500');
+
+            // Show/hide the toggle button based on the active view
+            if (activeButtonId === 'show-lobby-backgrounds') {
+                toggleLoadingScreenViewBtn.classList.remove('hidden');
+            } else {
+                toggleLoadingScreenViewBtn.classList.add('hidden');
+            }
+
+            // Reset loading screen view mode when switching categories
+            if (activeButtonId !== 'show-lobby-backgrounds') {
+                loadingScreenViewMode = 'detailed'; // Reset to default detailed view
+            }
+            updateToggleLoadingScreenButtonText(); // Update button text and style
+            updateFilterNewButtonText(); // Update filter new button text and style
+        }
+
         async function loadJamTracks() {
-            // Changed API endpoint to the general cosmetics endpoint and filter for 'music' type
             const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
             const data = await fetchData(url);
             if (data) {
-                // Filter the data to find items where type.value is 'music'
-                allJamTracks = data.filter(item => item.type && item.type.value === 'music');
+                let filteredData = data.filter(item => item.type && item.type.value === 'music');
+                if (showNewItemsOnly) {
+                    filteredData = filteredData.filter(item => isItemNew(item));
+                }
+                allJamTracks = filteredData;
                 renderJamTracks(allJamTracks);
             }
         }
@@ -341,16 +469,64 @@
             const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
             const cosmetics = await fetchData(url);
             if (cosmetics) {
-                allCosmetics = cosmetics;
+                let filteredData = cosmetics.filter(item => item.type && item.type.value !== 'music' && item.type.value !== 'loading_screen');
+                if (showNewItemsOnly) {
+                    filteredData = filteredData.filter(item => isItemNew(item));
+                }
+                allCosmetics = filteredData;
                 renderCosmetics(allCosmetics);
+            }
+        }
+
+        async function loadLobbyBackgrounds() {
+            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+            const data = await fetchData(url);
+            if (data) {
+                let filteredData = data.filter(item => 
+                    item.type && (
+                        item.type.value === 'loading_screen' || 
+                        (item.type.displayValue && (item.type.displayValue.toLowerCase().includes('ladebildschirm') || item.type.displayValue.toLowerCase().includes('loading screen')))
+                    )
+                );
+                if (showNewItemsOnly) {
+                    filteredData = filteredData.filter(item => isItemNew(item));
+                }
+                allLobbyBackgrounds = filteredData;
+                renderLobbyBackgrounds(allLobbyBackgrounds); // Render with current mode
+                updateToggleLoadingScreenButtonText(); // Update button text
+            }
+        }
+
+        // Function to update the text and style of the toggle button
+        function updateToggleLoadingScreenButtonText() {
+            if (loadingScreenViewMode === 'imageOnly') {
+                toggleLoadingScreenViewBtn.textContent = 'Ansicht umschalten: Bild';
+                toggleLoadingScreenViewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+                toggleLoadingScreenViewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            } else {
+                toggleLoadingScreenViewBtn.textContent = 'Ansicht umschalten: Details';
+                toggleLoadingScreenViewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                toggleLoadingScreenViewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
+            }
+        }
+
+        // Function to update the text and style of the "Neu" filter button
+        function updateFilterNewButtonText() {
+            if (showNewItemsOnly) {
+                filterNewBtn.textContent = 'Neu (aktiv)';
+                filterNewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+                filterNewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            } else {
+                filterNewBtn.textContent = 'Neu';
+                filterNewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                filterNewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
             }
         }
 
         jamTracksBtn.addEventListener('click', () => {
             if (currentView === 'jam') return;
             currentView = 'jam';
-            cosmeticsBtn.classList.remove('active', 'bg-cyan-500');
-            jamTracksBtn.classList.add('active', 'bg-cyan-500');
+            updateNavButtons('show-jam-tracks');
             searchInput.value = '';
             loadJamTracks();
         });
@@ -358,16 +534,46 @@
         cosmeticsBtn.addEventListener('click', () => {
             if (currentView === 'cosmetics') return;
             currentView = 'cosmetics';
-            jamTracksBtn.classList.remove('active', 'bg-cyan-500');
-            cosmeticsBtn.classList.add('active', 'bg-cyan-500');
+            updateNavButtons('show-cosmetics');
             searchInput.value = '';
             loadCosmetics();
         });
 
+        lobbyBackgroundsBtn.addEventListener('click', () => {
+            if (currentView === 'lobbyBackgrounds') return;
+            currentView = 'lobbyBackgrounds';
+            updateNavButtons('show-lobby-backgrounds');
+            searchInput.value = '';
+            loadLobbyBackgrounds();
+        });
+
+        toggleLoadingScreenViewBtn.addEventListener('click', () => {
+            loadingScreenViewMode = (loadingScreenViewMode === 'imageOnly') ? 'detailed' : 'imageOnly';
+            renderLobbyBackgrounds(allLobbyBackgrounds); // Re-render with new mode
+            updateToggleLoadingScreenButtonText(); // Update button text
+        });
+
+        filterNewBtn.addEventListener('click', () => {
+            showNewItemsOnly = !showNewItemsOnly; // Toggle the filter state
+            updateFilterNewButtonText(); // Update button text and style
+
+            // Re-load content based on current view to apply the new filter
+            if (currentView === 'jam') {
+                loadJamTracks();
+            } else if (currentView === 'cosmetics') {
+                loadCosmetics();
+            } else if (currentView === 'lobbyBackgrounds') {
+                loadLobbyBackgrounds();
+            }
+        });
+
         // --- Initial Load ---
         function initializeApp() {
-            jamTracksBtn.classList.add('active', 'bg-cyan-500');
+            updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
+            appVersionDisplay.textContent = 'V1.6'; // Set the version text
+            updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
+            updateFilterNewButtonText(); // Set initial filter new button text and style
         }
 
         initializeApp();
