@@ -204,7 +204,7 @@
         
         <!-- Search and Filter -->
         <div class="mb-4"> <!-- Reduced margin-bottom to make space for count -->
-            <input type="text" id="search-input" placeholder="Suche nach Name..." class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
+            <input type="text" id="search-input" placeholder="Suche nach Name, Beschreibung, Set..." class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
             <div class="text-right text-sm text-gray-400 mt-2">
                 <span id="item-count"></span>
             </div>
@@ -305,7 +305,7 @@
             <p id="modal-item-type" class="text-gray-400 text-sm mb-1"></p>
             <p id="modal-item-rarity" class="text-gray-400 text-sm mb-1"></p>
             <p id="modal-item-set" class="text-gray-400 text-sm mb-1"></p>
-            <p id="modal-item-season" class="text-gray-400 text-sm mb-1"></p> <!-- New: Season info -->
+            <p id="modal-item-season" class="text-gray-400 text-sm mb-1"></p> <!-- Season info -->
             <p id="modal-item-added" class="text-gray-400 text-sm mb-4"></p>
             <p id="modal-item-description" class="text-gray-300 text-base"></p>
         </div>
@@ -324,6 +324,7 @@
         const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
         const filterNewBtn = document.getElementById('filter-new-btn');
         const rarityFilterSelect = document.getElementById('rarity-filter-select'); // New element reference for rarity filter
+        // const seasonFilterSelect = document.getElementById('season-filter-select'); // Removed season filter element reference
         const sortSelect = document.getElementById('sort-select'); // New element reference for sort dropdown
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
@@ -349,7 +350,7 @@
         const modalItemType = document.getElementById('modal-item-type');
         const modalItemRarity = document.getElementById('modal-item-rarity');
         const modalItemSet = document.getElementById('modal-item-set');
-        const modalItemSeason = document.getElementById('modal-item-season'); // New: Season info element
+        const modalItemSeason = document.getElementById('modal-item-season'); // Season info element
         const modalItemAdded = document.getElementById('modal-item-added');
         const modalItemDescription = document.getElementById('modal-item-description');
 
@@ -363,6 +364,7 @@
         let showNewItemsOnly = false; // Filter state for "Neu"
         let currentSortOrder = 'default'; // New state for sorting order
         let currentFilterRarity = 'all'; // New state for rarity filter
+        // let currentFilterSeason = 'all'; // Removed season filter state
         let currentFilterSetId = null; // New state for set filter (stores set.value)
         let currentAudio = {
             button: null,
@@ -812,6 +814,7 @@
                     searchInput.value = '';
                     rarityFilterSelect.value = 'all';
                     currentFilterRarity = 'all';
+                    // currentFilterSeason = 'all'; // Removed season filter reset
                     
                     // Set currentView to 'cosmetics' to ensure the correct rendering function is called
                     currentView = 'cosmetics';
@@ -868,11 +871,13 @@
         searchInput.addEventListener('input', () => {
             // Reset set filter when searching
             currentFilterSetId = null;
-            if (currentView === 'jam') {
+            // currentFilterSeason = 'all'; // Removed season filter reset
+            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
+            if (currentView === 'music') {
                 loadJamTracks();
             } else if (currentView === 'cosmetics') {
                 loadCosmeticsCategory('cosmetics');
-            } else if (currentView === 'lobbyBackgrounds') {
+            } else if (currentView === 'loading_screen') {
                 loadLobbyBackgrounds();
             } else { // All other specific cosmetic types
                 loadCosmeticsCategory(currentView);
@@ -883,9 +888,11 @@
             currentSortOrder = e.target.value;
             // Reset set filter when sorting
             currentFilterSetId = null;
-            if (currentView === 'jam') {
+            // currentFilterSeason = 'all'; // Removed season filter reset
+            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
+            if (currentView === 'music') {
                 loadJamTracks();
-            } else if (currentView === 'lobbyBackgrounds') {
+            } else if (currentView === 'loading_screen') {
                 loadLobbyBackgrounds();
             } else { // All other cosmetic types
                 loadCosmeticsCategory(currentView);
@@ -896,14 +903,18 @@
             currentFilterRarity = e.target.value;
             // Reset set filter when applying rarity filter
             currentFilterSetId = null;
-            if (currentView === 'jam') { // Rarity filter applies to all cosmetic types, including music
+            // currentFilterSeason = 'all'; // Removed season filter reset
+            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
+            if (currentView === 'music') { // Rarity filter applies to all cosmetic types, including music
                 loadJamTracks();
-            } else if (currentView === 'lobbyBackgrounds') {
+            } else if (currentView === 'loading_screen') {
                 loadLobbyBackgrounds();
             } else { // All other cosmetic types
                 loadCosmeticsCategory(currentView);
             }
         });
+
+        // Removed seasonFilterSelect.addEventListener('change', ...);
 
 
         // --- Page Initialization and Navigation ---
@@ -925,12 +936,14 @@
             showNewItemsOnly = false;
             currentSortOrder = 'default';
             currentFilterRarity = 'all';
+            // currentFilterSeason = 'all'; // Removed season filter reset
             currentFilterSetId = null; // Reset set filter
             
             updateToggleLoadingScreenButtonText(); // Update button text and style
             updateFilterNewButtonText(); // Update filter new button text and style
             sortSelect.value = currentSortOrder; // Ensure sort dropdown reflects current state
             rarityFilterSelect.value = currentFilterRarity; // Ensure rarity dropdown reflects current state
+            // seasonFilterSelect.value = currentFilterSeason; // Removed season filter dropdown reset
 
             stopVisualization(); // Stop visualization when changing categories
             audioPlayer.pause(); // Pause audio when changing categories
@@ -949,8 +962,11 @@
             }
         }
 
+        // Removed populateSeasonFilter() function
+
+
         /**
-         * Filters allCosmeticsData by type, search term, and applies the "new" and "rarity" filters.
+         * Filters allCosmeticsData by type, search term, and applies the "new", "rarity", and "season" filters.
          * @param {string} typeValue - The 'value' of the cosmetic type (e.g., 'outfit', 'emote').
          * @returns {Array} - Filtered and sorted array of cosmetics.
          */
@@ -968,9 +984,13 @@
                 filtered = allCosmeticsData.filter(item => item.type && item.type.value === typeValue);
             }
 
-            // Apply search filter
+            // Apply extended search filter (name, description, set name)
             if (searchTerm) {
-                filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
+                filtered = filtered.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    (item.description && item.description.toLowerCase().includes(searchTerm)) ||
+                    (item.set && item.set.text && item.set.text.toLowerCase().includes(searchTerm))
+                );
             }
 
             // Apply "new" filter
@@ -982,6 +1002,11 @@
             if (currentFilterRarity !== 'all') {
                 filtered = filtered.filter(item => item.rarity?.value === currentFilterRarity);
             }
+
+            // Removed season filter logic
+            // if (currentFilterSeason !== 'all') {
+            //     filtered = filtered.filter(item => item.season?.text === currentFilterSeason);
+            // }
 
             // Apply set filter (this will now correctly filter from the broader 'filtered' array if currentFilterSetId is set)
             if (currentFilterSetId) {
@@ -1000,8 +1025,14 @@
                 const searchTerm = searchInput.value.toLowerCase();
                 let filteredData = data.filter(item => item.type && item.type.value === 'music');
                 
-                // Apply search filter
-                filteredData = filteredData.filter(track => track.name.toLowerCase().includes(searchTerm));
+                // Apply extended search filter (name, description, set name)
+                if (searchTerm) {
+                    filteredData = filteredData.filter(track => 
+                        track.name.toLowerCase().includes(searchTerm) ||
+                        (track.description && track.description.toLowerCase().includes(searchTerm)) ||
+                        (track.set && track.set.text && track.set.text.toLowerCase().includes(searchTerm))
+                    );
+                }
 
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
@@ -1010,6 +1041,10 @@
                 if (currentFilterRarity !== 'all') {
                     filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
                 }
+                // Removed season filter logic
+                // if (currentFilterSeason !== 'all') {
+                //     filteredData = filteredData.filter(item => item.season?.text === currentFilterSeason);
+                // }
                 // Apply set filter (though music tracks typically don't have sets, keep for consistency)
                 if (currentFilterSetId) {
                     filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
@@ -1039,8 +1074,14 @@
                     )
                 );
                 
-                // Apply search filter
-                filteredData = filteredData.filter(item => item.name.toLowerCase().includes(searchTerm));
+                // Apply extended search filter (name, description, set name)
+                if (searchTerm) {
+                    filteredData = filteredData.filter(item => 
+                        item.name.toLowerCase().includes(searchTerm) ||
+                        (item.description && item.description.toLowerCase().includes(searchTerm)) ||
+                        (item.set && item.set.text && item.set.text.toLowerCase().includes(searchTerm))
+                    );
+                }
 
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
@@ -1049,6 +1090,10 @@
                 if (currentFilterRarity !== 'all') {
                     filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
                 }
+                // Removed season filter logic
+                // if (currentFilterSeason !== 'all') {
+                //     filteredData = filteredData.filter(item => item.season?.text === currentFilterSeason);
+                // }
                 // Apply set filter (though loading screens typically don't have sets, keep for consistency)
                 if (currentFilterSetId) {
                     filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
@@ -1194,13 +1239,15 @@
         // --- Initial Load ---
         async function initializeApp() {
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
+            // populateSeasonFilter(); // Removed season filter population
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.10'; // Set the version text
+            appVersionDisplay.textContent = 'V2.12'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
             rarityFilterSelect.value = currentFilterRarity; // Set initial rarity filter dropdown value
+            // seasonFilterSelect.value = currentFilterSeason; // Removed season filter dropdown reset
         }
 
         initializeApp();
