@@ -213,6 +213,41 @@
         .set-link:hover {
             color: #0891b2; /* cyan-600 */
         }
+
+        /* Rarity Colors */
+        .rarity-common { background-color: #b0b0b0; } /* Grau */
+        .rarity-uncommon { background-color: #64bc36; } /* Grün */
+        .rarity-rare { background-color: #4393e0; } /* Blau */
+        .rarity-epic { background-color: #a140da; } /* Lila */
+        .rarity-legendary { background-color: #d19a27; } /* Orange */
+        .rarity-mythic { background-color: #ff69b4; } /* Pink */
+        .rarity-exotic { background-color: #1a9e88; } /* Türkis */
+        .rarity-icon { background-color: #5d92f2; } /* Icon Blau */
+        .rarity-shadow { background-color: #3b3b3b; } /* Dunkelgrau */
+        .rarity-dark { background-color: #212121; } /* Schwarz */
+        .rarity-marvel { background-color: #cf3434; } /* Rot */
+        .rarity-dc { background-color: #3b5998; } /* DC Blau */
+        .rarity-gaminglegends { background-color: #7240a1; } /* Gaming Legends Lila */
+        .rarity-slurp { background-color: #00e4ff; } /* Slurp Hellblau */
+        .rarity-frozen { background-color: #92d4f2; } /* Gefroren Hellblau */
+        .rarity-lava { background-color: #ff6600; } /* Lava Orange */
+        .rarity-creator { background-color: #c0c0c0; } /* Creator Silber */
+        .rarity-starwars { background-color: #ffe81f; } /* Star Wars Gelb */
+        .rarity-platform { background-color: #808080; } /* Plattform Grau */
+        
+        /* New Badge Styling */
+        .new-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #10b981; /* Emerald 500 */
+            color: white;
+            font-size: 0.75rem; /* text-xs */
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            z-index: 10;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -460,19 +495,20 @@
         }
 
         /**
-         * Triggers a browser download for a given URL and filename.
+         * Triggers a browser download. Tries direct download first, then falls back to opening in a new tab.
          * @param {string} url - The URL of the file to download.
          * @param {string} filename - The desired name for the downloaded file.
          */
         async function downloadFile(url, filename) {
             try {
+                // Attempt direct download using fetch and Blob
                 const response = await fetch(url);
                 if (!response.ok) {
-                    console.error('Download failed: Network response was not ok.', response);
                     throw new Error(`Failed to fetch file: ${response.statusText}`);
                 }
                 const blob = await response.blob();
                 const blobUrl = window.URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = blobUrl;
@@ -481,12 +517,17 @@
                 a.click();
                 window.URL.revokeObjectURL(blobUrl);
                 a.remove();
-                console.log(`Download initiated for: ${filename}`);
+                
+                console.log(`Direkter Download gestartet für: ${filename}`);
+                showNotification(`"${filename}" wird heruntergeladen.`);
             } catch (e) {
-                console.error('Download failed:', e);
-                showNotification('Download fehlgeschlagen. Möglicherweise blockiert Ihr Browser dies oder es gibt ein CORS-Problem.');
+                console.warn('Direkter Download fehlgeschlagen, Fallback auf Öffnen in neuem Tab:', e);
+                // Fallback: Open in a new tab if direct download is blocked
+                window.open(url, '_blank');
+                showNotification('Der automatische Download wurde möglicherweise blockiert. Das Asset wurde in einem neuen Tab geöffnet. Bitte speichere es von dort manuell (Rechtsklick > Speichern unter...).');
             }
         }
+
 
         /**
          * Checks if an item was added recently (e.g., in the last 7 days).
@@ -602,11 +643,27 @@
                 }
             }
             
+            // Determine the best image URL for the modal, prioritizing higher resolutions
+            let imageUrl = 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt'; // Default fallback
+
+            if (item.type && item.type.value === 'loading_screen' && item.images.full_background) {
+                imageUrl = item.images.full_background;
+            } else if (item.images.featured) {
+                imageUrl = item.images.featured;
+            } else if (item.images.render) { // Some items have a 'render' image which is also high quality
+                imageUrl = item.images.render;
+            } else if (item.images.icon) {
+                imageUrl = item.images.icon;
+            } else if (item.images.smallIcon) {
+                imageUrl = item.images.smallIcon;
+            }
+
             // Set initial image
             if (currentModalVariantsOptions.length > 0) {
-                modalItemImage.src = currentModalVariantsOptions[currentModalVariantOptionIndex].image;
+                // If variants exist, use the variant image, which should also be high-res
+                modalItemImage.src = currentModalVariantsOptions[currentModalVariantOptionIndex].image || imageUrl;
             } else {
-                modalItemImage.src = item.images.featured || item.images.icon || item.images.smallIcon || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+                modalItemImage.src = imageUrl;
             }
             modalItemImage.alt = item.name;
 
@@ -707,12 +764,16 @@
             
             tracks.forEach(track => {
                 const hasAudio = track.audio && track.audio.preview && track.audio.full;
+                const isNew = isItemNew(track); // Check if item is new
+                const rarityClass = track.rarity ? `rarity-${track.rarity.value}` : ''; // Get rarity class
+
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col cursor-pointer'; // Added cursor-pointer
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col cursor-pointer relative'; // Added relative for badge positioning
                 card.dataset.itemId = track.id; // Store item ID for modal lookup
                 card.dataset.itemType = 'jam'; // Store item type for modal lookup
                 card.innerHTML = `
                     <img src="${track.images.icon}" alt="${track.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=Bild+fehlt';">
+                    ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                     <div class="p-4 flex-grow flex flex-col">
                         <h3 class="text-lg font-semibold truncate">${track.name}</h3>
                         <p class="text-sm text-gray-400">${track.artist || 'Unbekannter Künstler'}</p>
@@ -731,6 +792,7 @@
                             `}
                         </div>
                     </div>
+                    <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                 `;
                 grid.appendChild(card);
             });
@@ -752,16 +814,22 @@
             grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
 
             cosmetics.forEach(item => {
+                // Prioritize icon, then smallIcon, then featured for card images (reverted to V2.21 logic)
                 const imageUrl = item.images.icon || item.images.smallIcon || item.images.featured;
                 if (!imageUrl) return;
 
+                const isNew = isItemNew(item); // Check if item is new
+                const rarityClass = item.rarity ? `rarity-${item.rarity.value}` : ''; // Get rarity class
+
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer'; // Added cursor-pointer
+                // Added flex flex-col to ensure consistent height and pushing rarity strip to bottom
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer relative flex flex-col'; 
                 card.dataset.itemId = item.id; // Store item ID for modal lookup
                 card.dataset.itemType = 'cosmetic'; // Store item type for modal lookup
                 card.innerHTML = `
-                    <div class="relative">
+                    <div class="relative flex-grow"> <!-- Added flex-grow here -->
                         <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                        ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                         <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                              <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                 Download
@@ -774,6 +842,7 @@
                         ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
                         ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                     </div>
+                    <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                 `;
                 grid.appendChild(card);
             });
@@ -796,29 +865,38 @@
             grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
 
             backgrounds.forEach(item => {
-                const imageUrl = item.images.icon || item.images.smallIcon || item.images.featured;
+                // For loading screens, prioritize full_background, then featured, then icon
+                // Reverted image selection for loading screens to prioritize full_background as it's usually higher quality
+                const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
                 if (!imageUrl) return;
 
+                const isNew = isItemNew(item); // Check if item is new
+                const rarityClass = item.rarity ? `rarity-${item.rarity.value}` : ''; // Get rarity class
+
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer'; // Added cursor-pointer
+                // Added flex flex-col to ensure consistent height and pushing rarity strip to bottom
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer relative flex flex-col'; 
                 card.dataset.itemId = item.id; // Store item ID for modal lookup
                 card.dataset.itemType = 'lobbyBackground'; // Store item type for modal lookup
                 
                 if (loadingScreenViewMode === 'imageOnly') {
                     card.innerHTML = `
-                        <div class="relative">
+                        <div class="relative flex-grow"> <!-- Added flex-grow here -->
                             <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                     Download
                                 </button>
                             </div>
                         </div>
+                        <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                     `;
                 } else { // 'detailed' view
                     card.innerHTML = `
-                        <div class="relative">
+                        <div class="relative flex-grow"> <!-- Added flex-grow here -->
                             <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                     Download
@@ -831,6 +909,7 @@
                             ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
                             ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                         </div>
+                        <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                     `;
                 }
                 grid.appendChild(card);
@@ -841,21 +920,17 @@
         // --- Event Handling ---
         contentArea.addEventListener('click', function(e) {
             const playBtn = e.target.closest('.play-pause-btn');
-            const downloadBtn = e.target.closest('.download-btn');
+            const downloadBtn = e.target.closest('.download-btn'); 
             const card = e.target.closest('[data-item-id]'); // Listen for clicks on the card itself
 
             if (playBtn) {
                 const trackId = playBtn.dataset.trackId;
                 const audioUrl = playBtn.dataset.audioUrl;
                 togglePlay(trackId, audioUrl, playBtn);
-            } else if (downloadBtn) {
+            } else if (downloadBtn) { 
                 const url = downloadBtn.dataset.downloadUrl;
                 const filename = downloadBtn.dataset.filename;
-                const originalText = downloadBtn.textContent;
-                downloadBtn.textContent = 'Lädt...';
-                downloadFile(url, filename).finally(() => {
-                    downloadBtn.textContent = originalText;
-                });
+                downloadFile(url, filename);
             } else if (card) { // If a card was clicked (and not a button inside it)
                 const itemId = card.dataset.itemId;
                 const itemType = card.dataset.itemType;
@@ -1322,7 +1397,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.13'; // Set the version text
+            appVersionDisplay.textContent = 'V2.25'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
