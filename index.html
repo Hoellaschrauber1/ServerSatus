@@ -124,8 +124,9 @@
             background-color: #1f2937; /* gray-800 */
             border-radius: 0.75rem; /* rounded-xl */
             padding: 1.5rem;
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 700px; /* Feste maximale Breite für Konsistenz */
+            max-height: 90vh; /* Maximale Höhe relativ zum Viewport */
+            width: auto; /* Ermöglicht das Schrumpfen auf kleineren Bildschirmen */
             overflow-y: auto;
             color: white;
             position: relative;
@@ -1408,7 +1409,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.31'; // Set the version text
+            appVersionDisplay.textContent = 'V2.35'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
