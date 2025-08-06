@@ -58,6 +58,24 @@
             flex-wrap: wrap;
             gap: 0.5rem; /* Adjust gap for wrapped items */
         }
+        /* Scroll to top button styling */
+        #scroll-to-top-btn {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: #06b6d4; /* cyan-500 */
+            color: white;
+            padding: 0.75rem; /* Smaller padding */
+            border-radius: 9999px; /* Fully rounded */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            transition: background-color 0.3s ease;
+            z-index: 999;
+        }
+        #scroll-to-top-btn:hover {
+            background-color: #0891b2; /* cyan-600 */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -133,6 +151,13 @@
     <!-- Version Display -->
     <div id="app-version" class="version-display"></div>
 
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top-btn" title="Nach oben scrollen">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
     <script>
         // --- DOM Elements ---
         const contentArea = document.getElementById('content-area');
@@ -151,6 +176,7 @@
         const notificationCloseBtn = document.getElementById('notification-close');
         const appVersionDisplay = document.getElementById('app-version');
         const itemCountDisplay = document.getElementById('item-count'); // New element reference
+        const scrollToTopBtn = document.getElementById('scroll-to-top-btn'); // New button reference
 
         // New category buttons
         const outfitsBtn = document.getElementById('show-outfits');
@@ -548,7 +574,7 @@
         }
 
         async function loadLobbyBackgrounds() {
-            const url = `https://api.fortnitetracker.com/v1/assets/image/backgrounds?language=de`; // Attempting a different endpoint for backgrounds
+            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
             const data = await fetchData(url);
             if (data) {
                 const searchTerm = searchInput.value.toLowerCase();
@@ -691,12 +717,28 @@
             }
         });
 
+        // --- Scroll to Top Functionality ---
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 200) { // Show button after scrolling 200px down
+                scrollToTopBtn.style.display = 'block';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Smooth scroll animation
+            });
+        });
+
         // --- Initial Load ---
         async function initializeApp() {
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
-            appVersionDisplay.textContent = 'V2.2'; // Set the version text
+            appVersionDisplay.textContent = 'V2.4'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
         }
