@@ -222,7 +222,7 @@
         .rarity-legendary { background-color: #d19a27; } /* Orange */
         .rarity-mythic { background-color: #ff69b4; } /* Pink */
         .rarity-exotic { background-color: #1a9e88; } /* Türkis */
-        .rarity-icon { background-color: #5d92f2; } /* Icon Blau */
+        .rarity-icon { background-color: #66CCFF; } /* Icon Hellblau/Cyan */
         .rarity-shadow { background-color: #3b3b3b; } /* Dunkelgrau */
         .rarity-dark { background-color: #212121; } /* Schwarz */
         .rarity-marvel { background-color: #cf3434; } /* Rot */
@@ -713,7 +713,7 @@
             if (!analyser || !canvas) return;
 
             const ctx = canvas.getContext('2d');
-            const bufferLength = analyser.frequencyBinBincount;
+            const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
             animationFrameId = requestAnimationFrame(() => drawVisualization(canvas));
@@ -1397,7 +1397,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.27'; // Set the version text
+            appVersionDisplay.textContent = 'V2.30'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
