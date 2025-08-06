@@ -351,7 +351,7 @@
                 if (loadingScreenViewMode === 'imageOnly') {
                     card.innerHTML = `
                         <div class="relative">
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
                                     Download
@@ -683,7 +683,7 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
-            appVersionDisplay.textContent = 'V2.0'; // Set the version text
+            appVersionDisplay.textContent = 'V2.1'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
         }
