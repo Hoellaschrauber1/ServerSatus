@@ -254,32 +254,56 @@
         .no-scroll {
             overflow: hidden;
         }
+
+        /* Settings icon container for positioning */
+        .settings-icon-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+        }
+        /* Rotation for the gear icon */
+        .rotate-on-click {
+            transform: rotate(90deg);
+            transition: transform 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
 
-    <div class="container mx-auto p-4 md:p-8">
+    <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative to container for settings icon positioning -->
         <header class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-bold text-cyan-400">Fortnite Asset Explorer</h1>
-            <p class="text-gray-400 mt-2">Durchsuche, höre und lade Jam-Tracks und kosmetische Gegenstände herunter.</p>
+            <p class="text-gray-400 mt-2"></p> <!-- Subtitle will be set by JS -->
+            
+            <!-- Settings Icon and Language Dropdown -->
+            <div class="settings-icon-container">
+                <svg id="settings-gear" class="w-8 h-8 text-gray-400 cursor-pointer transition-transform duration-300 hover:rotate-90" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M11.078 2.298a.75.75 0 01.844 0L12 2.5l.078-.202a.75.75 0 01.844 0l.976.255a.75.75 0 01.52.52l.255.976a.75.75 0 010 .844L14.5 12l.202.078a.75.75 0 010 .844l-.255.976a.75.75 0 01-.52.52l-.976.255a.75.75 0 01-.844 0L12 21.5l-.078.202a.75.75 0 01-.844 0l-.976-.255a.75.75 0 01-.52-.52l-.255-.976a.75.75 0 010-.844L9.5 12l-.202-.078a.75.75 0 010-.844l.255-.976a.75.75 0 01.52-.52l.976-.255zM12 10.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd" />
+                </svg>
+                <div id="language-dropdown" class="absolute hidden bg-gray-800 rounded-lg shadow-lg py-2 mt-2 right-0 top-full z-20 border border-gray-700">
+                    <button class="lang-option w-full text-left px-4 py-2 hover:bg-gray-700 text-white" data-lang="de">Deutsch</button>
+                    <button class="lang-option w-full text-left px-4 py-2 hover:bg-gray-700 text-white" data-lang="en">English</button>
+                </div>
+            </div>
         </header>
 
         <!-- Navigation -->
         <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2 main-nav">
-            <button id="show-outfits" class="nav-button active px-4 py-2 font-semibold rounded-md">Outfits</button>
-            <button id="show-emotes" class="nav-button px-4 py-2 font-semibold rounded-md">Emotes</button>
-            <button id="show-pickaxes" class="nav-button px-4 py-2 font-semibold rounded-md">Spitzhacken</button>
-            <button id="show-gliders" class="nav-button px-4 py-2 font-semibold rounded-md">Hängegleiter</button>
-            <button id="show-wraps" class="nav-button px-4 py-2 font-semibold rounded-md">Lackierungen</button>
-            <button id="show-backblings" class="nav-button px-4 py-2 font-semibold rounded-md">Rücken-Accessoires</button>
-            <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md">Ladebildschirme</button>
-            <button id="show-jam-tracks" class="nav-button px-4 py-2 font-semibold rounded-md">Jam Tracks</button>
-            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md">Andere Kosmetik</button>
+            <button id="show-outfits" class="nav-button active px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-emotes" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-pickaxes" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-gliders" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-wraps" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-backblings" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-jam-tracks" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
         </nav>
         
         <!-- Search and Filter -->
         <div class="mb-4"> <!-- Reduced margin-bottom to make space for count -->
-            <input type="text" id="search-input" placeholder="Suche nach Name, Beschreibung, Set..." class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
+            <input type="text" id="search-input" class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
             <div class="text-right text-sm text-gray-400 mt-2">
                 <span id="item-count"></span>
             </div>
@@ -287,42 +311,42 @@
 
         <!-- New container for the toggle, new filter, and sort buttons -->
         <div class="filter-buttons-container">
-            <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md">Ansicht umschalten: Details</button>
-            <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600">Neu</button>
+            <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md"></button>
+            <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600"></button>
             
             <!-- Rarity Filter Dropdown -->
             <select id="rarity-filter-select" class="filter-dropdown">
-                <option value="all">Alle Seltenheiten</option>
-                <option value="common">Gewöhnlich</option>
-                <option value="uncommon">Ungewöhnlich</option>
-                <option value="rare">Selten</option>
-                <option value="epic">Episch</option>
-                <option value="legendary">Legendär</option>
-                <option value="mythic">Mythisch</option>
-                <option value="exotic">Exotisch</option>
-                <option value="icon">Icon</option>
-                <option value="shadow">Schatten</option>
-                <option value="dark">Dunkel</option>
-                <option value="marvel">Marvel</option>
-                <option value="dc">DC</option>
-                <option value="gaminglegends">Gaming Legends</option>
-                <option value="slurp">Slurp</option>
-                <option value="frozen">Gefroren</option>
-                <option value="lava">Lava</option>
-                <option value="creator">Creator</option>
-                <option value="starwars">Star Wars</option>
-                <option value="platform">Plattform</option>
+                <option value="all"></option>
+                <option value="common"></option>
+                <option value="uncommon"></option>
+                <option value="rare"></option>
+                <option value="epic"></option>
+                <option value="legendary"></option>
+                <option value="mythic"></option>
+                <option value="exotic"></option>
+                <option value="icon"></option>
+                <option value="shadow"></option>
+                <option value="dark"></option>
+                <option value="marvel"></option>
+                <option value="dc"></option>
+                <option value="gaminglegends"></option>
+                <option value="slurp"></option>
+                <option value="frozen"></option>
+                <option value="lava"></option>
+                <option value="creator"></option>
+                <option value="starwars"></option>
+                <option value="platform"></option>
             </select>
 
             <!-- New Sort Dropdown -->
             <select id="sort-select" class="sort-dropdown">
-                <option value="default">Standard Sortierung</option>
-                <option value="name-asc">Name (A-Z)</option>
-                <option value="name-desc">Name (Z-A)</option>
-                <option value="rarity-asc">Seltenheit (aufsteigend)</option>
-                <option value="rarity-desc">Seltenheit (absteigend)</option>
-                <option value="added-desc">Hinzugefügt (neueste)</option>
-                <option value="added-asc">Hinzugefügt (älteste)</option>
+                <option value="default"></option>
+                <option value="name-asc"></option>
+                <option value="name-desc"></option>
+                <option value="rarity-asc"></option>
+                <option value="rarity-desc"></option>
+                <option value="added-desc"></option>
+                <option value="added-asc"></option>
             </select>
         </div>
 
@@ -337,13 +361,13 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-gray-400">Lade Inhalte...</p>
+            <p class="mt-4 text-gray-400"></p>
         </div>
         
         <!-- Error Message -->
         <div id="error-message" class="hidden text-center py-10 bg-red-900/50 border border-red-500 rounded-lg">
-            <h3 class="text-xl text-red-400">Fehler</h3>
-            <p id="error-text" class="text-red-300 mt-2">Die Inhalte konnten nicht geladen werden. Bitte versuche es später erneut.</p>
+            <h3 class="text-xl text-red-400"></h3>
+            <p id="error-text" class="text-red-300 mt-2"></p>
         </div>
 
     </div>
@@ -365,7 +389,7 @@
     <div id="app-version" class="version-display"></div>
 
     <!-- Scroll to Top Button -->
-    <button id="scroll-to-top-btn" title="Nach oben scrollen">
+    <button id="scroll-to-top-btn" title="">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
         </svg>
@@ -434,8 +458,12 @@
         const modalImagePrevBtn = document.getElementById('modal-image-prev'); // New nav button
         const modalImageNextBtn = document.getElementById('modal-image-next'); // New nav button
 
+        // Language elements
+        const settingsGear = document.getElementById('settings-gear');
+        const languageDropdown = document.getElementById('language-dropdown');
 
         // --- State Management ---
+        let currentLanguage = localStorage.getItem('fortnite_explorer_lang') || 'de'; // Load from localStorage or default to German
         let currentView = 'outfit'; // Changed initial view to 'outfit'
         let allJamTracks = [];
         let allCosmeticsData = []; // Stores ALL cosmetic data from the API
@@ -462,28 +490,170 @@
         let animationFrameId = null; // To store the ID of the requestAnimationFrame
         let currentVisualizerCanvas = null; // To store the canvas element of the currently playing track
 
+        // --- Translations ---
+        const translations = {
+            de: {
+                title: "Fortnite Asset Explorer",
+                subtitle: "Durchsuche, höre und lade Jam-Tracks und kosmetische Gegenstände herunter.",
+                outfits: "Outfits",
+                emotes: "Emotes",
+                pickaxes: "Spitzhacken",
+                gliders: "Hängegleiter",
+                wraps: "Lackierungen",
+                backblings: "Rücken-Accessoires",
+                lobbyBackgrounds: "Ladebildschirme",
+                jamTracks: "Jam Tracks",
+                otherCosmetics: "Andere Kosmetik",
+                searchPlaceholder: "Suche nach Name, Beschreibung, Set...",
+                itemCount: "Anzahl der Funde:",
+                toggleViewDetails: "Ansicht umschalten: Details",
+                toggleViewImage: "Ansicht umschalten: Bild",
+                new: "Neu",
+                newActive: "Neu (aktiv)",
+                allRarities: "Alle Seltenheiten",
+                rarityCommon: "Gewöhnlich",
+                rarityUncommon: "Ungewöhnlich",
+                rarityRare: "Selten",
+                rarityEpic: "Episch",
+                rarityLegendary: "Legendär",
+                rarityMythic: "Mythisch",
+                rarityExotic: "Exotisch",
+                rarityIcon: "Icon",
+                rarityShadow: "Schatten",
+                rarityDark: "Dunkel",
+                rarityMarvel: "Marvel",
+                rarityDC: "DC",
+                rarityGamingLegends: "Gaming Legends",
+                raritySlurp: "Slurp",
+                rarityFrozen: "Gefroren",
+                rarityLava: "Lava",
+                rarityCreator: "Creator",
+                rarityStarWars: "Star Wars",
+                rarityPlatform: "Plattform",
+                defaultSort: "Standard Sortierung",
+                nameAsc: "Name (A-Z)",
+                nameDesc: "Name (Z-A)",
+                rarityAsc: "Seltenheit (aufsteigend)",
+                rarityDesc: "Seltenheit (absteigend)",
+                addedDesc: "Hinzugefügt (neueste)",
+                addedAsc: "Hinzugefügt (älteste)",
+                loadingContent: "Lade Inhalte...",
+                errorTitle: "Fehler",
+                errorMessage: "Die Inhalte konnten nicht geladen werden. Bitte versuche es später erneut.",
+                noJamTracksFound: "Keine Jam-Tracks gefunden.",
+                noCosmeticsFound: "Keine kosmetischen Gegenstände gefunden.",
+                noAudioAvailable: "Kein Audio verfügbar",
+                play: "Play",
+                pause: "Pause",
+                download: "Download",
+                imageMissing: "Bild fehlt",
+                downloading: "wird heruntergeladen.",
+                downloadBlocked: "Der automatische Download wurde möglicherweise blockiert. Das Asset wurde in einem neuen Tab geöffnet. Bitte speichere es von dort manuell (Rechtsklick > Speichern unter...).",
+                modalType: "Typ:",
+                modalRarity: "Seltenheit:",
+                modalSet: "Set:",
+                modalSeason: "Saison:",
+                modalAdded: "Hinzugefügt:",
+                modalNoDescription: "Keine Beschreibung verfügbar.",
+                scrollToTop: "Nach oben scrollen",
+                ok: "OK"
+            },
+            en: {
+                title: "Fortnite Asset Explorer",
+                subtitle: "Browse, listen to, and download Jam Tracks and cosmetic items.",
+                outfits: "Outfits",
+                emotes: "Emotes",
+                pickaxes: "Pickaxes",
+                gliders: "Gliders",
+                wraps: "Wraps",
+                backblings: "Back Blings",
+                lobbyBackgrounds: "Loading Screens",
+                jamTracks: "Jam Tracks",
+                otherCosmetics: "Other Cosmetics",
+                searchPlaceholder: "Search by name, description, set...",
+                itemCount: "Items found:",
+                toggleViewDetails: "Toggle View: Details",
+                toggleViewImage: "Toggle View: Image",
+                new: "New",
+                newActive: "New (active)",
+                allRarities: "All Rarities",
+                rarityCommon: "Common",
+                rarityUncommon: "Uncommon",
+                rarityRare: "Rare",
+                rarityEpic: "Epic",
+                rarityLegendary: "Legendary",
+                rarityMythic: "Mythic",
+                rarityExotic: "Exotic",
+                rarityIcon: "Icon",
+                rarityShadow: "Shadow",
+                rarityDark: "Dark",
+                rarityMarvel: "Marvel",
+                rarityDC: "DC",
+                rarityGamingLegends: "Gaming Legends",
+                raritySlurp: "Slurp",
+                rarityFrozen: "Frozen",
+                rarityLava: "Lava",
+                rarityCreator: "Creator",
+                rarityStarWars: "Star Wars",
+                rarityPlatform: "Platform",
+                defaultSort: "Default Sort",
+                nameAsc: "Name (A-Z)",
+                nameDesc: "Name (Z-A)",
+                rarityAsc: "Rarity (Asc)",
+                rarityDesc: "Rarity (Desc)",
+                addedDesc: "Added (Newest)",
+                addedAsc: "Added (Oldest)",
+                loadingContent: "Loading content...",
+                errorTitle: "Error",
+                errorMessage: "Failed to load content. Please try again later.",
+                noJamTracksFound: "No Jam Tracks found.",
+                noCosmeticsFound: "No cosmetic items found.",
+                noAudioAvailable: "No audio available",
+                play: "Play",
+                pause: "Pause",
+                download: "Download",
+                imageMissing: "Image missing",
+                downloading: "downloading.",
+                downloadBlocked: "Automatic download might have been blocked. The asset was opened in a new tab. Please save it manually from there (Right-click > Save As...).",
+                modalType: "Type:",
+                modalRarity: "Rarity:",
+                modalSet: "Set:",
+                modalSeason: "Season:",
+                modalAdded: "Added:",
+                modalNoDescription: "No description available.",
+                scrollToTop: "Scroll to top",
+                ok: "OK"
+            }
+        };
+
+
         // --- Utility Functions ---
         /**
          * Fetches data from a given API endpoint with error handling.
-         * @param {string} fullUrl - The full API URL to fetch from.
+         * @param {string} baseUrl - The base API URL to fetch from.
          * @returns {Promise<any>} - The JSON response data.
          */
-        async function fetchData(fullUrl) {
+        async function fetchData(baseUrl) {
             loadingIndicator.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             contentArea.innerHTML = '';
             itemCountDisplay.textContent = ''; // Clear count while loading
-            console.log(`Fetching from: ${fullUrl}`); // Log the URL for debugging
+            
+            const url = new URL(baseUrl);
+            url.searchParams.set('language', currentLanguage); // Set language parameter based on currentLanguage
+            
+            console.log(`Fetching from: ${url.toString()}`); // Log the URL for debugging
             try {
-                const response = await fetch(fullUrl);
+                const response = await fetch(url.toString());
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const json = await response.json();
                 return json.data;
             } catch (error) {
-                console.error(`Failed to fetch data from ${fullUrl}:`, error);
-                errorText.textContent = `Die Inhalte konnten nicht geladen werden (${error.message}). Bitte versuche es später erneut.`;
+                console.error(`Failed to fetch data from ${url.toString()}:`, error);
+                document.querySelector('#error-message h3').textContent = translations[currentLanguage].errorTitle; // Fixed: Target h3
+                errorText.textContent = translations[currentLanguage].errorMessage;
                 errorMessage.classList.remove('hidden');
                 return null;
             } finally {
@@ -525,12 +695,12 @@
                 a.remove();
                 
                 console.log(`Direkter Download gestartet für: ${filename}`);
-                showNotification(`"${filename}" wird heruntergeladen.`);
+                showNotification(`"${filename}" ${translations[currentLanguage].downloading}`);
             } catch (e) {
                 console.warn('Direkter Download fehlgeschlagen, Fallback auf Öffnen in neuem Tab:', e);
                 // Fallback: Open in a new tab if direct download is blocked
                 window.open(url, '_blank');
-                showNotification('Der automatische Download wurde möglicherweise blockiert. Das Asset wurde in einem neuen Tab geöffnet. Bitte speichere es von dort manuell (Rechtsklick > Speichern unter...).');
+                showNotification(translations[currentLanguage].downloadBlocked);
             }
         }
 
@@ -616,7 +786,7 @@
         function updateModalImageForVariant() {
             if (currentModalVariantsOptions.length > 0) {
                 const imageUrl = currentModalVariantsOptions[currentModalVariantOptionIndex].image;
-                modalItemImage.src = imageUrl || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+                modalItemImage.src = imageUrl || `https://placehold.co/400x400/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}`;
             }
             // Show/hide navigation buttons
             if (currentModalVariantsOptions.length > 1) {
@@ -653,7 +823,7 @@
             }
             
             // Determine the best image URL for the modal, prioritizing higher resolutions
-            let imageUrl = 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt'; // Default fallback
+            let imageUrl = `https://placehold.co/400x400/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}`; // Default fallback
 
             if (item.type && item.type.value === 'loading_screen' && item.images.full_background) {
                 imageUrl = item.images.full_background;
@@ -678,19 +848,19 @@
 
             // Update other modal details
             modalItemName.textContent = item.name;
-            modalItemType.textContent = `Typ: ${item.type?.displayValue || 'N/A'}`;
-            modalItemRarity.textContent = item.rarity ? `Seltenheit: ${item.rarity.displayValue}` : 'Seltenheit: N/A';
+            modalItemType.textContent = `${translations[currentLanguage].modalType} ${item.type?.displayValue || 'N/A'}`;
+            modalItemRarity.textContent = item.rarity ? `${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}` : `${translations[currentLanguage].modalRarity} N/A`;
             
             // Make set name clickable
             if (item.set && item.set.value && item.set.text) {
-                modalItemSet.innerHTML = `Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span>`;
+                modalItemSet.innerHTML = `${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span>`;
             } else {
                 modalItemSet.textContent = ''; // Clear if no set
             }
 
-            modalItemSeason.textContent = item.season ? `Saison: ${item.season.text}` : ''; // Display season info
-            modalItemAdded.textContent = item.added ? `Hinzugefügt: ${new Date(item.added).toLocaleDateString('de-DE')}` : 'Hinzugefügt: N/A';
-            modalItemDescription.textContent = item.description || 'Keine Beschreibung verfügbar.';
+            modalItemSeason.textContent = item.season ? `${translations[currentLanguage].modalSeason} ${item.season.text}` : ''; // Display season info
+            modalItemAdded.textContent = item.added ? `${translations[currentLanguage].modalAdded} ${new Date(item.added).toLocaleDateString(currentLanguage === 'de' ? 'de-DE' : 'en-US')}` : `${translations[currentLanguage].modalAdded} N/A`;
+            modalItemDescription.textContent = item.description || translations[currentLanguage].modalNoDescription;
 
             updateModalImageForVariant(); // Ensure buttons are correctly shown/hidden
             itemDetailModalOverlay.classList.add('active');
@@ -766,9 +936,9 @@
          */
         function renderJamTracks(tracks) {
             contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `Anzahl der Funde: ${tracks.length}`; // Update count
+            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${tracks.length}`; // Update count
             if (!tracks || tracks.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">Keine Jam-Tracks gefunden.</p>`;
+                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noJamTracksFound}</p>`;
                 return;
             }
             const grid = document.createElement('div');
@@ -784,23 +954,23 @@
                 card.dataset.itemId = track.id; // Store item ID for modal lookup
                 card.dataset.itemType = 'jam'; // Store item type for modal lookup
                 card.innerHTML = `
-                    <img src="${track.images.icon}" alt="${track.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=Bild+fehlt';">
-                    ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
+                    <img src="${track.images.icon}" alt="${track.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
+                    ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
                     <div class="p-4 flex-grow flex flex-col">
                         <h3 class="text-lg font-semibold truncate">${track.name}</h3>
-                        <p class="text-sm text-gray-400">${track.artist || 'Unbekannter Künstler'}</p>
+                        <p class="text-sm text-gray-400">${track.artist || translations[currentLanguage].unknownArtist}</p>
                         ${hasAudio ? `<canvas class="audio-visualizer hidden"></canvas>` : ''} <!-- Audio Visualizer Canvas -->
                         <div class="mt-auto pt-4 flex items-center justify-between">
                             ${hasAudio ? `
                                 <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}" onclick="event.stopPropagation()">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                                    <span class="ml-2">Play</span>
+                                    <span class="ml-2">${translations[currentLanguage].play}</span>
                                 </button>
                                 <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg" onclick="event.stopPropagation()">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
                                 </button>
                             ` : `
-                                <span class="text-gray-500 text-sm">Kein Audio verfügbar</span>
+                                <span class="text-gray-500 text-sm">${translations[currentLanguage].noAudioAvailable}</span>
                             `}
                         </div>
                     </div>
@@ -817,9 +987,9 @@
          */
         function renderCosmetics(cosmetics) {
             contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `Anzahl der Funde: ${cosmetics.length}`; // Update count
+            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${cosmetics.length}`; // Update count
              if (!cosmetics || cosmetics.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">Keine kosmetischen Gegenstände gefunden.</p>`;
+                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noCosmeticsFound}</p>`;
                 return;
             }
             const grid = document.createElement('div');
@@ -840,19 +1010,19 @@
                 card.dataset.itemType = 'cosmetic'; // Store item type for modal lookup
                 card.innerHTML = `
                     <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
-                        ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
+                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
+                        ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
                         <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                              <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                Download
+                                ${translations[currentLanguage].download}
                             </button>
                         </div>
                     </div>
                     <div class="p-3">
                         <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                         <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
-                        ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
-                        ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
+                        ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}</p>` : ''}
+                        ${item.set ? `<p class="text-xs text-gray-500">${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                     </div>
                     <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                 `;
@@ -868,9 +1038,9 @@
          */
         function renderLobbyBackgrounds(backgrounds) {
             contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `Anzahl der Funde: ${backgrounds.length}`; // Update count
+            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${backgrounds.length}`; // Update count
             if (!backgrounds || backgrounds.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">Keine Ladebildschirme gefunden.</p>`;
+                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noCosmeticsFound}</p>`;
                 return;
             }
             const grid = document.createElement('div');
@@ -894,11 +1064,11 @@
                 if (loadingScreenViewMode === 'imageOnly') {
                     card.innerHTML = `
                         <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
-                            ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
+                            ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                    Download
+                                    ${translations[currentLanguage].download}
                                 </button>
                             </div>
                         </div>
@@ -907,19 +1077,19 @@
                 } else { // 'detailed' view
                     card.innerHTML = `
                         <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
-                            ${isNew ? '<span class="new-badge">Neu</span>' : ''} <!-- New badge -->
+                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
+                            ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                  <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                    Download
+                                    ${translations[currentLanguage].download}
                                 </button>
                             </div>
                         </div>
                         <div class="p-3">
                             <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                             <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
-                            ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
-                            ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
+                            ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}</p>` : ''}
+                            ${item.set ? `<p class="text-xs text-gray-500">${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                         </div>
                         <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
                     `;
@@ -1023,7 +1193,7 @@
             stopVisualization();
             audioPlayer.pause();
             if (currentAudio.button) {
-                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
+                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].play}</span>`;
             }
 
 
@@ -1034,7 +1204,7 @@
             if (audioPlayer.paused || audioPlayer.currentTime === 0) {
                 initAudioContext(); // Initialize audio context if not already
                 audioPlayer.play().then(() => {
-                    button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">Pause</span>`;
+                    button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].pause}</span>`;
                     currentAudio = { button, trackId, audioUrl };
                     
                     // Start visualization for the current track
@@ -1052,7 +1222,7 @@
         audioPlayer.onpause = () => {
             stopVisualization(); // Stop visualization when audio pauses
             if (currentAudio.button) {
-                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
+                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].play}</span>`;
                 currentAudio = { button: null, trackId: null, audioUrl: null };
             }
         };
@@ -1137,12 +1307,15 @@
          * Fetches all cosmetic data if not already loaded.
          */
         async function ensureAllCosmeticsLoaded() {
-            if (allCosmeticsData.length === 0) {
-                const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
-                const data = await fetchData(url);
-                if (data) {
-                    allCosmeticsData = data;
-                }
+            // Only fetch if data is empty OR if language has changed from the last fetch
+            // To properly handle language changes, we need to re-fetch if the language changes.
+            // So, we'll always fetch when the language changes, and only fetch once per language.
+            // For simplicity, we'll re-fetch all data on language change for now.
+            // A more optimized approach would be to store data per language, but for this scale, re-fetching is fine.
+            const url = `https://fortnite-api.com/v2/cosmetics/br`; // Language is set in fetchData
+            const data = await fetchData(url);
+            if (data) {
+                allCosmeticsData = data;
             }
         }
 
@@ -1195,7 +1368,7 @@
 
 
         async function loadJamTracks() {
-            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+            const url = `https://fortnite-api.com/v2/cosmetics/br`;
             const data = await fetchData(url);
             if (data) {
                 const searchTerm = searchInput.value.toLowerCase();
@@ -1235,7 +1408,7 @@
         }
 
         async function loadLobbyBackgrounds() {
-            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+            const url = `https://fortnite-api.com/v2/cosmetics/br`;
             const data = await fetchData(url);
             if (data) {
                 const searchTerm = searchInput.value.toLowerCase();
@@ -1274,14 +1447,98 @@
             }
         }
 
+        /**
+         * Updates all static UI text based on the currentLanguage.
+         */
+        function updateUIForLanguage() {
+            const lang = currentLanguage;
+            const t = translations[lang];
+
+            // Header
+            document.querySelector('h1').textContent = t.title;
+            document.querySelector('header p').textContent = t.subtitle;
+
+            // Navigation Buttons
+            document.getElementById('show-outfits').textContent = t.outfits;
+            document.getElementById('show-emotes').textContent = t.emotes;
+            document.getElementById('show-pickaxes').textContent = t.pickaxes;
+            document.getElementById('show-gliders').textContent = t.gliders;
+            document.getElementById('show-wraps').textContent = t.wraps;
+            document.getElementById('show-backblings').textContent = t.backblings;
+            document.getElementById('show-lobby-backgrounds').textContent = t.lobbyBackgrounds;
+            document.getElementById('show-jam-tracks').textContent = t.jamTracks;
+            document.getElementById('show-cosmetics').textContent = t.otherCosmetics;
+
+            // Search and Filters
+            searchInput.placeholder = t.searchPlaceholder;
+            toggleLoadingScreenViewBtn.textContent = loadingScreenViewMode === 'imageOnly' ? t.toggleViewImage : t.toggleViewDetails;
+            filterNewBtn.textContent = showNewItemsOnly ? t.newActive : t.new;
+
+            // Rarity Filter Dropdown
+            const rarityOptions = rarityFilterSelect.options;
+            rarityOptions[0].textContent = t.allRarities;
+            rarityOptions[1].textContent = t.rarityCommon;
+            rarityOptions[2].textContent = t.rarityUncommon;
+            rarityOptions[3].textContent = t.rarityRare;
+            rarityOptions[4].textContent = t.rarityEpic;
+            rarityOptions[5].textContent = t.rarityLegendary;
+            rarityOptions[6].textContent = t.rarityMythic;
+            rarityOptions[7].textContent = t.rarityExotic;
+            rarityOptions[8].textContent = t.rarityIcon;
+            rarityOptions[9].textContent = t.rarityShadow;
+            rarityOptions[10].textContent = t.rarityDark;
+            rarityOptions[11].textContent = t.rarityMarvel;
+            rarityOptions[12].textContent = t.rarityDC;
+            rarityOptions[13].textContent = t.rarityGamingLegends;
+            rarityOptions[14].textContent = t.raritySlurp;
+            rarityOptions[15].textContent = t.rarityFrozen;
+            rarityOptions[16].textContent = t.rarityLava;
+            rarityOptions[17].textContent = t.rarityCreator;
+            rarityOptions[18].textContent = t.rarityStarWars;
+            rarityOptions[19].textContent = t.rarityPlatform;
+
+            // Sort Dropdown
+            const sortOptions = sortSelect.options;
+            sortOptions[0].textContent = t.defaultSort;
+            sortOptions[1].textContent = t.nameAsc;
+            sortOptions[2].textContent = t.nameDesc;
+            sortOptions[3].textContent = t.rarityAsc;
+            sortOptions[4].textContent = t.rarityDesc;
+            sortOptions[5].textContent = t.addedDesc;
+            sortOptions[6].textContent = t.addedAsc;
+
+            // Loading/Error Messages
+            document.querySelector('#loading-indicator p').textContent = t.loadingContent;
+            document.querySelector('#error-message h3').textContent = t.errorTitle; // FIX HERE
+            document.getElementById('error-text').textContent = t.errorMessage; 
+
+            // Notification Modal
+            notificationCloseBtn.textContent = t.ok;
+            
+            // Scroll to Top Button
+            scrollToTopBtn.title = t.scrollToTop;
+
+            // Re-render current content to update dynamic text within cards (like "No Audio Available")
+            // This is crucial. We need to re-render the *current* category.
+            if (currentView === 'music') {
+                renderJamTracks(allJamTracks); // Re-render with potentially new audio button text
+            } else if (currentView === 'loading_screen') {
+                renderLobbyBackgrounds(allLobbyBackgrounds);
+            } else {
+                // For other cosmetic types, re-render with current filtered data (which is already localized)
+                renderCosmetics(getFilteredCosmeticsByType(currentView));
+            }
+        }
+
+
         // Function to update the text and style of the toggle button
         function updateToggleLoadingScreenButtonText() {
             if (loadingScreenViewMode === 'imageOnly') {
-                toggleLoadingScreenViewBtn.textContent = 'Ansicht umschalten: Bild';
+                toggleLoadingScreenViewBtn.textContent = translations[currentLanguage].toggleViewImage;
                 toggleLoadingScreenViewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
                 toggleLoadingScreenViewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
             } else {
-                toggleLoadingScreenViewBtn.textContent = 'Ansicht umschalten: Details';
+                toggleLoadingScreenViewBtn.textContent = translations[currentLanguage].toggleViewDetails;
                 toggleLoadingScreenViewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
                 toggleLoadingScreenViewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
             }
@@ -1290,11 +1547,11 @@
         // Function to update the text and style of the "Neu" filter button
         function updateFilterNewButtonText() {
             if (showNewItemsOnly) {
-                filterNewBtn.textContent = 'Neu (aktiv)';
+                filterNewBtn.textContent = translations[currentLanguage].newActive;
                 filterNewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
                 filterNewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
             } else {
-                filterNewBtn.textContent = 'Neu';
+                filterNewBtn.textContent = translations[currentLanguage].new;
                 filterNewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
                 filterNewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
             }
@@ -1404,16 +1661,56 @@
             });
         });
 
+        // --- Language Switcher Events ---
+        settingsGear.addEventListener('click', () => {
+            languageDropdown.classList.toggle('hidden');
+            // Toggle rotation class on click
+            settingsGear.classList.toggle('rotate-on-click');
+        });
+
+        // Hide dropdown if clicked outside
+        document.addEventListener('click', (e) => {
+            if (!settingsGear.contains(e.target) && !languageDropdown.contains(e.target)) {
+                languageDropdown.classList.add('hidden');
+                settingsGear.classList.remove('rotate-on-click'); // Remove rotation when closing
+            }
+        });
+
+        document.querySelectorAll('.lang-option').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const selectedLang = e.target.dataset.lang;
+                if (currentLanguage !== selectedLang) {
+                    currentLanguage = selectedLang;
+                    localStorage.setItem('fortnite_explorer_lang', currentLanguage);
+                    languageDropdown.classList.add('hidden'); // Hide dropdown
+                    settingsGear.classList.remove('rotate-on-click'); // Remove rotation
+                    
+                    updateUIForLanguage(); // Update static UI text
+                    // Re-fetch data for the current category in the new language
+                    if (currentView === 'music') {
+                        await loadJamTracks();
+                    } else if (currentView === 'loading_screen') {
+                        await loadLobbyBackgrounds();
+                    } else {
+                        await loadCosmeticsCategory(currentView);
+                    }
+                }
+            });
+        });
+
+
         // --- Initial Load ---
         async function initializeApp() {
-            await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
+            // Ensure all cosmetic data is loaded in the current language
+            await ensureAllCosmeticsLoaded(); 
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.35'; // Set the version text
+            appVersionDisplay.textContent = 'V2.37'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
             rarityFilterSelect.value = currentFilterRarity; // Set initial rarity filter dropdown value
+            updateUIForLanguage(); // Apply initial language settings to UI
         }
 
         initializeApp();
