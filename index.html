@@ -151,12 +151,46 @@
         .modal-close-btn:hover {
             color: #f3f4f6;
         }
+        .modal-image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
         .modal-image {
             max-width: 100%;
             height: auto;
             border-radius: 0.5rem;
-            margin-bottom: 1rem;
+            flex-shrink: 0; /* Prevent image from shrinking */
         }
+        .modal-image-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            z-index: 10;
+            opacity: 0.7;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+        }
+        .modal-image-nav-btn:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-image-nav-btn.left {
+            left: 0.5rem;
+        }
+        .modal-image-nav-btn.right {
+            right: 0.5rem;
+        }
+
 
         /* Audio Visualizer Canvas */
         .audio-visualizer {
@@ -300,7 +334,11 @@
     <div id="item-detail-modal-overlay" class="modal-overlay">
         <div id="item-detail-modal-content" class="modal-content">
             <button id="item-detail-modal-close" class="modal-close-btn">&times;</button>
-            <img id="modal-item-image" class="modal-image" src="" alt="Item Image">
+            <div class="modal-image-container">
+                <button id="modal-image-prev" class="modal-image-nav-btn left hidden">&lsaquo;</button>
+                <img id="modal-item-image" class="modal-image" src="" alt="Item Image">
+                <button id="modal-image-next" class="modal-image-nav-btn right hidden">&rsaquo;</button>
+            </div>
             <h2 id="modal-item-name" class="text-2xl font-bold mb-2"></h2>
             <p id="modal-item-type" class="text-gray-400 text-sm mb-1"></p>
             <p id="modal-item-rarity" class="text-gray-400 text-sm mb-1"></p>
@@ -324,7 +362,6 @@
         const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
         const filterNewBtn = document.getElementById('filter-new-btn');
         const rarityFilterSelect = document.getElementById('rarity-filter-select'); // New element reference for rarity filter
-        // const seasonFilterSelect = document.getElementById('season-filter-select'); // Removed season filter element reference
         const sortSelect = document.getElementById('sort-select'); // New element reference for sort dropdown
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
@@ -353,6 +390,8 @@
         const modalItemSeason = document.getElementById('modal-item-season'); // Season info element
         const modalItemAdded = document.getElementById('modal-item-added');
         const modalItemDescription = document.getElementById('modal-item-description');
+        const modalImagePrevBtn = document.getElementById('modal-image-prev'); // New nav button
+        const modalImageNextBtn = document.getElementById('modal-image-next'); // New nav button
 
 
         // --- State Management ---
@@ -364,8 +403,12 @@
         let showNewItemsOnly = false; // Filter state for "Neu"
         let currentSortOrder = 'default'; // New state for sorting order
         let currentFilterRarity = 'all'; // New state for rarity filter
-        // let currentFilterSeason = 'all'; // Removed season filter state
         let currentFilterSetId = null; // New state for set filter (stores set.value)
+
+        // New state for modal variant navigation
+        let currentModalVariantsOptions = []; // Stores options of the currently active variant type
+        let currentModalVariantOptionIndex = 0; // Current index within currentModalVariantsOptions
+
         let currentAudio = {
             button: null,
             trackId: null
@@ -424,16 +467,21 @@
         async function downloadFile(url, filename) {
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
+                if (!response.ok) {
+                    console.error('Download failed: Network response was not ok.', response);
+                    throw new Error(`Failed to fetch file: ${response.statusText}`);
+                }
                 const blob = await response.blob();
                 const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = blobUrl;
+                a.download = filename; // Set the download attribute
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(blobUrl);
                 a.remove();
+                console.log(`Download initiated for: ${filename}`);
             } catch (e) {
                 console.error('Download failed:', e);
                 showNotification('Download fehlgeschlagen. Möglicherweise blockiert Ihr Browser dies oder es gibt ein CORS-Problem.');
@@ -516,12 +564,53 @@
         }
 
         /**
+         * Updates the displayed image in the modal based on the current variant option.
+         */
+        function updateModalImageForVariant() {
+            if (currentModalVariantsOptions.length > 0) {
+                const imageUrl = currentModalVariantsOptions[currentModalVariantOptionIndex].image;
+                modalItemImage.src = imageUrl || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+            }
+            // Show/hide navigation buttons
+            if (currentModalVariantsOptions.length > 1) {
+                modalImagePrevBtn.classList.remove('hidden');
+                modalImageNextBtn.classList.remove('hidden');
+            } else {
+                modalImagePrevBtn.classList.add('hidden');
+                modalImageNextBtn.classList.add('hidden');
+            }
+        }
+
+        /**
          * Shows the item detail modal with provided item data.
          * @param {object} item - The item object to display details for.
          */
         function showItemDetailsModal(item) {
-            modalItemImage.src = item.images.featured || item.images.icon || item.images.smallIcon || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+            // Reset variant state
+            currentModalVariantsOptions = [];
+            currentModalVariantOptionIndex = 0;
+
+            // Find relevant variants for display (e.g., clothing styles)
+            if (item.variants && item.variants.length > 0) {
+                const clothingVariant = item.variants.find(v => v.type === 'clothing');
+                if (clothingVariant && clothingVariant.options && clothingVariant.options.length > 0) {
+                    currentModalVariantsOptions = clothingVariant.options;
+                } else {
+                    // Fallback to the first variant's options if no clothing variant is found
+                    // or if the first variant is the only one
+                    currentModalVariantsOptions = item.variants[0].options || [];
+                }
+            }
+            
+            // Set initial image
+            if (currentModalVariantsOptions.length > 0) {
+                modalItemImage.src = currentModalVariantsOptions[currentModalVariantOptionIndex].image;
+            } else {
+                modalItemImage.src = item.images.featured || item.images.icon || item.images.smallIcon || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+            }
             modalItemImage.alt = item.name;
+
+            // Update other modal details
             modalItemName.textContent = item.name;
             modalItemType.textContent = `Typ: ${item.type?.displayValue || 'N/A'}`;
             modalItemRarity.textContent = item.rarity ? `Seltenheit: ${item.rarity.displayValue}` : 'Seltenheit: N/A';
@@ -537,6 +626,7 @@
             modalItemAdded.textContent = item.added ? `Hinzugefügt: ${new Date(item.added).toLocaleDateString('de-DE')}` : 'Hinzugefügt: N/A';
             modalItemDescription.textContent = item.description || 'Keine Beschreibung verfügbar.';
 
+            updateModalImageForVariant(); // Ensure buttons are correctly shown/hidden
             itemDetailModalOverlay.classList.add('active');
         }
 
@@ -545,6 +635,9 @@
          */
         function hideItemDetailsModal() {
             itemDetailModalOverlay.classList.remove('active');
+            // Hide navigation buttons when modal closes
+            modalImagePrevBtn.classList.add('hidden');
+            modalImageNextBtn.classList.add('hidden');
         }
 
         // --- Audio Visualization Functions ---
@@ -814,12 +907,26 @@
                     searchInput.value = '';
                     rarityFilterSelect.value = 'all';
                     currentFilterRarity = 'all';
-                    // currentFilterSeason = 'all'; // Removed season filter reset
                     
                     // Set currentView to 'cosmetics' to ensure the correct rendering function is called
                     currentView = 'cosmetics';
                     loadCosmeticsCategory('cosmetics'); // Reload with set filter
                 }
+            }
+        });
+
+        // Event listeners for modal image navigation
+        modalImagePrevBtn.addEventListener('click', () => {
+            if (currentModalVariantsOptions.length > 0) {
+                currentModalVariantOptionIndex = (currentModalVariantOptionIndex - 1 + currentModalVariantsOptions.length) % currentModalVariantsOptions.length;
+                updateModalImageForVariant();
+            }
+        });
+
+        modalImageNextBtn.addEventListener('click', () => {
+            if (currentModalVariantsOptions.length > 0) {
+                currentModalVariantOptionIndex = (currentModalVariantOptionIndex + 1) % currentModalVariantsOptions.length;
+                updateModalImageForVariant();
             }
         });
 
@@ -871,8 +978,6 @@
         searchInput.addEventListener('input', () => {
             // Reset set filter when searching
             currentFilterSetId = null;
-            // currentFilterSeason = 'all'; // Removed season filter reset
-            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
             if (currentView === 'music') {
                 loadJamTracks();
             } else if (currentView === 'cosmetics') {
@@ -888,8 +993,6 @@
             currentSortOrder = e.target.value;
             // Reset set filter when sorting
             currentFilterSetId = null;
-            // currentFilterSeason = 'all'; // Removed season filter reset
-            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
             if (currentView === 'music') {
                 loadJamTracks();
             } else if (currentView === 'loading_screen') {
@@ -903,8 +1006,6 @@
             currentFilterRarity = e.target.value;
             // Reset set filter when applying rarity filter
             currentFilterSetId = null;
-            // currentFilterSeason = 'all'; // Removed season filter reset
-            // seasonFilterSelect.value = 'all'; // Removed season filter dropdown reset
             if (currentView === 'music') { // Rarity filter applies to all cosmetic types, including music
                 loadJamTracks();
             } else if (currentView === 'loading_screen') {
@@ -913,8 +1014,6 @@
                 loadCosmeticsCategory(currentView);
             }
         });
-
-        // Removed seasonFilterSelect.addEventListener('change', ...);
 
 
         // --- Page Initialization and Navigation ---
@@ -936,14 +1035,12 @@
             showNewItemsOnly = false;
             currentSortOrder = 'default';
             currentFilterRarity = 'all';
-            // currentFilterSeason = 'all'; // Removed season filter reset
             currentFilterSetId = null; // Reset set filter
             
             updateToggleLoadingScreenButtonText(); // Update button text and style
             updateFilterNewButtonText(); // Update filter new button text and style
             sortSelect.value = currentSortOrder; // Ensure sort dropdown reflects current state
             rarityFilterSelect.value = currentFilterRarity; // Ensure rarity dropdown reflects current state
-            // seasonFilterSelect.value = currentFilterSeason; // Removed season filter dropdown reset
 
             stopVisualization(); // Stop visualization when changing categories
             audioPlayer.pause(); // Pause audio when changing categories
@@ -961,9 +1058,6 @@
                 }
             }
         }
-
-        // Removed populateSeasonFilter() function
-
 
         /**
          * Filters allCosmeticsData by type, search term, and applies the "new", "rarity", and "season" filters.
@@ -1003,11 +1097,6 @@
                 filtered = filtered.filter(item => item.rarity?.value === currentFilterRarity);
             }
 
-            // Removed season filter logic
-            // if (currentFilterSeason !== 'all') {
-            //     filtered = filtered.filter(item => item.season?.text === currentFilterSeason);
-            // }
-
             // Apply set filter (this will now correctly filter from the broader 'filtered' array if currentFilterSetId is set)
             if (currentFilterSetId) {
                 filtered = filtered.filter(item => item.set?.value === currentFilterSetId);
@@ -1041,10 +1130,6 @@
                 if (currentFilterRarity !== 'all') {
                     filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
                 }
-                // Removed season filter logic
-                // if (currentFilterSeason !== 'all') {
-                //     filteredData = filteredData.filter(item => item.season?.text === currentFilterSeason);
-                // }
                 // Apply set filter (though music tracks typically don't have sets, keep for consistency)
                 if (currentFilterSetId) {
                     filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
@@ -1090,10 +1175,6 @@
                 if (currentFilterRarity !== 'all') {
                     filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
                 }
-                // Removed season filter logic
-                // if (currentFilterSeason !== 'all') {
-                //     filteredData = filteredData.filter(item => item.season?.text === currentFilterSeason);
-                // }
                 // Apply set filter (though loading screens typically don't have sets, keep for consistency)
                 if (currentFilterSetId) {
                     filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
@@ -1239,15 +1320,13 @@
         // --- Initial Load ---
         async function initializeApp() {
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
-            // populateSeasonFilter(); // Removed season filter population
             updateNavButtons('show-outfits'); // Set Outfits as active initially
             loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.12'; // Set the version text
+            appVersionDisplay.textContent = 'V2.13'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
             rarityFilterSelect.value = currentFilterRarity; // Set initial rarity filter dropdown value
-            // seasonFilterSelect.value = currentFilterSeason; // Removed season filter dropdown reset
         }
 
         initializeApp();
