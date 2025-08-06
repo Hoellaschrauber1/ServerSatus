@@ -52,6 +52,7 @@
             justify-content: center;
             gap: 1rem; /* Space between buttons */
             margin-bottom: 1.5rem; /* mb-6 */
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
         }
         /* Styling for the main navigation bar to allow wrapping */
         .main-nav {
@@ -75,6 +76,86 @@
         }
         #scroll-to-top-btn:hover {
             background-color: #0891b2; /* cyan-600 */
+        }
+        /* Style for the sort dropdown */
+        .sort-dropdown {
+            background-color: #1f2937; /* gray-800 */
+            border: 2px solid #374151; /* gray-700 */
+            color: #f3f4f6; /* gray-100 */
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            appearance: none; /* Remove default dropdown arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' class='w-4 h-4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .sort-dropdown:focus {
+            outline: none;
+            border-color: #06b6d4; /* cyan-500 */
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1f2937; /* gray-800 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.5rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            color: white;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            color: #f3f4f6;
+        }
+        .modal-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -107,10 +188,21 @@
             </div>
         </div>
 
-        <!-- New container for the toggle and new filter buttons -->
+        <!-- New container for the toggle, new filter, and sort buttons -->
         <div class="filter-buttons-container">
             <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md">Ansicht umschalten: Details</button>
             <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600">Neu</button>
+            
+            <!-- New Sort Dropdown -->
+            <select id="sort-select" class="sort-dropdown">
+                <option value="default">Standard Sortierung</option>
+                <option value="name-asc">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="rarity-asc">Seltenheit (aufsteigend)</option>
+                <option value="rarity-desc">Seltenheit (absteigend)</option>
+                <option value="added-desc">Hinzugefügt (neueste)</option>
+                <option value="added-asc">Hinzugefügt (älteste)</option>
+            </select>
         </div>
 
         <!-- Content Area -->
@@ -158,6 +250,20 @@
         </svg>
     </button>
 
+    <!-- Item Detail Modal -->
+    <div id="item-detail-modal-overlay" class="modal-overlay">
+        <div id="item-detail-modal-content" class="modal-content">
+            <button id="item-detail-modal-close" class="modal-close-btn">&times;</button>
+            <img id="modal-item-image" class="modal-image" src="" alt="Item Image">
+            <h2 id="modal-item-name" class="text-2xl font-bold mb-2"></h2>
+            <p id="modal-item-type" class="text-gray-400 text-sm mb-1"></p>
+            <p id="modal-item-rarity" class="text-gray-400 text-sm mb-1"></p>
+            <p id="modal-item-set" class="text-gray-400 text-sm mb-1"></p>
+            <p id="modal-item-added" class="text-gray-400 text-sm mb-4"></p>
+            <p id="modal-item-description" class="text-gray-300 text-base"></p>
+        </div>
+    </div>
+
     <script>
         // --- DOM Elements ---
         const contentArea = document.getElementById('content-area');
@@ -170,13 +276,14 @@
         const lobbyBackgroundsBtn = document.getElementById('show-lobby-backgrounds');
         const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
         const filterNewBtn = document.getElementById('filter-new-btn');
+        const sortSelect = document.getElementById('sort-select'); // New element reference for sort dropdown
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
         const notificationMessage = document.getElementById('notification-message');
         const notificationCloseBtn = document.getElementById('notification-close');
         const appVersionDisplay = document.getElementById('app-version');
-        const itemCountDisplay = document.getElementById('item-count'); // New element reference
-        const scrollToTopBtn = document.getElementById('scroll-to-top-btn'); // New button reference
+        const itemCountDisplay = document.getElementById('item-count');
+        const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
 
         // New category buttons
         const outfitsBtn = document.getElementById('show-outfits');
@@ -186,6 +293,17 @@
         const wrapsBtn = document.getElementById('show-wraps');
         const backblingsBtn = document.getElementById('show-backblings');
 
+        // Item Detail Modal Elements
+        const itemDetailModalOverlay = document.getElementById('item-detail-modal-overlay');
+        const itemDetailModalCloseBtn = document.getElementById('item-detail-modal-close');
+        const modalItemImage = document.getElementById('modal-item-image');
+        const modalItemName = document.getElementById('modal-item-name');
+        const modalItemType = document.getElementById('modal-item-type');
+        const modalItemRarity = document.getElementById('modal-item-rarity');
+        const modalItemSet = document.getElementById('modal-item-set');
+        const modalItemAdded = document.getElementById('modal-item-added');
+        const modalItemDescription = document.getElementById('modal-item-description');
+
 
         // --- State Management ---
         let currentView = 'jam'; // 'jam', 'cosmetics', 'lobbyBackgrounds', 'outfits', 'emotes', 'pickaxes', 'gliders', 'wraps', 'backblings'
@@ -194,6 +312,7 @@
         let allLobbyBackgrounds = [];
         let loadingScreenViewMode = 'detailed'; // Default to 'detailed'
         let showNewItemsOnly = false; // Filter state for "Neu"
+        let currentSortOrder = 'default'; // New state for sorting order
         let currentAudio = {
             button: null,
             trackId: null
@@ -251,7 +370,6 @@
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = blobUrl;
-                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(blobUrl);
@@ -275,6 +393,92 @@
             return addedDate >= sevenDaysAgo;
         }
 
+        /**
+         * Maps rarity values to a numerical scale for consistent sorting.
+         * Higher number means higher rarity.
+         * @param {string} rarityValue - The rarity value (e.g., 'common', 'legendary').
+         * @returns {number} - Numerical representation of rarity.
+         */
+        function getRarityOrder(rarityValue) {
+            switch (rarityValue) {
+                case 'common': return 1;
+                case 'uncommon': return 2;
+                case 'rare': return 3;
+                case 'epic': return 4;
+                case 'legendary': return 5;
+                case 'mythic': return 6;
+                case 'exotic': return 7;
+                case 'icon': return 8;
+                case 'shadow': return 9;
+                case 'dark': return 10;
+                case 'marvel': return 11;
+                case 'dc': return 12;
+                case 'gaminglegends': return 13;
+                case 'slurp': return 14;
+                case 'frozen': return 15;
+                case 'lava': return 16;
+                case 'creator': return 17;
+                case 'starwars': return 18;
+                case 'platform': return 19;
+                default: return 0; // For unknown rarities
+            }
+        }
+
+        /**
+         * Applies sorting to an array of items based on the currentSortOrder.
+         * @param {Array} items - The array of items to sort.
+         * @param {string} sortOrder - The current sorting order (e.g., 'name-asc', 'rarity-desc').
+         * @returns {Array} - The sorted array.
+         */
+        function applySorting(items, sortOrder) {
+            const sortedItems = [...items]; // Create a shallow copy to avoid modifying the original array
+
+            sortedItems.sort((a, b) => {
+                switch (sortOrder) {
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'rarity-asc':
+                        return getRarityOrder(a.rarity?.value) - getRarityOrder(b.rarity?.value);
+                    case 'rarity-desc':
+                        return getRarityOrder(b.rarity?.value) - getRarityOrder(a.rarity?.value);
+                    case 'added-asc':
+                        return new Date(a.added) - new Date(b.added);
+                    case 'added-desc':
+                        return new Date(b.added) - new Date(a.added);
+                    case 'default':
+                    default:
+                        return 0; // No specific sort order, maintain original order
+                }
+            });
+            return sortedItems;
+        }
+
+        /**
+         * Shows the item detail modal with provided item data.
+         * @param {object} item - The item object to display details for.
+         */
+        function showItemDetailsModal(item) {
+            modalItemImage.src = item.images.featured || item.images.icon || item.images.smallIcon || 'https://placehold.co/400x400/1f2937/9ca3af?text=Bild+fehlt';
+            modalItemImage.alt = item.name;
+            modalItemName.textContent = item.name;
+            modalItemType.textContent = `Typ: ${item.type?.displayValue || 'N/A'}`;
+            modalItemRarity.textContent = item.rarity ? `Seltenheit: ${item.rarity.displayValue}` : 'Seltenheit: N/A';
+            modalItemSet.textContent = item.set ? `Set: ${item.set.value}` : '';
+            modalItemAdded.textContent = item.added ? `Hinzugefügt: ${new Date(item.added).toLocaleDateString('de-DE')}` : 'Hinzugefügt: N/A';
+            modalItemDescription.textContent = item.description || 'Keine Beschreibung verfügbar.';
+
+            itemDetailModalOverlay.classList.add('active');
+        }
+
+        /**
+         * Hides the item detail modal.
+         */
+        function hideItemDetailsModal() {
+            itemDetailModalOverlay.classList.remove('active');
+        }
+
         // --- Rendering Functions ---
         /**
          * Renders a grid of Jam Tracks.
@@ -291,11 +495,11 @@
             grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
             
             tracks.forEach(track => {
-                // Check if audio data exists for the track
                 const hasAudio = track.audio && track.audio.preview && track.audio.full;
-
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col';
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col cursor-pointer'; // Added cursor-pointer
+                card.dataset.itemId = track.id; // Store item ID for modal lookup
+                card.dataset.itemType = 'jam'; // Store item type for modal lookup
                 card.innerHTML = `
                     <img src="${track.images.icon}" alt="${track.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=Bild+fehlt';">
                     <div class="p-4 flex-grow flex flex-col">
@@ -303,11 +507,11 @@
                         <p class="text-sm text-gray-400">${track.artist || 'Unbekannter Künstler'}</p>
                         <div class="mt-auto pt-4 flex items-center justify-between">
                             ${hasAudio ? `
-                                <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}">
+                                <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}" onclick="event.stopPropagation()">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                                     <span class="ml-2">Play</span>
                                 </button>
-                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg">
+                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg" onclick="event.stopPropagation()">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
                                 </button>
                             ` : `
@@ -340,12 +544,14 @@
                 if (!imageUrl) return;
 
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group';
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer'; // Added cursor-pointer
+                card.dataset.itemId = item.id; // Store item ID for modal lookup
+                card.dataset.itemType = 'cosmetic'; // Store item type for modal lookup
                 card.innerHTML = `
                     <div class="relative">
                         <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                         <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                             <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
+                             <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                 Download
                             </button>
                         </div>
@@ -353,6 +559,7 @@
                     <div class="p-3">
                         <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                         <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
+                        ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
                     </div>
                 `;
                 grid.appendChild(card);
@@ -380,14 +587,16 @@
                 if (!imageUrl) return;
 
                 const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group';
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer'; // Added cursor-pointer
+                card.dataset.itemId = item.id; // Store item ID for modal lookup
+                card.dataset.itemType = 'lobbyBackground'; // Store item type for modal lookup
                 
                 if (loadingScreenViewMode === 'imageOnly') {
                     card.innerHTML = `
                         <div class="relative">
                             <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
+                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                     Download
                                 </button>
                             </div>
@@ -398,7 +607,7 @@
                         <div class="relative">
                             <img src="${imageUrl}" alt="${item.name}" class="w-full h-40 object-contain p-2" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=Bild+fehlt';">
                             <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png">
+                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
                                     Download
                                 </button>
                             </div>
@@ -406,6 +615,7 @@
                         <div class="p-3">
                             <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                             <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
+                            ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
                         </div>
                     `;
                 }
@@ -418,14 +628,13 @@
         contentArea.addEventListener('click', function(e) {
             const playBtn = e.target.closest('.play-pause-btn');
             const downloadBtn = e.target.closest('.download-btn');
+            const card = e.target.closest('[data-item-id]'); // Listen for clicks on the card itself
 
             if (playBtn) {
                 const trackId = playBtn.dataset.trackId;
                 const audioUrl = playBtn.dataset.audioUrl;
                 togglePlay(trackId, audioUrl, playBtn);
-            }
-
-            if (downloadBtn) {
+            } else if (downloadBtn) {
                 const url = downloadBtn.dataset.downloadUrl;
                 const filename = downloadBtn.dataset.filename;
                 const originalText = downloadBtn.textContent;
@@ -433,12 +642,38 @@
                 downloadFile(url, filename).finally(() => {
                     downloadBtn.textContent = originalText;
                 });
+            } else if (card) { // If a card was clicked (and not a button inside it)
+                const itemId = card.dataset.itemId;
+                const itemType = card.dataset.itemType;
+                let item = null;
+
+                // Find the item in the correct global array
+                if (itemType === 'jam') {
+                    item = allJamTracks.find(t => t.id === itemId);
+                } else if (itemType === 'cosmetic') {
+                    item = allCosmeticsData.find(c => c.id === itemId);
+                } else if (itemType === 'lobbyBackground') {
+                    item = allLobbyBackgrounds.find(lb => lb.id === itemId);
+                }
+
+                if (item) {
+                    showItemDetailsModal(item);
+                }
             }
         });
 
         notificationCloseBtn.addEventListener('click', () => {
             notificationModal.classList.add('hidden');
         });
+
+        // Close item detail modal
+        itemDetailModalCloseBtn.addEventListener('click', hideItemDetailsModal);
+        itemDetailModalOverlay.addEventListener('click', (e) => {
+            if (e.target === itemDetailModalOverlay) { // Close only if clicking on the overlay, not the content
+                hideItemDetailsModal();
+            }
+        });
+
 
         function togglePlay(trackId, audioUrl, button) {
             if (currentAudio.trackId && currentAudio.audioUrl && currentAudio.trackId !== trackId) {
@@ -487,6 +722,19 @@
             }
         });
 
+        sortSelect.addEventListener('change', (e) => {
+            currentSortOrder = e.target.value;
+            // Re-load content based on current view to apply the new sort order
+            if (currentView === 'jam') {
+                loadJamTracks();
+            } else if (currentView === 'lobbyBackgrounds') {
+                loadLobbyBackgrounds();
+            } else { // All other cosmetic types
+                loadCosmeticsCategory(currentView);
+            }
+        });
+
+
         // --- Page Initialization and Navigation ---
         function updateNavButtons(activeButtonId) {
             document.querySelectorAll('.nav-button').forEach(button => {
@@ -507,6 +755,7 @@
             }
             updateToggleLoadingScreenButtonText(); // Update button text and style
             updateFilterNewButtonText(); // Update filter new button text and style
+            sortSelect.value = currentSortOrder; // Ensure sort dropdown reflects current state
         }
 
         /**
@@ -525,7 +774,7 @@
         /**
          * Filters allCosmeticsData by type, search term, and applies the "new" filter.
          * @param {string} typeValue - The 'value' of the cosmetic type (e.g., 'outfit', 'emote').
-         * @returns {Array} - Filtered array of cosmetics.
+         * @returns {Array} - Filtered and sorted array of cosmetics.
          */
         function getFilteredCosmeticsByType(typeValue) {
             const searchTerm = searchInput.value.toLowerCase();
@@ -545,7 +794,9 @@
             if (showNewItemsOnly) {
                 filtered = filtered.filter(item => isItemNew(item));
             }
-            return filtered;
+
+            // Apply sorting
+            return applySorting(filtered, currentSortOrder);
         }
 
 
@@ -562,14 +813,15 @@
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
                 }
-                allJamTracks = filteredData;
+                // Apply sorting
+                allJamTracks = applySorting(filteredData, currentSortOrder);
                 renderJamTracks(allJamTracks);
             }
         }
 
         async function loadCosmeticsCategory(categoryType) {
             await ensureAllCosmeticsLoaded();
-            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search
+            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search and sort
             renderCosmetics(filteredData);
         }
 
@@ -591,7 +843,8 @@
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
                 }
-                allLobbyBackgrounds = filteredData;
+                // Apply sorting
+                allLobbyBackgrounds = applySorting(filteredData, currentSortOrder);
                 renderLobbyBackgrounds(allLobbyBackgrounds); // Render with current mode
                 updateToggleLoadingScreenButtonText(); // Update button text
             }
@@ -738,9 +991,10 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
-            appVersionDisplay.textContent = 'V2.4'; // Set the version text
+            appVersionDisplay.textContent = 'V2.6'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
+            sortSelect.value = currentSortOrder; // Set initial sort dropdown value
         }
 
         initializeApp();
