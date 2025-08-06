@@ -71,7 +71,7 @@
         <!-- Error Message -->
         <div id="error-message" class="hidden text-center py-10 bg-red-900/50 border border-red-500 rounded-lg">
             <h3 class="text-xl text-red-400">Fehler</h3>
-            <p class="text-red-300 mt-2">Die Inhalte konnten nicht geladen werden. Bitte versuche es später erneut.</p>
+            <p id="error-text" class="text-red-300 mt-2">Die Inhalte konnten nicht geladen werden. Bitte versuche es später erneut.</p>
         </div>
 
     </div>
@@ -95,6 +95,7 @@
         const contentArea = document.getElementById('content-area');
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
         const searchInput = document.getElementById('search-input');
         const jamTracksBtn = document.getElementById('show-jam-tracks');
         const cosmeticsBtn = document.getElementById('show-cosmetics');
@@ -113,29 +114,27 @@
             trackId: null
         };
 
-        // --- API Configuration ---
-        const API_BASE_URL = 'https://fortnite-api.com'; // FIX: Base URL changed
-        const API_LANG = 'de'; // German language for API results
-
         // --- Utility Functions ---
         /**
          * Fetches data from a given API endpoint with error handling.
-         * @param {string} endpoint - The API endpoint to fetch from.
+         * @param {string} fullUrl - The full API URL to fetch from.
          * @returns {Promise<any>} - The JSON response data.
          */
-        async function fetchData(endpoint) {
+        async function fetchData(fullUrl) {
             loadingIndicator.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             contentArea.innerHTML = '';
+            console.log(`Fetching from: ${fullUrl}`); // Log the URL for debugging
             try {
-                const response = await fetch(`${API_BASE_URL}/${endpoint}?language=${API_LANG}`);
+                const response = await fetch(fullUrl);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const json = await response.json();
                 return json.data;
             } catch (error) {
-                console.error("Failed to fetch data:", error);
+                console.error(`Failed to fetch data from ${fullUrl}:`, error);
+                errorText.textContent = `Die Inhalte konnten nicht geladen werden (${error.message}). Bitte versuche es später erneut.`;
                 errorMessage.classList.remove('hidden');
                 return null;
             } finally {
@@ -154,13 +153,13 @@
 
         /**
          * Triggers a browser download for a given URL and filename.
-         * Fetches as a blob to bypass potential CORS issues with direct linking.
          * @param {string} url - The URL of the file to download.
          * @param {string} filename - The desired name for the downloaded file.
          */
         async function downloadFile(url, filename) {
             try {
                 const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
                 const blob = await response.blob();
                 const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -173,7 +172,7 @@
                 a.remove();
             } catch (e) {
                 console.error('Download failed:', e);
-                showNotification('Download fehlgeschlagen. Möglicherweise blockiert Ihr Browser dies.'); // FIX: Replaced alert
+                showNotification('Download fehlgeschlagen. Möglicherweise blockiert Ihr Browser dies oder es gibt ein CORS-Problem.');
             }
         }
 
@@ -192,6 +191,9 @@
             grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
             
             tracks.forEach(track => {
+                // Check if audio data exists for the track
+                const hasAudio = track.audio && track.audio.preview && track.audio.full;
+
                 const card = document.createElement('div');
                 card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col';
                 card.innerHTML = `
@@ -200,13 +202,17 @@
                         <h3 class="text-lg font-semibold truncate">${track.name}</h3>
                         <p class="text-sm text-gray-400">${track.artist || 'Unbekannter Künstler'}</p>
                         <div class="mt-auto pt-4 flex items-center justify-between">
-                            <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                                <span class="ml-2">Play</span>
-                            </button>
-                            <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
-                            </button>
+                            ${hasAudio ? `
+                                <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                    <span class="ml-2">Play</span>
+                                </button>
+                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
+                                </button>
+                            ` : `
+                                <span class="text-gray-500 text-sm">Kein Audio verfügbar</span>
+                            `}
                         </div>
                     </div>
                 `;
@@ -230,7 +236,7 @@
 
             cosmetics.forEach(item => {
                 const imageUrl = item.images.icon || item.images.smallIcon || item.images.featured;
-                if (!imageUrl) return; // Skip items without a displayable image
+                if (!imageUrl) return;
 
                 const card = document.createElement('div');
                 card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group';
@@ -282,7 +288,6 @@
         function togglePlay(trackId, audioUrl, button) {
             if (currentAudio.trackId && currentAudio.trackId !== trackId) {
                 audioPlayer.pause();
-                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
             }
 
             if (audioPlayer.src !== audioUrl) {
@@ -290,7 +295,7 @@
             }
 
             if (audioPlayer.paused || audioPlayer.currentTime === 0) {
-                audioPlayer.play();
+                audioPlayer.play().catch(e => console.error("Audio Play Error:", e));
                 button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">Pause</span>`;
                 currentAudio = { button, trackId };
             } else {
@@ -306,7 +311,7 @@
         };
         
         audioPlayer.onended = () => {
-            audioPlayer.onpause(); // Reuse the same logic
+            audioPlayer.onpause();
         };
 
         searchInput.addEventListener('input', (e) => {
@@ -322,15 +327,19 @@
 
         // --- Page Initialization and Navigation ---
         async function loadJamTracks() {
-            const tracks = await fetchData('v2/jamtracks'); // FIX: endpoint path changed
-            if (tracks) {
-                allJamTracks = tracks;
+            // Changed API endpoint to the general cosmetics endpoint and filter for 'music' type
+            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+            const data = await fetchData(url);
+            if (data) {
+                // Filter the data to find items where type.value is 'music'
+                allJamTracks = data.filter(item => item.type && item.type.value === 'music');
                 renderJamTracks(allJamTracks);
             }
         }
 
         async function loadCosmetics() {
-            const cosmetics = await fetchData('v2/cosmetics/br'); // FIX: endpoint path changed
+            const url = `https://fortnite-api.com/v2/cosmetics/br?language=de`;
+            const cosmetics = await fetchData(url);
             if (cosmetics) {
                 allCosmetics = cosmetics;
                 renderCosmetics(allCosmetics);
