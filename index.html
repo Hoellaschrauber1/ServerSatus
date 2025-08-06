@@ -78,7 +78,7 @@
             background-color: #0891b2; /* cyan-600 */
         }
         /* Style for the sort dropdown */
-        .sort-dropdown {
+        .sort-dropdown, .filter-dropdown {
             background-color: #1f2937; /* gray-800 */
             border: 2px solid #374151; /* gray-700 */
             color: #f3f4f6; /* gray-100 */
@@ -88,14 +88,14 @@
             appearance: none; /* Remove default dropdown arrow */
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' class='w-4 h-4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' class='w-4 h-4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3Csvg%3E");
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 1rem;
             cursor: pointer;
             transition: border-color 0.3s ease;
         }
-        .sort-dropdown:focus {
+        .sort-dropdown:focus, .filter-dropdown:focus {
             outline: none;
             border-color: #06b6d4; /* cyan-500 */
         }
@@ -157,6 +157,28 @@
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
+
+        /* Audio Visualizer Canvas */
+        .audio-visualizer {
+            display: block;
+            width: 100%;
+            height: 30px; /* Fixed height for the visualizer */
+            background-color: #0f172a; /* slate-900 */
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Clickable set name in modal */
+        .set-link {
+            color: #06b6d4; /* cyan-500 */
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .set-link:hover {
+            color: #0891b2; /* cyan-600 */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -193,6 +215,30 @@
             <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md">Ansicht umschalten: Details</button>
             <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600">Neu</button>
             
+            <!-- Rarity Filter Dropdown -->
+            <select id="rarity-filter-select" class="filter-dropdown">
+                <option value="all">Alle Seltenheiten</option>
+                <option value="common">Gewöhnlich</option>
+                <option value="uncommon">Ungewöhnlich</option>
+                <option value="rare">Selten</option>
+                <option value="epic">Episch</option>
+                <option value="legendary">Legendär</option>
+                <option value="mythic">Mythisch</option>
+                <option value="exotic">Exotisch</option>
+                <option value="icon">Icon</option>
+                <option value="shadow">Schatten</option>
+                <option value="dark">Dunkel</option>
+                <option value="marvel">Marvel</option>
+                <option value="dc">DC</option>
+                <option value="gaminglegends">Gaming Legends</option>
+                <option value="slurp">Slurp</option>
+                <option value="frozen">Gefroren</option>
+                <option value="lava">Lava</option>
+                <option value="creator">Creator</option>
+                <option value="starwars">Star Wars</option>
+                <option value="platform">Plattform</option>
+            </select>
+
             <!-- New Sort Dropdown -->
             <select id="sort-select" class="sort-dropdown">
                 <option value="default">Standard Sortierung</option>
@@ -259,6 +305,7 @@
             <p id="modal-item-type" class="text-gray-400 text-sm mb-1"></p>
             <p id="modal-item-rarity" class="text-gray-400 text-sm mb-1"></p>
             <p id="modal-item-set" class="text-gray-400 text-sm mb-1"></p>
+            <p id="modal-item-season" class="text-gray-400 text-sm mb-1"></p> <!-- New: Season info -->
             <p id="modal-item-added" class="text-gray-400 text-sm mb-4"></p>
             <p id="modal-item-description" class="text-gray-300 text-base"></p>
         </div>
@@ -276,6 +323,7 @@
         const lobbyBackgroundsBtn = document.getElementById('show-lobby-backgrounds');
         const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
         const filterNewBtn = document.getElementById('filter-new-btn');
+        const rarityFilterSelect = document.getElementById('rarity-filter-select'); // New element reference for rarity filter
         const sortSelect = document.getElementById('sort-select'); // New element reference for sort dropdown
         const audioPlayer = document.getElementById('audio-player');
         const notificationModal = document.getElementById('notification-modal');
@@ -301,6 +349,7 @@
         const modalItemType = document.getElementById('modal-item-type');
         const modalItemRarity = document.getElementById('modal-item-rarity');
         const modalItemSet = document.getElementById('modal-item-set');
+        const modalItemSeason = document.getElementById('modal-item-season'); // New: Season info element
         const modalItemAdded = document.getElementById('modal-item-added');
         const modalItemDescription = document.getElementById('modal-item-description');
 
@@ -313,10 +362,19 @@
         let loadingScreenViewMode = 'detailed'; // Default to 'detailed'
         let showNewItemsOnly = false; // Filter state for "Neu"
         let currentSortOrder = 'default'; // New state for sorting order
+        let currentFilterRarity = 'all'; // New state for rarity filter
+        let currentFilterSetId = null; // New state for set filter (stores set.value)
         let currentAudio = {
             button: null,
             trackId: null
         };
+
+        // --- Audio Visualization Variables ---
+        let audioContext = null;
+        let analyser = null;
+        let source = null;
+        let animationFrameId = null; // To store the ID of the requestAnimationFrame
+        let currentVisualizerCanvas = null; // To store the canvas element of the currently playing track
 
         // --- Utility Functions ---
         /**
@@ -465,7 +523,15 @@
             modalItemName.textContent = item.name;
             modalItemType.textContent = `Typ: ${item.type?.displayValue || 'N/A'}`;
             modalItemRarity.textContent = item.rarity ? `Seltenheit: ${item.rarity.displayValue}` : 'Seltenheit: N/A';
-            modalItemSet.textContent = item.set ? `Set: ${item.set.value}` : '';
+            
+            // Make set name clickable
+            if (item.set && item.set.value && item.set.text) {
+                modalItemSet.innerHTML = `Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span>`;
+            } else {
+                modalItemSet.textContent = ''; // Clear if no set
+            }
+
+            modalItemSeason.textContent = item.season ? `Saison: ${item.season.text}` : ''; // Display season info
             modalItemAdded.textContent = item.added ? `Hinzugefügt: ${new Date(item.added).toLocaleDateString('de-DE')}` : 'Hinzugefügt: N/A';
             modalItemDescription.textContent = item.description || 'Keine Beschreibung verfügbar.';
 
@@ -478,6 +544,56 @@
         function hideItemDetailsModal() {
             itemDetailModalOverlay.classList.remove('active');
         }
+
+        // --- Audio Visualization Functions ---
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256; // Smaller FFT size for quicker visualization
+                source = audioContext.createMediaElementSource(audioPlayer);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+            }
+        }
+
+        function drawVisualization(canvas) {
+            if (!analyser || !canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            animationFrameId = requestAnimationFrame(() => drawVisualization(canvas));
+
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.5; // Adjust width for better visuals
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = dataArray[i] / 255 * canvas.height; // Normalize height
+                ctx.fillStyle = `rgb(${barHeight + 100}, 50, 150)`; // Color based on height
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                x += barWidth + 1; // Space between bars
+            }
+        }
+
+        function stopVisualization() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            if (currentVisualizerCanvas) {
+                const ctx = currentVisualizerCanvas.getContext('2d');
+                ctx.clearRect(0, 0, currentVisualizerCanvas.width, currentVisualizerCanvas.height);
+                currentVisualizerCanvas.classList.add('hidden'); // Hide the canvas
+                currentVisualizerCanvas = null;
+            }
+        }
+
 
         // --- Rendering Functions ---
         /**
@@ -505,6 +621,7 @@
                     <div class="p-4 flex-grow flex flex-col">
                         <h3 class="text-lg font-semibold truncate">${track.name}</h3>
                         <p class="text-sm text-gray-400">${track.artist || 'Unbekannter Künstler'}</p>
+                        ${hasAudio ? `<canvas class="audio-visualizer hidden"></canvas>` : ''} <!-- Audio Visualizer Canvas -->
                         <div class="mt-auto pt-4 flex items-center justify-between">
                             ${hasAudio ? `
                                 <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}" onclick="event.stopPropagation()">
@@ -560,6 +677,7 @@
                         <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                         <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
                         ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
+                        ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                     </div>
                 `;
                 grid.appendChild(card);
@@ -616,6 +734,7 @@
                             <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
                             <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
                             ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">Seltenheit: ${item.rarity.displayValue}</p>` : ''}
+                            ${item.set ? `<p class="text-xs text-gray-500">Set: <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
                         </div>
                     `;
                 }
@@ -674,43 +793,81 @@
             }
         });
 
+        // Event listener for clickable set names in the modal
+        itemDetailModalOverlay.addEventListener('click', (e) => {
+            const setLink = e.target.closest('.set-link');
+            if (setLink) {
+                const setValue = setLink.dataset.setValue;
+                if (setValue) {
+                    currentFilterSetId = setValue; // Set the filter
+                    hideItemDetailsModal(); // Close the modal
+                    
+                    // Manually activate the 'Andere Kosmetik' button without resetting other filters
+                    document.querySelectorAll('.nav-button').forEach(button => {
+                        button.classList.remove('active', 'bg-cyan-500');
+                    });
+                    document.getElementById('show-cosmetics').classList.add('active', 'bg-cyan-500');
 
-        function togglePlay(trackId, audioUrl, button) {
-            if (currentAudio.trackId && currentAudio.audioUrl && currentAudio.trackId !== trackId) {
-                // Pause the currently playing audio if a different track is selected
-                audioPlayer.pause();
-                // Reset the previous button's icon and text
-                if (currentAudio.button) {
-                    currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
+                    // Reset search and rarity filters only, as the set filter is intended to be kept.
+                    searchInput.value = '';
+                    rarityFilterSelect.value = 'all';
+                    currentFilterRarity = 'all';
+                    
+                    // Set currentView to 'cosmetics' to ensure the correct rendering function is called
+                    currentView = 'cosmetics';
+                    loadCosmeticsCategory('cosmetics'); // Reload with set filter
                 }
             }
+        });
+
+
+        function togglePlay(trackId, audioUrl, button) {
+            // Stop any existing visualization and audio
+            stopVisualization();
+            audioPlayer.pause();
+            if (currentAudio.button) {
+                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
+            }
+
 
             if (audioPlayer.src !== audioUrl) {
                 audioPlayer.src = audioUrl;
             }
 
             if (audioPlayer.paused || audioPlayer.currentTime === 0) {
-                audioPlayer.play().catch(e => console.error("Audio Play Error:", e));
-                button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">Pause</span>`;
-                currentAudio = { button, trackId, audioUrl };
+                initAudioContext(); // Initialize audio context if not already
+                audioPlayer.play().then(() => {
+                    button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">Pause</span>`;
+                    currentAudio = { button, trackId, audioUrl };
+                    
+                    // Start visualization for the current track
+                    currentVisualizerCanvas = button.closest('.flex-col').querySelector('.audio-visualizer');
+                    if (currentVisualizerCanvas) {
+                        currentVisualizerCanvas.classList.remove('hidden');
+                        drawVisualization(currentVisualizerCanvas);
+                    }
+                }).catch(e => console.error("Audio Play Error:", e));
             } else {
                 audioPlayer.pause();
             }
         }
         
         audioPlayer.onpause = () => {
-             if (currentAudio.button) {
+            stopVisualization(); // Stop visualization when audio pauses
+            if (currentAudio.button) {
                 currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">Play</span>`;
                 currentAudio = { button: null, trackId: null, audioUrl: null };
             }
         };
         
         audioPlayer.onended = () => {
+            stopVisualization(); // Stop visualization when audio ends
             audioPlayer.onpause();
         };
 
         searchInput.addEventListener('input', () => {
-            // Trigger a re-load of the current view to apply search and new filters
+            // Reset set filter when searching
+            currentFilterSetId = null;
             if (currentView === 'jam') {
                 loadJamTracks();
             } else if (currentView === 'cosmetics') {
@@ -724,8 +881,22 @@
 
         sortSelect.addEventListener('change', (e) => {
             currentSortOrder = e.target.value;
-            // Re-load content based on current view to apply the new sort order
+            // Reset set filter when sorting
+            currentFilterSetId = null;
             if (currentView === 'jam') {
+                loadJamTracks();
+            } else if (currentView === 'lobbyBackgrounds') {
+                loadLobbyBackgrounds();
+            } else { // All other cosmetic types
+                loadCosmeticsCategory(currentView);
+            }
+        });
+
+        rarityFilterSelect.addEventListener('change', (e) => {
+            currentFilterRarity = e.target.value;
+            // Reset set filter when applying rarity filter
+            currentFilterSetId = null;
+            if (currentView === 'jam') { // Rarity filter applies to all cosmetic types, including music
                 loadJamTracks();
             } else if (currentView === 'lobbyBackgrounds') {
                 loadLobbyBackgrounds();
@@ -749,13 +920,20 @@
                 toggleLoadingScreenViewBtn.classList.add('hidden');
             }
 
-            // Reset loading screen view mode when switching categories
-            if (activeButtonId !== 'show-lobby-backgrounds') {
-                loadingScreenViewMode = 'detailed'; // Reset to default detailed view
-            }
+            // Reset filters and sort when changing main categories
+            searchInput.value = '';
+            showNewItemsOnly = false;
+            currentSortOrder = 'default';
+            currentFilterRarity = 'all';
+            currentFilterSetId = null; // Reset set filter
+            
             updateToggleLoadingScreenButtonText(); // Update button text and style
             updateFilterNewButtonText(); // Update filter new button text and style
             sortSelect.value = currentSortOrder; // Ensure sort dropdown reflects current state
+            rarityFilterSelect.value = currentFilterRarity; // Ensure rarity dropdown reflects current state
+
+            stopVisualization(); // Stop visualization when changing categories
+            audioPlayer.pause(); // Pause audio when changing categories
         }
 
         /**
@@ -772,7 +950,7 @@
         }
 
         /**
-         * Filters allCosmeticsData by type, search term, and applies the "new" filter.
+         * Filters allCosmeticsData by type, search term, and applies the "new" and "rarity" filters.
          * @param {string} typeValue - The 'value' of the cosmetic type (e.g., 'outfit', 'emote').
          * @returns {Array} - Filtered and sorted array of cosmetics.
          */
@@ -780,19 +958,34 @@
             const searchTerm = searchInput.value.toLowerCase();
             let filtered = [];
 
-            if (typeValue === 'cosmetics') { // "Andere Kosmetik"
+            // If a set filter is active, start with ALL cosmetic data, otherwise filter by type
+            if (currentFilterSetId) {
+                filtered = [...allCosmeticsData]; // Start with a copy of all cosmetics
+            } else if (typeValue === 'cosmetics') { // "Andere Kosmetik" (excluding specific types)
                 const excludedTypes = ['music', 'loading_screen', 'outfit', 'emote', 'pickaxe', 'glider', 'wrap', 'backpack'];
                 filtered = allCosmeticsData.filter(item => item.type && !excludedTypes.includes(item.type.value));
-            } else {
+            } else { // Specific cosmetic type (outfit, emote, etc.)
                 filtered = allCosmeticsData.filter(item => item.type && item.type.value === typeValue);
             }
 
             // Apply search filter
-            filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
+            if (searchTerm) {
+                filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
+            }
 
             // Apply "new" filter
             if (showNewItemsOnly) {
                 filtered = filtered.filter(item => isItemNew(item));
+            }
+
+            // Apply rarity filter
+            if (currentFilterRarity !== 'all') {
+                filtered = filtered.filter(item => item.rarity?.value === currentFilterRarity);
+            }
+
+            // Apply set filter (this will now correctly filter from the broader 'filtered' array if currentFilterSetId is set)
+            if (currentFilterSetId) {
+                filtered = filtered.filter(item => item.set?.value === currentFilterSetId);
             }
 
             // Apply sorting
@@ -813,6 +1006,15 @@
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
                 }
+                // Apply rarity filter
+                if (currentFilterRarity !== 'all') {
+                    filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
+                }
+                // Apply set filter (though music tracks typically don't have sets, keep for consistency)
+                if (currentFilterSetId) {
+                    filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
+                }
+
                 // Apply sorting
                 allJamTracks = applySorting(filteredData, currentSortOrder);
                 renderJamTracks(allJamTracks);
@@ -821,7 +1023,7 @@
 
         async function loadCosmeticsCategory(categoryType) {
             await ensureAllCosmeticsLoaded();
-            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search and sort
+            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search, sort, rarity, and set
             renderCosmetics(filteredData);
         }
 
@@ -843,6 +1045,15 @@
                 if (showNewItemsOnly) {
                     filteredData = filteredData.filter(item => isItemNew(item));
                 }
+                // Apply rarity filter
+                if (currentFilterRarity !== 'all') {
+                    filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
+                }
+                // Apply set filter (though loading screens typically don't have sets, keep for consistency)
+                if (currentFilterSetId) {
+                    filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
+                }
+
                 // Apply sorting
                 allLobbyBackgrounds = applySorting(filteredData, currentSortOrder);
                 renderLobbyBackgrounds(allLobbyBackgrounds); // Render with current mode
@@ -881,7 +1092,6 @@
             if (currentView === 'outfit') return;
             currentView = 'outfit';
             updateNavButtons('show-outfits');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('outfit');
         });
 
@@ -889,7 +1099,6 @@
             if (currentView === 'emote') return;
             currentView = 'emote';
             updateNavButtons('show-emotes');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('emote');
         });
 
@@ -897,7 +1106,6 @@
             if (currentView === 'pickaxe') return;
             currentView = 'pickaxe';
             updateNavButtons('show-pickaxes');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('pickaxe');
         });
 
@@ -905,7 +1113,6 @@
             if (currentView === 'glider') return;
             currentView = 'glider';
             updateNavButtons('show-gliders');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('glider');
         });
 
@@ -913,7 +1120,6 @@
             if (currentView === 'wrap') return;
             currentView = 'wrap';
             updateNavButtons('show-wraps');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('wrap');
         });
 
@@ -921,7 +1127,6 @@
             if (currentView === 'backpack') return;
             currentView = 'backpack';
             updateNavButtons('show-backblings');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('backpack');
         });
 
@@ -930,7 +1135,6 @@
             if (currentView === 'jam') return;
             currentView = 'jam';
             updateNavButtons('show-jam-tracks');
-            searchInput.value = ''; // Clear search on category change
             loadJamTracks();
         });
 
@@ -938,7 +1142,6 @@
             if (currentView === 'cosmetics') return;
             currentView = 'cosmetics';
             updateNavButtons('show-cosmetics');
-            searchInput.value = ''; // Clear search on category change
             loadCosmeticsCategory('cosmetics'); // This will load "other" cosmetics
         });
 
@@ -946,7 +1149,6 @@
             if (currentView === 'lobbyBackgrounds') return;
             currentView = 'lobbyBackgrounds';
             updateNavButtons('show-lobby-backgrounds');
-            searchInput.value = ''; // Clear search on category change
             loadLobbyBackgrounds();
         });
 
@@ -960,6 +1162,9 @@
             showNewItemsOnly = !showNewItemsOnly; // Toggle the filter state
             updateFilterNewButtonText(); // Update button text and style
 
+            // Reset set filter when applying new filter
+            currentFilterSetId = null; 
+            
             // Re-load content based on current view to apply the new filter
             if (currentView === 'jam') {
                 loadJamTracks();
@@ -991,10 +1196,11 @@
             await ensureAllCosmeticsLoaded(); // Load all cosmetics once at startup
             updateNavButtons('show-jam-tracks'); // Set Jam Tracks as active initially
             loadJamTracks();
-            appVersionDisplay.textContent = 'V2.6'; // Set the version text
+            appVersionDisplay.textContent = 'V2.9'; // Set the version text
             updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
             updateFilterNewButtonText(); // Set initial filter new button text and style
             sortSelect.value = currentSortOrder; // Set initial sort dropdown value
+            rarityFilterSelect.value = currentFilterRarity; // Set initial rarity filter dropdown value
         }
 
         initializeApp();
