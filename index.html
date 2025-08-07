@@ -1368,11 +1368,11 @@
 
 
         async function loadJamTracks() {
-            const url = `https://fortnite-api.com/v2/cosmetics/`;
+            const url = `https://fortnite-api.com/v2/cosmetics`;
             const data = await fetchData(url);
             if (data) {
                 const searchTerm = searchInput.value.toLowerCase();
-                let filteredData = data.filter(item => item.type && item.type.value === 'music');
+                let filteredData = data.filter(item => item.bpm);
                 
                 // Apply extended search filter (name, description, set name)
                 if (searchTerm) {
@@ -1398,52 +1398,6 @@
                 // Apply sorting
                 allJamTracks = applySorting(filteredData, currentSortOrder);
                 renderJamTracks(allJamTracks);
-            }
-        }
-
-        async function loadCosmeticsCategory(categoryType) {
-            await ensureAllCosmeticsLoaded();
-            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search, sort, rarity, and set
-            renderCosmetics(filteredData);
-        }
-
-        async function loadLobbyBackgrounds() {
-            const url = `https://fortnite-api.com/v2/cosmetics/br`;
-            const data = await fetchData(url);
-            if (data) {
-                const searchTerm = searchInput.value.toLowerCase();
-                let filteredData = data.filter(item => 
-                    item.type && (
-                        item.type.value === 'loading_screen' || 
-                        (item.type.displayValue && (item.type.displayValue.toLowerCase().includes('ladebildschirm') || item.type.displayValue.toLowerCase().includes('loading screen')))
-                    )
-                );
-                
-                // Apply extended search filter (name, description, set name)
-                if (searchTerm) {
-                    filteredData = filteredData.filter(item => 
-                        item.name.toLowerCase().includes(searchTerm) ||
-                        (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-                        (item.set && item.set.text && item.set.text.toLowerCase().includes(searchTerm))
-                    );
-                }
-
-                if (showNewItemsOnly) {
-                    filteredData = filteredData.filter(item => isItemNew(item));
-                }
-                // Apply rarity filter
-                if (currentFilterRarity !== 'all') {
-                    filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
-                }
-                // Apply set filter (though loading screens typically don't have sets, keep for consistency)
-                if (currentFilterSetId) {
-                    filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
-                }
-
-                // Apply sorting
-                allLobbyBackgrounds = applySorting(filteredData, currentSortOrder);
-                renderLobbyBackgrounds(allLobbyBackgrounds); // Render with current mode
-                updateToggleLoadingScreenButtonText(); // Update button text
             }
         }
 
