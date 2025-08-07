@@ -551,6 +551,7 @@
                 downloadBlocked: "Der automatische Download wurde möglicherweise blockiert. Das Asset wurde in einem neuen Tab geöffnet. Bitte speichere es von dort manuell (Rechtsklick > Speichern unter...).",
                 modalType: "Typ:",
                 modalRarity: "Seltenheit:",
+                modalYear: "Jahr:",
                 modalSet: "Set:",
                 modalSeason: "Saison:",
                 modalAdded: "Hinzugefügt:",
@@ -617,6 +618,7 @@
                 downloadBlocked: "Automatic download might have been blocked. The asset was opened in a new tab. Please save it manually from there (Right-click > Save As...).",
                 modalType: "Type:",
                 modalRarity: "Rarity:",
+                modalYear: "Year:",
                 modalSet: "Set:",
                 modalSeason: "Season:",
                 modalAdded: "Added:",
@@ -825,16 +827,20 @@
             // Determine the best image URL for the modal, prioritizing higher resolutions
             let imageUrl = `https://placehold.co/400x400/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}`; // Default fallback
 
-            if (item.type && item.type.value === 'loading_screen' && item.images.full_background) {
-                imageUrl = item.images.full_background;
-            } else if (item.images.featured) {
-                imageUrl = item.images.featured;
-            } else if (item.images.render) { // Some items have a 'render' image which is also high quality
-                imageUrl = item.images.render;
-            } else if (item.images.icon) {
-                imageUrl = item.images.icon;
-            } else if (item.images.smallIcon) {
-                imageUrl = item.images.smallIcon;
+            if (item.albumArt) {
+                imageUrl = item.albumArt;
+            } else {
+                if (item.type && item.type.value === 'loading_screen' && item.images.full_background) {
+                    imageUrl = item.images.full_background;
+                } else if (item.images.featured) {
+                    imageUrl = item.images.featured;
+                } else if (item.images.render) { // Some items have a 'render' image which is also high quality
+                    imageUrl = item.images.render;
+                } else if (item.images.icon) {
+                    imageUrl = item.images.icon;
+                } else if (item.images.smallIcon) {
+                    imageUrl = item.images.smallIcon;
+                }
             }
 
             // Set initial image
@@ -848,8 +854,13 @@
 
             // Update other modal details
             modalItemName.textContent = item.name;
-            modalItemType.textContent = `${translations[currentLanguage].modalType} ${item.type?.displayValue || 'N/A'}`;
-            modalItemRarity.textContent = item.rarity ? `${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}` : `${translations[currentLanguage].modalRarity} N/A`;
+            if(item.albumArt) {
+                modalItemType.textContent = "Jam Track";
+                modalItemRarity.textContent = item.releaseYear ? `${translations[currentLanguage].modalYear} ${item.releaseYear}` : `${translations[currentLanguage].modalRarity} N/A`;
+            } else {
+                modalItemType.textContent = `${translations[currentLanguage].modalType} ${item.type?.displayValue || 'N/A'}`;
+                modalItemRarity.textContent = item.rarity ? `${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}` : `${translations[currentLanguage].modalRarity} N/A`;
+            }
             
             // Make set name clickable
             if (item.set && item.set.value && item.set.text) {
@@ -860,7 +871,11 @@
 
             modalItemSeason.textContent = item.season ? `${translations[currentLanguage].modalSeason} ${item.season.text}` : ''; // Display season info
             modalItemAdded.textContent = item.added ? `${translations[currentLanguage].modalAdded} ${new Date(item.added).toLocaleDateString(currentLanguage === 'de' ? 'de-DE' : 'en-US')}` : `${translations[currentLanguage].modalAdded} N/A`;
-            modalItemDescription.textContent = item.description || translations[currentLanguage].modalNoDescription;
+            if(item.albumArt) {
+                modalItemDescription.textContent = item.artist || translations[currentLanguage].modalNoDescription;
+            } else {
+                modalItemDescription.textContent = item.description || translations[currentLanguage].modalNoDescription;
+            }
 
             updateModalImageForVariant(); // Ensure buttons are correctly shown/hidden
             itemDetailModalOverlay.classList.add('active');
@@ -954,10 +969,10 @@
                 card.dataset.itemId = track.id; // Store item ID for modal lookup
                 card.dataset.itemType = 'jam'; // Store item type for modal lookup
                 card.innerHTML = `
-                    <img src="${track.images.icon}" alt="${track.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
+                    <img src="${track.albumArt}" alt="${track.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
                     ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
                     <div class="p-4 flex-grow flex flex-col">
-                        <h3 class="text-lg font-semibold truncate">${track.name}</h3>
+                        <h3 class="text-lg font-semibold truncate">${track.title}</h3>
                         <p class="text-sm text-gray-400">${track.artist || translations[currentLanguage].unknownArtist}</p>
                         ${hasAudio ? `<canvas class="audio-visualizer hidden"></canvas>` : ''} <!-- Audio Visualizer Canvas -->
                         <div class="mt-auto pt-4 flex items-center justify-between">
@@ -966,7 +981,7 @@
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                                     <span class="ml-2">${translations[currentLanguage].play}</span>
                                 </button>
-                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.name.replace(/[^a-z0-9]/gi, '_')}.ogg" onclick="event.stopPropagation()">
+                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.title.replace(/[^a-z0-9]/gi, '_')}.ogg" onclick="event.stopPropagation()">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
                                 </button>
                             ` : `
@@ -1368,36 +1383,28 @@
 
 
         async function loadJamTracks() {
-            const url = `https://fortnite-api.com/v2/cosmetics`;
-            const data = await fetchData(url);
-            if (data) {
-                const searchTerm = searchInput.value.toLowerCase();
-                let filteredData = data.filter(item => item.bpm);
+            const url = `https://fortnite-api.com/v2/cosmetics/tracks`;
+            const tracks = await fetchData(url);
+
+            console.log('Jam-Tracks:', tracks);
+            
+            if (tracks) {
+                let filteredData = tracks.filter(track => track.albumArt);
+                  
+                console.log(filteredData);                
                 
-                // Apply extended search filter (name, description, set name)
-                if (searchTerm) {
-                    filteredData = filteredData.filter(track => 
-                        track.name.toLowerCase().includes(searchTerm) ||
-                        (track.description && track.description.toLowerCase().includes(searchTerm))
-                    );
-                }
+                // if (searchTerm) {
+                //     filteredData = filteredData.filter(track => 
+                //         track.name.toLowerCase().includes(searchTerm) ||
+                //         (track.description && track.description.toLowerCase().includes(searchTerm))
+                //     );
+                // }
+    
 
-                // if (showNewItemsOnly) {
-                //     filteredData = filteredData.filter(item => isItemNew(item));
-                // }
-                // Apply rarity filter
-                // if (currentFilterRarity !== 'all') {
-                //     filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
-                // }
-                // Apply set filter (though music tracks typically don't have sets, keep for consistency)
-                // if (currentFilterSetId) {
-                //     filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
-                // }
-
-                // Apply sorting
-                // allJamTracks = applySorting(filteredData, currentSortOrder);
-                renderJamTracks(filteredData);
+                allJamTracks = applySorting(filteredData, currentSortOrder);
+                renderJamTracks(allJamTracks);
             }
+            
         }
 
         async function loadCosmeticsCategory(categoryType) {
