@@ -9,735 +9,302 @@
     <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* CSS for the card loading animation (shine effect) */
+        @keyframes shine {
+            to {
+                background-position: 200% 0; /* Moves the shine effect across the element */
+            }
+        }
+        
         /* Apply the Inter font to the entire body */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* A slightly different dark background */
+            color: #e2e8f0;
         }
 
-        /* Custom scrollbar for better aesthetics, mimicking the original design */
+        /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #1f2937;
+            background: #2d3748;
         }
         ::-webkit-scrollbar-thumb {
-            background: #4b5563;
+            background: #4a5568;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
+            background: #6a728a;
         }
 
-        /* Simple pulse animation for loading skeletons */
-        @keyframes pulse {
-            50% {
-                opacity: .5;
-            }
-        }
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Style for the "Scroll to Top" button, initially hidden */
-        #scroll-to-top-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 3rem;
-            height: 3rem;
-            background-color: #4b5563;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.2s ease;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-        }
-
-        #scroll-to-top-btn:hover {
-            transform: scale(1.1);
-            background-color: #6b7280;
-        }
-
-        #scroll-to-top-btn.visible {
-            opacity: 1;
-        }
-
-        /* Styles for the modal backdrop and content */
+        /* Ensures the modal covers the entire screen */
         .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             background-color: rgba(0, 0, 0, 0.75);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
-        .modal-backdrop.active {
+
+        /* Shows the scroll-to-top button */
+        .scroll-to-top-btn.visible {
             opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background-color: #1f2937;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal-backdrop.active .modal-content {
-            transform: scale(1);
+            transform: translateY(0);
         }
         
-        /* New styles for the shine animation on cards */
-        .shine-animation {
-            position: relative;
-            overflow: hidden;
+        /* Hides the modal by default */
+        .modal.hidden {
+            display: none;
         }
-
-        .shine-animation::after {
-            content: '';
+        
+        /*
+         * CSS for the image loading transition
+         * The skeleton is initially visible, then its opacity transitions to 0
+         * The image is initially at opacity 0, and then transitions to 1
+         */
+        .loading-image {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .loaded-image {
+            opacity: 1;
+        }
+        .loading-skeleton {
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                to bottom,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.1) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: translateY(-100%);
-            animation: shine 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            z-index: 10;
+        }
+        .loaded-skeleton {
+            opacity: 0;
+            z-index: 1;
         }
 
-        @keyframes shine {
-            0% {
-                transform: translateY(-100%);
-            }
-            50% {
-                transform: translateY(100%);
-            }
-            100% {
-                transform: translateY(-100%);
-            }
+        /* Adjusted skeleton size for consistency */
+        .loading-skeleton-image {
+            height: 8rem; /* Equivalent to w-full h-32 */
+        }
+        
+        /* Base card style */
+        .item-card {
+            background-color: #2d3748; /* Base background color */
+        }
+        
+        /* Applies shine animation only when the card is in the loading state */
+        .item-card.is-loading {
+            background-image: linear-gradient(
+                135deg,
+                transparent 0%,
+                transparent 40%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 60%,
+                transparent 100%
+            );
+            background-size: 200% 100%;
+            animation: shine 1.5s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 p-4 md:p-8 min-h-screen">
-    <!-- Main container for the entire application, centered on the page -->
-    <div class="max-w-7xl mx-auto">
-        <!-- Header with title and navigation -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 space-y-4 md:space-y-0">
-            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-                Fortnite Asset Explorer
-            </h1>
-            <!-- Language and Version display in the header -->
-            <div class="flex items-center space-x-4">
-                <span id="app-version-display" class="text-xs text-gray-400"></span>
-                <select id="language-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
-                    <option value="de">Deutsch</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
-        </header>
+<body class="bg-gray-900 text-gray-200">
 
-        <!-- Navigation Buttons -->
-        <nav class="flex flex-wrap justify-center sm:justify-start gap-3 mb-6">
-            <!-- Buttons for different cosmetic categories -->
-            <button id="show-outfits-btn" data-category="outfit" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Outfits</button>
-            <button id="show-backpacks-btn" data-category="backpack" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Rucksäcke</button>
-            <button id="show-pickaxes-btn" data-category="pickaxe" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Spitzhacken</button>
-            <button id="show-gliders-btn" data-category="glider" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Hängegleiter</button>
-            <button id="show-emotes-btn" data-category="emote" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Emotes</button>
-            <button id="show-wraps-btn" data-category="wrap" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Lackierungen</button>
-            <button id="show-music-btn" data-category="music" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Musik</button>
-            <button id="show-lobby-backgrounds-btn" data-category="loading_screen" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Lobby-Hintergründe</button>
-        </nav>
+    <!-- Header with title and version -->
+    <header class="bg-gray-800 p-4 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fortnite Asset Explorer</h1>
+            <span class="text-sm text-gray-400 mt-2 sm:mt-0">Version <span id="app-version">1.0.1</span></span>
+        </div>
+    </header>
 
-        <!-- Filter and Sort Controls -->
-        <!-- The controls are always visible now -->
-        <div id="filter-sort-controls" class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <!-- Search input -->
-            <input type="text" id="search-input" placeholder="Suchen Sie nach Artikeln..." class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors w-full sm:w-auto">
-            <!-- Display search results count -->
-            <span id="search-results-count" class="text-gray-400 text-sm"></span>
+    <!-- Main content and controls -->
+    <main class="container mx-auto p-4 md:p-8">
 
-            <!-- Sort dropdown -->
-            <div class="flex items-center space-x-2">
-                <label for="sort-select" class="text-gray-400">Sortieren:</label>
-                <select id="sort-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
-                    <option value="name">Name (A-Z)</option>
-                    <option value="rarity">Seltenheit</option>
-                </select>
+        <!-- Filter and sort controls -->
+        <div class="bg-gray-800 p-4 rounded-xl shadow-inner mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+            <!-- Category Tabs -->
+            <div class="flex flex-wrap justify-center gap-2">
+                <button data-category="outfit" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 shadow-lg">Outfit</button>
+                <button data-category="backpack" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Rucksack</button>
+                <button data-category="pickaxe" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Spitzhacke</button>
+                <button data-category="emote" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Emote</button>
+                <button data-category="wrap" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Lackierung</button>
             </div>
-            <!-- Rarity filter dropdown -->
-            <div class="flex items-center space-x-2">
-                <label for="rarity-filter-select" class="text-gray-400">Seltenheit:</label>
-                <select id="rarity-filter-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
-                    <option value="all">Alle</option>
-                    <option value="legendary">Legendär</option>
-                    <option value="epic">Episch</option>
-                    <option value="rare">Selten</option>
-                    <option value="uncommon">Ungewöhnlich</option>
-                    <option value="common">Gewöhnlich</option>
-                </select>
+            
+            <!-- Sort and filter -->
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto mt-4 md:mt-0">
+                <div class="w-full sm:w-auto">
+                    <label for="sort-select" class="sr-only">Sortierung</label>
+                    <select id="sort-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
+                        <option value="name">Name</option>
+                        <option value="added">Zuletzt Hinzugefügt</option>
+                    </select>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <label for="rarity-filter-select" class="sr-only">Seltenheit</label>
+                    <select id="rarity-filter-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
+                        <option value="all">Alle Seltenheiten</option>
+                        <option value="new">Neu</option>
+                        <option value="Common">Gewöhnlich</option>
+                        <option value="Uncommon">Ungewöhnlich</option>
+                        <option value="Rare">Selten</option>
+                        <option value="Epic">Episch</option>
+                        <option value="Legendary">Legendär</option>
+                        <option value="Mythic">Mythisch</option>
+                        <option value="Crew">Crew</option>
+                        <option value="Marvel">Marvel</option>
+                        <option value="DC">DC</option>
+                        <option value="StarWars">Star Wars</option>
+                        <option value="GamingLegends">Gaming Legends</option>
+                        <option value="IconSeries">Icon Series</option>
+                        <option value="ShadowSeries">Shadow Series</option>
+                        <option value="Slurp">Slurp</option>
+                        <option value="LavaSeries">Lava Series</option>
+                        <option value="FrozenSeries">Frozen Series</option>
+                    </select>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <label for="language-select" class="sr-only">Sprache</label>
+                    <select id="language-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
+                        <option value="de">Deutsch</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
             </div>
-            <!-- New items filter button -->
-            <button id="filter-new-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">
-                Neue Artikel filtern
-            </button>
         </div>
 
-        <!-- Main content area where items are displayed -->
+        <!-- Search bar and counter -->
+        <div class="mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+            <div class="relative w-full flex-grow">
+                <input type="text" id="search-input" placeholder="Nach Artikeln suchen..." class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+            <span id="result-count" class="text-sm text-gray-400 whitespace-nowrap">0 Ergebnisse</span>
+        </div>
+
+        <!-- Cosmetics grid -->
         <div id="item-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            <!-- Items will be dynamically inserted here -->
+        </div>
+
+        <!-- Sentinel element for lazy loading -->
+        <div id="lazy-load-sentinel" class="w-full h-1 my-8"></div>
+    </main>
+
+    <!-- Modal for item details (hidden by default) -->
+    <div id="item-details-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+        <div class="modal-backdrop absolute inset-0"></div>
+        <div class="bg-gray-800 rounded-xl shadow-2xl relative z-10 p-6 max-w-2xl w-full mx-auto transform transition-all scale-95 duration-200">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div id="modal-content" class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+                <!-- Image and details will be inserted here -->
+            </div>
         </div>
     </div>
 
-    <!-- Scroll to Top Button -->
-    <button id="scroll-to-top-btn" aria-label="Zurück nach oben">
+    <!-- Scroll-to-Top Button (hidden by default) -->
+    <button id="scroll-to-top-btn" class="scroll-to-top-btn fixed bottom-6 right-6 p-3 bg-purple-600 text-white rounded-full shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 z-50 hover:scale-110 active:scale-95">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
     </button>
 
-    <!-- Modal for detailed item view -->
-    <div id="item-details-modal-backdrop" class="modal-backdrop">
-        <div id="item-details-modal-content" class="modal-content relative p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <!-- Close button -->
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-100 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <!-- Modal content will be populated here by JavaScript -->
-        </div>
-    </div>
-    
-    <!-- JavaScript for all application logic -->
     <script>
-        // --- Configuration & State ---
-        // A simple object to store translated UI strings
-        const translations = {
-            'de': {
-                todayShop: 'Shop des Tages',
-                outfits: 'Outfits',
-                backpacks: 'Rucksäcke',
-                pickaxes: 'Spitzhacken',
-                gliders: 'Hängegleiter',
-                emotes: 'Emotes',
-                wraps: 'Lackierungen',
-                music: 'Musik',
-                lobbyBackgrounds: 'Lobby-Hintergründe',
-                filterNewBtn: 'Neue Artikel filtern',
-                filterNewBtnActive: 'Alle Artikel anzeigen',
-                sortLabel: 'Sortieren:',
-                rarityLabel: 'Seltenheit:',
-                sortName: 'Name (A-Z)',
-                sortRarity: 'Seltenheit',
-                rarityAll: 'Alle',
-                rarityLegendary: 'Legendär',
-                rarityEpic: 'Episch',
-                rarityRare: 'Selten',
-                rarityUncommon: 'Ungewöhnlich',
-                rarityCommon: 'Gewöhnlich',
-                appTitle: 'Fortnite Asset Explorer',
-                noItemsFound: 'Keine Artikel gefunden.',
-                searchInputPlaceholder: 'Suchen Sie nach Artikeln...',
-                // Translations for modal content
-                description: 'Beschreibung',
-                source: 'Herkunft',
-                price: 'Preis',
-                noDescription: 'Keine Beschreibung verfügbar.',
-                noPriceInfo: 'Unbekannt',
-                // New translations for item origin
-                shop: 'Shop',
-                crew: 'Crew',
-                battlepass: 'Battle Pass',
-                // Translation for last seen in shop
-                lastSeen: 'Zuletzt im Shop: Vor {days} Tagen',
-                lastSeenToday: 'Zuletzt im Shop: Heute',
-                // NEW: Translation for search results count
-                searchResultsCount: '{count} Artikel gefunden',
-                searchResultsCountOne: '1 Artikel gefunden',
-                searchResultsCountNone: 'Keine Artikel gefunden',
-                // NEW: Loading text
-                loading: 'Lade...',
-            },
-            'en': {
-                todayShop: 'Today\'s Shop',
-                outfits: 'Outfits',
-                backpacks: 'Backpacks',
-                pickaxes: 'Pickaxes',
-                gliders: 'Gliders',
-                emotes: 'Emotes',
-                wraps: 'Wraps',
-                music: 'Music',
-                lobbyBackgrounds: 'Lobby Backgrounds',
-                filterNewBtn: 'Filter New Items',
-                filterNewBtnActive: 'Show All Items',
-                sortLabel: 'Sort:',
-                rarityLabel: 'Rarity:',
-                sortName: 'Name (A-Z)',
-                sortRarity: 'Rarity',
-                rarityAll: 'All',
-                rarityLegendary: 'Legendary',
-                rarityEpic: 'Epic',
-                rarityRare: 'Rare',
-                rarityUncommon: 'Uncommon',
-                rarityCommon: 'Common',
-                appTitle: 'Fortnite Asset Explorer',
-                noItemsFound: 'No items found.',
-                searchInputPlaceholder: 'Search for items...',
-                // Translations for modal content
-                description: 'Description',
-                source: 'Source',
-                price: 'Price',
-                noDescription: 'No description available.',
-                noPriceInfo: 'Unknown',
-                // New translations for item origin
-                shop: 'Shop',
-                crew: 'Crew',
-                battlepass: 'Battle Pass',
-                // Translation for last seen in shop
-                lastSeen: 'Last seen in shop: {days} days ago',
-                lastSeenToday: 'Last seen in shop: Today',
-                // NEW: Translation for search results count
-                searchResultsCount: '{count} items found',
-                searchResultsCountOne: '1 item found',
-                searchResultsCountNone: 'No items found',
-                // NEW: Loading text
-                loading: 'Loading...',
-            }
-        };
-
-        // Current application state
-        let currentLanguage = 'de';
-        let currentView = 'outfit';
-        let currentSortOrder = 'name';
-        let currentFilterRarity = 'all';
-        let isFilteringNew = false;
-        let currentSearchQuery = ''; 
-        let cosmeticData = {}; // Cache for fetched data
-        const appVersion = 'V2.51';
-
-        // --- DOM Elements ---
-        const navButtons = document.querySelectorAll('.nav-btn');
+        // General app variables
+        const appVersion = "1.0.1";
+        const apiUrl = "https://fortnite-api.com/v2/cosmetics/br";
+        
+        // DOM elements
+        const appVersionDisplay = document.getElementById('app-version');
         const itemGrid = document.getElementById('item-grid');
-        const languageSelect = document.getElementById('language-select');
+        const tabButtons = document.querySelectorAll('.tab-btn');
         const sortSelect = document.getElementById('sort-select');
         const rarityFilterSelect = document.getElementById('rarity-filter-select');
-        const filterNewBtn = document.getElementById('filter-new-btn');
-        const appVersionDisplay = document.getElementById('app-version-display');
-        const searchInput = document.getElementById('search-input');
-        const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
-        const filterSortControls = document.getElementById('filter-sort-controls');
-        const searchResultsCountDisplay = document.getElementById('search-results-count');
-
-        // Modal elements
-        const modalBackdrop = document.getElementById('item-details-modal-backdrop');
-        const modalContent = document.getElementById('item-details-modal-content');
+        const languageSelect = document.getElementById('language-select');
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        const itemDetailsModal = document.getElementById('item-details-modal');
+        const modalContent = document.getElementById('modal-content');
         const closeModalBtn = document.getElementById('close-modal-btn');
-        
-        // --- SVG Icons ---
-        // Unknown/no price info icon
-        const unknownIcon = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-400">
-                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.558a.75.75 0 10-1.412.576l1.412-.576zM11.25 6a.75.75 0 01.75-.75h.001a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V6z" clip-rule="evenodd" />
-            </svg>
-        `;
+        const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
+        const lazyLoadSentinel = document.getElementById('lazy-load-sentinel');
+        const searchInput = document.getElementById('search-input');
+        const resultCountSpan = document.getElementById('result-count');
 
-        // V-Bucks icon (inline SVG)
-        const vbucksIcon = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="#5DADE2" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-400">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.756a4.5 4.5 0 014.073 4.072M14.25 7.756a4.5 4.5 0 01-4.073 4.072m4.073-4.072A4.5 4.5 0 0118.75 12a4.5 4.5 0 01-4.427 4.928m-4.073-4.072a4.5 4.5 0 014.073-4.072m-4.073 4.072a4.5 4.5 0 01-4.427 4.928M18.75 12a4.5 4.5 0 01-4.5 4.5m4.5-4.5a4.5 4.5 0 01-4.5-4.5m-4.5 9a4.5 4.5 0 014.5-4.5m-4.5 4.5a4.5 4.5 0 014.5 4.5m-4.5-4.5v2.25" />
-            </svg>
-        `;
+        // Global state variables
+        let allCosmetics = {};
+        let currentCosmetics = [];
+        let currentLanguage = 'de';
+        let currentSortOrder = 'added';
+        let currentFilterRarity = 'all';
+        let currentSearchTerm = '';
 
-        // --- Core Functions ---
-        
-        /**
-         * Fetches cosmetic data for a specific category from the Fortnite-API.com.
-         * @param {string} category The category to fetch data for.
-         * @returns {Promise<Object[]>} A promise that resolves with the data.
-         */
-        async function fetchRealCosmeticData(category) {
-            try {
-                const apiUrl = `https://fortnite-api.com/v2/cosmetics/br/search/all?type=${category}&language=${currentLanguage}`;
-                
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    console.error('API Error:', response.status, response.statusText);
-                    throw new Error(`API-Fehler: ${response.statusText}`);
-                }
-                const data = await response.json();
-                
-                return data.data || [];
-            } catch (error) {
-                console.error("Fehler beim Abrufen der Daten von der API:", error);
-                itemGrid.innerHTML = `<p class="col-span-full text-center text-red-400 text-lg py-12">Es gab ein Problem beim Laden der Daten. Bitte versuchen Sie es später erneut.</p>`;
-                return [];
+        // Lazy loading variables
+        const itemsPerPage = 50; // Number of items per chunk
+        let allFilteredItems = []; // Stores all filtered & sorted items
+        let currentIndex = 0; // Current index of rendered items
+
+        // IntersectionObserver for lazy loading
+        const observer = new IntersectionObserver(entries => {
+            // Checks if the sentinel element is visible
+            if (entries[0].isIntersecting) {
+                renderNextChunk();
             }
-        }
-        
-        /**
-         * Checks if an item is considered "new" based on its introduced date.
-         * We define new as being introduced in the last 7 days.
-         * @param {Object} item The item to check.
-         * @returns {boolean} True if the item is new, false otherwise.
-         */
-        function isNewItem(item) {
-            if (!item.introduction || !item.introduction.date) {
-                return false;
-            }
-            const introducedDate = new Date(item.introduction.date);
-            const now = new Date();
-            const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-            return (now - introducedDate) < oneWeekInMs;
-        }
-
-        /**
-         * Generates the HTML for a single cosmetic item card.
-         * The `onload` event on the image is used to remove the shine animation
-         * as soon as the image is loaded.
-         * @param {Object} item The cosmetic item data from the API.
-         * @returns {string} The HTML string for the item card.
-         */
-        function createItemCard(item) {
-            const isNew = isNewItem(item);
-            const isNewBadge = isNew ? `<span class="absolute top-2 right-2 bg-purple-500 text-xs font-bold px-2 py-1 rounded-full text-white">Neu</span>` : '';
-            
-            const rarity = item.rarity ? item.rarity.value : 'common';
-            const rarityClass = getRarityColor(rarity);
-            const imageUrl = item.images.icon;
-            
-            let sourceContent = '';
-            if (item.price && item.price.price > 0 && item.price.currency === 'VBuck') {
-                sourceContent = `<div class="flex items-center space-x-1">
-                                    ${vbucksIcon}
-                                    <p class="text-xs font-bold text-gray-400">${item.price.price}</p>
-                                </div>`;
-            } else if (item.battlepass) {
-                sourceContent = `<p class="text-xs font-bold text-gray-400">${translations[currentLanguage].battlepass}</p>`;
-            } else if (item.crew) {
-                sourceContent = `<p class="text-xs font-bold text-gray-400">${translations[currentLanguage].crew}</p>`;
-            } else {
-                sourceContent = unknownIcon;
-            }
-            
-            // Add the `onload` attribute to the image to remove the animation when loaded
-            return `
-                <div onclick='showItemDetails(${JSON.stringify(item)})' class="bg-gray-800 rounded-xl p-4 shadow-lg transform transition-transform duration-200 hover:scale-105 relative border-2 ${rarityClass} flex flex-col cursor-pointer shine-animation">
-                    <div class="flex-grow flex flex-col justify-start">
-                        <img src="${imageUrl}" loading="lazy" alt="${item.name}" class="rounded-lg w-full mb-3" onload="this.closest('.shine-animation').classList.remove('shine-animation')" onerror="this.onerror=null; this.src='https://placehold.co/200x200/374151/D1D5DB?text=Image+Not+Found';">
-                        <h3 class="text-sm font-semibold truncate">${item.name}</h3>
-                    </div>
-
-                    <div class="flex items-center justify-between mt-2">
-                        <p class="text-xs text-gray-400 capitalize">${rarity}</p>
-                        ${sourceContent}
-                    </div>
-
-                    ${isNewBadge}
-                </div>
-            `;
-        }
-
-        /**
-         * Gets the Tailwind color class for a given rarity.
-         * @param {string} rarity The rarity of the item.
-         * @returns {string} The Tailwind class for the border color.
-         */
-        function getRarityColor(rarity) {
-            switch (rarity) {
-                case 'legendary': return 'border-orange-500';
-                case 'epic': return 'border-purple-500';
-                case 'rare': return 'border-blue-500';
-                case 'uncommon': return 'border-green-500';
-                case 'common': return 'border-gray-500';
-                default: return 'border-gray-500';
-            }
-        }
-        
-        /**
-         * Displays a loading skeleton in the grid.
-         * The skeleton elements also have the shine animation class.
-         */
-        function showLoadingState() {
-            itemGrid.innerHTML = '';
-            for (let i = 0; i < 12; i++) {
-                itemGrid.innerHTML += `
-                    <div class="bg-gray-800 rounded-xl p-4 shadow-lg animate-pulse h-48 flex flex-col justify-end shine-animation">
-                        <div class="bg-gray-700 h-4 w-3/4 rounded-lg mb-2"></div>
-                        <div class="bg-gray-700 h-3 w-1/2 rounded-lg"></div>
-                    </div>
-                `;
-            }
-        }
-
-        /**
-         * Updates the UI to show the list of items based on current filters and sorting.
-         */
-        function updateGrid() {
-            const data = cosmeticData[currentView] || [];
-            
-            const filteredData = data.filter(item => {
-                const rarityMatch = currentFilterRarity === 'all' || (item.rarity && item.rarity.value === currentFilterRarity);
-                const isNew = isNewItem(item);
-                const newMatch = !isFilteringNew || isNew;
-                const searchMatch = item.name.toLowerCase().includes(currentSearchQuery.toLowerCase());
-
-                return rarityMatch && newMatch && searchMatch;
-            });
-
-            filteredData.sort((a, b) => {
-                if (currentSortOrder === 'name') {
-                    return a.name.localeCompare(b.name, currentLanguage);
-                }
-                const rarityOrder = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
-                const rarityA = a.rarity ? a.rarity.value : 'common';
-                const rarityB = b.rarity ? b.rarity.value : 'common';
-                return rarityOrder.indexOf(rarityA) - rarityOrder.indexOf(rarityB);
-            });
-
-            if (filteredData.length > 0) {
-                itemGrid.innerHTML = filteredData.map(createItemCard).join('');
-            } else {
-                itemGrid.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg py-12">${translations[currentLanguage].noItemsFound}</p>`;
-            }
-
-            // Update the search results count display
-            const count = filteredData.length;
-            if (currentSearchQuery.trim() === '') {
-                searchResultsCountDisplay.textContent = '';
-            } else if (count === 0) {
-                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCountNone;
-            } else if (count === 1) {
-                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCountOne;
-            } else {
-                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCount.replace('{count}', count);
-            }
-        }
-        
-        /**
-         * Loads cosmetic data for a given category and updates the UI.
-         * @param {string} category The category to load.
-         */
-        async function loadCosmeticsCategory(category) {
-            currentView = category;
-            updateNavButtons(category);
-            // Show the loading skeletons with the shine animation
-            showLoadingState();
-
-            // Check if we already have the data in cache
-            if (!cosmeticData[category]) {
-                const data = await fetchRealCosmeticData(category);
-                cosmeticData[category] = data;
-            }
-
-            updateGrid();
-        }
-
-        /**
-         * Updates the active state of the navigation buttons.
-         * @param {string} activeCategory The category to mark as active.
-         */
-        function updateNavButtons(activeCategory) {
-            navButtons.forEach(btn => {
-                const category = btn.getAttribute('data-category');
-                if (category === activeCategory) {
-                    btn.classList.add('bg-purple-600', 'text-white');
-                    btn.classList.remove('bg-gray-800');
-                } else {
-                    btn.classList.remove('bg-purple-600', 'text-white');
-                    btn.classList.add('bg-gray-800');
-                }
-            });
-        }
-
-        /**
-         * Updates all UI text elements based on the current language.
-         */
-        function updateUIForLanguage() {
-            const lang = translations[currentLanguage];
-            document.title = lang.appTitle;
-
-            document.getElementById('show-outfits-btn').textContent = lang.outfits;
-            document.getElementById('show-backpacks-btn').textContent = lang.backpacks;
-            document.getElementById('show-pickaxes-btn').textContent = lang.pickaxes;
-            document.getElementById('show-gliders-btn').textContent = lang.gliders;
-            document.getElementById('show-emotes-btn').textContent = lang.emotes;
-            document.getElementById('show-wraps-btn').textContent = lang.wraps;
-            document.getElementById('show-music-btn').textContent = lang.music;
-            document.getElementById('show-lobby-backgrounds-btn').textContent = lang.lobbyBackgrounds;
-
-            document.querySelector('label[for="sort-select"]').textContent = lang.sortLabel;
-            document.getElementById('sort-select').options[0].textContent = lang.sortName;
-            document.getElementById('sort-select').options[1].textContent = lang.sortRarity;
-
-            document.querySelector('label[for="rarity-filter-select"]').textContent = lang.rarityLabel;
-            document.getElementById('rarity-filter-select').options[0].textContent = lang.rarityAll;
-            document.getElementById('rarity-filter-select').options[1].textContent = lang.rarityLegendary;
-            document.getElementById('rarity-filter-select').options[2].textContent = lang.rarityEpic;
-            document.getElementById('rarity-filter-select').options[3].textContent = lang.rarityRare;
-            document.getElementById('rarity-filter-select').options[4].textContent = lang.rarityUncommon;
-            document.getElementById('rarity-filter-select').options[5].textContent = lang.rarityCommon;
-            
-            filterNewBtn.textContent = isFilteringNew ? translations[currentLanguage].filterNewBtnActive : translations[currentLanguage].filterNewBtn;
-            searchInput.placeholder = lang.searchInputPlaceholder;
-            
-            // Update search results count when language changes
-            updateGrid();
-        }
-
-        /**
-         * Populates and shows the detailed item modal.
-         * @param {Object} item The item to display in the modal.
-         */
-        function showItemDetails(item) {
-            const lang = translations[currentLanguage];
-            const rarity = item.rarity ? item.rarity.value : 'common';
-            const rarityClass = getRarityColor(rarity);
-
-            // Determine the source text to display
-            let sourceText = lang.noPriceInfo;
-            let priceSection = '';
-            if (item.price && item.price.price > 0 && item.price.currency === 'VBuck') {
-                sourceText = lang.shop;
-                priceSection = `<div class="mt-4">
-                                    <h3 class="text-lg font-semibold">${lang.price}</h3>
-                                    <div class="flex items-center space-x-2 text-sm text-gray-300">
-                                        ${vbucksIcon}
-                                        <span>${item.price.price}</span>
-                                    </div>
-                                </div>`;
-            } else if (item.battlepass) {
-                sourceText = lang.battlepass;
-            } else if (item.crew) {
-                sourceText = lang.crew;
-            }
-            
-            // Logic to determine how many days ago the item was last seen
-            let lastSeenSection = '';
-            if (item.shopHistory && item.shopHistory.length > 0) {
-                const lastSeenDate = new Date(item.shopHistory[0].date);
-                const today = new Date();
-                const diffInTime = today.getTime() - lastSeenDate.getTime();
-                const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
-                
-                if (diffInDays === 0) {
-                    lastSeenSection = `<div class="mt-4">
-                                         <h3 class="text-lg font-semibold">${lang.lastSeenToday}</h3>
-                                     </div>`;
-                } else {
-                    lastSeenSection = `<div class="mt-4">
-                                         <h3 class="text-lg font-semibold">${lang.lastSeen.replace('{days}', diffInDays)}</h3>
-                                     </div>`;
-                }
-            }
-            
-            modalContent.innerHTML = `
-                <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-100 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div class="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
-                    <!-- Image container -->
-                    <div class="md:w-1/2">
-                        <img src="${item.images.featured || item.images.icon}" alt="${item.name}" class="rounded-lg w-full border-2 ${rarityClass}" onerror="this.onerror=null; this.src='https://placehold.co/400x400/374151/D1D5DB?text=Image+Not+Found';">
-                    </div>
-                    <!-- Details container -->
-                    <div class="md:w-1/2 flex flex-col justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-50 mb-2">${item.name}</h2>
-                            <p class="text-sm text-gray-400 capitalize mb-4">${rarity} ${item.type.displayValue}</p>
-                            <h3 class="text-lg font-semibold mb-2">${lang.description}</h3>
-                            <p class="text-sm text-gray-300 mb-4">${item.description || lang.noDescription}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold">${lang.source}</h3>
-                            <p class="text-sm text-gray-300">${sourceText}</p>
-                            ${priceSection}
-                            ${lastSeenSection} <!-- Add the last seen section here -->
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Re-attach event listener to the new close button
-            document.getElementById('close-modal-btn').addEventListener('click', hideItemDetails);
-            
-            modalBackdrop.classList.add('active');
-        }
-
-        /**
-         * Hides the detailed item modal.
-         */
-        function hideItemDetails() {
-            modalBackdrop.classList.remove('active');
-        }
-
-        // --- Event Listeners ---
-        
-        // Listen for clicks on navigation buttons
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const category = button.getAttribute('data-category');
-                
-                // Load the category
-                loadCosmeticsCategory(category);
-            });
-        });
-        
-        // Listen for changes in the sort dropdown
-        sortSelect.addEventListener('change', (event) => {
-            currentSortOrder = event.target.value;
-            updateGrid();
+        }, {
+            root: null, // Uses the viewport as the root
+            rootMargin: '0px',
+            threshold: 1.0 // Triggers when 100% of the element is visible
         });
 
-        // Listen for changes in the rarity filter dropdown
-        rarityFilterSelect.addEventListener('change', (event) => {
-            currentFilterRarity = event.target.value;
-            updateGrid();
+        // Event listener for the tabs
+        tabButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const category = button.dataset.category;
+                // Deactivates the observer before new data is loaded
+                observer.unobserve(lazyLoadSentinel); 
+                await loadCosmeticsCategory(category);
+                // Update UI for active tab
+                tabButtons.forEach(btn => btn.classList.remove('bg-purple-600', 'hover:bg-purple-700'));
+                tabButtons.forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
+                button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                button.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            });
         });
-        
-        // Listen for changes in the language select
-        languageSelect.addEventListener('change', async (event) => {
-            currentLanguage = event.target.value;
-            // Clear cached data to force a re-fetch in the new language
-            cosmeticData = {};
+
+        // Event listener for sort, filter, language and search
+        sortSelect.addEventListener('change', () => {
+            currentSortOrder = sortSelect.value;
+            applyFiltersAndSort();
+        });
+
+        rarityFilterSelect.addEventListener('change', () => {
+            currentFilterRarity = rarityFilterSelect.value;
+            applyFiltersAndSort();
+        });
+
+        languageSelect.addEventListener('change', () => {
+            currentLanguage = languageSelect.value;
             updateUIForLanguage();
-            await loadCosmeticsCategory(currentView);
         });
         
-        // Listen for input in the search field
-        searchInput.addEventListener('input', (event) => {
-            currentSearchQuery = event.target.value;
-            updateGrid();
+        searchInput.addEventListener('input', () => {
+            currentSearchTerm = searchInput.value.toLowerCase();
+            applyFiltersAndSort();
         });
 
-        // Toggle the "Filter New" state
-        filterNewBtn.addEventListener('click', () => {
-            isFilteringNew = !isFilteringNew;
-            filterNewBtn.textContent = isFilteringNew ? translations[currentLanguage].filterNewBtnActive : translations[currentLanguage].filterNewBtn;
-            updateGrid();
-        });
+        // Event listener for the modal
+        closeModalBtn.addEventListener('click', hideItemDetails);
 
-        // Event listener to show/hide the scroll-to-top button
+        // Adds an event listener to show/hide the scroll-to-top button
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 200) { // Show button after scrolling 200px
+            if (window.scrollY > 200) { // Shows button after scrolling 200px
                 scrollToTopBtn.classList.add('visible');
             } else {
                 scrollToTopBtn.classList.remove('visible');
@@ -752,28 +319,316 @@
             });
         });
         
-        // Close modal when clicking on the backdrop
+        // Closes the modal when clicking on the backdrop
         modalBackdrop.addEventListener('click', (e) => {
             if (e.target === modalBackdrop) {
                 hideItemDetails();
             }
         });
 
-        // --- Initial Application Load ---
+        // --- Main Functions ---
+
+        /**
+         * Fetches cosmetics of a specific category from the API or loads them from the cache.
+         * @param {string} category - The category to load (e.g., 'outfit').
+         */
+        async function loadCosmeticsCategory(category) {
+            itemGrid.innerHTML = '';
+            
+            try {
+                // Fetches data from the API
+                const response = await fetch(`${apiUrl}?language=${currentLanguage}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await response.json();
+                allCosmetics = data.data;
+
+                currentCosmetics = allCosmetics.filter(item => item.type.value === category);
+                applyFiltersAndSort(); // Applies filters and sort, then renders the first chunk
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                itemGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.</p>`;
+            }
+        }
+
+        /**
+         * Applies the current filters and sorting to the data and renders the first chunk.
+         */
+        function applyFiltersAndSort() {
+            // Copies the cosmetics data to manipulate it
+            allFilteredItems = [...currentCosmetics];
+            
+            // Apply filtering
+            if (currentFilterRarity === 'new') {
+                const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+                const now = new Date();
+                allFilteredItems = allFilteredItems.filter(item => (now - new Date(item.added)) < oneWeekInMs);
+            } else if (currentFilterRarity !== 'all') {
+                // Converts both values to lowercase to ignore case
+                allFilteredItems = allFilteredItems.filter(item => item.rarity.value.toLowerCase() === currentFilterRarity.toLowerCase());
+            }
+            // Apply search
+            if (currentSearchTerm) {
+                allFilteredItems = allFilteredItems.filter(item => 
+                    item.name.toLowerCase().includes(currentSearchTerm) ||
+                    (item.description && item.description.toLowerCase().includes(currentSearchTerm))
+                );
+            }
+
+            // Apply sorting
+            allFilteredItems.sort((a, b) => {
+                if (currentSortOrder === 'name') {
+                    return a.name.localeCompare(b.name, currentLanguage);
+                } else if (currentSortOrder === 'added') {
+                    return new Date(b.added) - new Date(a.added);
+                }
+            });
+
+            // Update counter
+            resultCountSpan.textContent = `${allFilteredItems.length} Ergebnisse`;
+
+            // Resets the index and clears the grid before rendering the first chunk
+            currentIndex = 0;
+            itemGrid.innerHTML = '';
+
+            // Starts lazy loading by rendering the first chunk
+            renderNextChunk();
+        }
+        
+        /**
+         * Renders the next chunk of items and appends it to the grid.
+         */
+        function renderNextChunk() {
+            // Check if there are still items to load
+            if (currentIndex >= allFilteredItems.length) {
+                observer.unobserve(lazyLoadSentinel);
+                return;
+            }
+
+            const chunk = allFilteredItems.slice(currentIndex, currentIndex + itemsPerPage);
+            
+            chunk.forEach(item => {
+                const card = createItemCard(item);
+                itemGrid.appendChild(card);
+            });
+            
+            currentIndex += itemsPerPage;
+
+            // Observe the sentinel element if the observer is not yet observing
+            if (currentIndex < allFilteredItems.length) {
+                observer.observe(lazyLoadSentinel);
+            }
+        }
+
+        /**
+         * Creates a single item card with a loading skeleton.
+         * The skeleton is shown by default and hides when the image is loaded.
+         * @param {object} item - The item object.
+         * @returns {HTMLElement} - The DOM element of the item card.
+         */
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card bg-gray-800 rounded-xl p-2 md:p-4 cursor-pointer transition-colors duration-200 overflow-hidden shadow-md relative group hover:scale-[1.03] active:scale-[0.97] transition-all duration-200';
+            card.dataset.id = item.id;
+            
+            // Add a class for the loading state to enable the animation
+            card.classList.add('is-loading');
+
+            const rarityColorClass = getRarityColor(item.rarity.value);
+            const rarityBorderClass = rarityColorClass.replace('text-', 'border-');
+            const imageUrl = item.images.smallIcon || item.images.icon || item.images.featured || 'https://placehold.co/128x128/374151/d1d5db?text=Image';
+
+            // Image container to hold both skeleton and image
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'relative w-full h-32 rounded-lg mb-2 overflow-hidden';
+
+            // Skeleton element
+            const skeleton = document.createElement('div');
+            skeleton.className = 'loading-skeleton absolute inset-0 bg-gray-700';
+            imageContainer.appendChild(skeleton);
+
+            // Image element
+            const img = document.createElement('img');
+            img.alt = item.name;
+            img.className = 'loading-image w-full h-auto rounded-lg transform transition-transform duration-300 group-hover:scale-105'; 
+            
+            // Onload handler
+            img.onload = () => {
+                skeleton.classList.add('loaded-skeleton');
+                img.classList.add('loaded-image');
+                // Remove the loading class from the card once the image is loaded
+                card.classList.remove('is-loading');
+            };
+            
+            // Onerror handler
+            img.onerror = () => {
+                img.src = 'https://placehold.co/128x128/374151/d1d5db?text=Image';
+                skeleton.classList.add('loaded-skeleton');
+                img.classList.add('loaded-image');
+                card.classList.remove('is-loading');
+            };
+
+            // Set the src AFTER listeners are attached
+            img.src = imageUrl;
+            imageContainer.appendChild(img);
+
+            // Append the container to the card
+            card.appendChild(imageContainer);
+
+            // Text content
+            const textContainer = document.createElement('div');
+            textContainer.className = 'text-center truncate';
+            textContainer.innerHTML = `
+                <p class="font-semibold text-sm truncate">${item.name}</p>
+                <p class="text-xs font-medium ${rarityColorClass} truncate mt-1">${item.rarity.displayValue}</p>
+            `;
+            card.appendChild(textContainer);
+
+            // Border
+            const border = document.createElement('div');
+            border.className = `absolute inset-0 border-2 ${rarityBorderClass} rounded-xl transition-all duration-300 pointer-events-none`;
+            card.appendChild(border);
+            
+            // Checks if the item was added in the last 7 days
+            const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+            const now = new Date();
+            const itemAddedDate = new Date(item.added);
+            if (now - itemAddedDate < oneWeekInMs) {
+                const newBadge = document.createElement('span');
+                newBadge.textContent = 'Neu';
+                newBadge.className = 'absolute top-2 right-2 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg transform rotate-6 animate-pulse';
+                card.appendChild(newBadge);
+            }
+
+            card.addEventListener('click', () => showItemDetails(item));
+
+            return card;
+        }
+
+        /**
+         * Displays the details of an item in a modal.
+         * @param {object} item - The item object.
+         */
+        function showItemDetails(item) {
+            // First, show a loading animation
+            modalContent.innerHTML = `
+                <div class="w-full md:w-1/2">
+                    <div class="shine-animation w-full h-64 rounded-lg shadow-lg"></div>
+                </div>
+                <div class="w-full md:w-1/2 mt-4 md:mt-0">
+                    <div class="shine-animation h-8 w-3/4 mb-4 rounded"></div>
+                    <div class="shine-animation h-4 w-1/2 mb-4 rounded"></div>
+                    <div class="shine-animation h-3 w-full mb-2 rounded"></div>
+                    <div class="shine-animation h-3 w-full mb-4 rounded"></div>
+                    <div class="shine-animation h-3 w-1/2 rounded"></div>
+                </div>
+            `;
+            itemDetailsModal.classList.remove('hidden');
+
+            const rarityColor = getRarityColor(item.rarity.value);
+            const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
+
+            // Creates a new Image object to monitor loading
+            const img = new Image();
+            img.onload = () => {
+                // Once the image is loaded, update the modal content
+                modalContent.innerHTML = `
+                    <div class="w-full md:w-1/2">
+                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-auto rounded-lg shadow-lg">
+                    </div>
+                    <div class="w-full md:w-1/2 mt-4 md:mt-0">
+                        <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
+                        <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
+                        <p class="text-gray-400 mb-2">Beschreibung:</p>
+                        <p class="text-gray-300 mb-4">${item.description || 'Keine Beschreibung verfügbar.'}</p>
+                        <p class="text-gray-400">Veröffentlicht am:</p>
+                        <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+                `;
+            };
+            img.onerror = () => {
+                // In case of an error, show a fallback image
+                const fallbackImageUrl = 'https://placehold.co/512x512/374151/d1d5db?text=Image+Not+Found';
+                modalContent.innerHTML = `
+                    <div class="w-full md:w-1/2">
+                        <img src="${fallbackImageUrl}" alt="Bild nicht gefunden" class="w-full h-auto rounded-lg shadow-lg">
+                    </div>
+                    <div class="w-full md:w-1/2 mt-4 md:mt-0">
+                        <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
+                        <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
+                        <p class="text-gray-400 mb-2">Beschreibung:</p>
+                        <p class="text-gray-300 mb-4">${item.description || 'Keine Beschreibung verfügbar.'}</p>
+                        <p class="text-gray-400">Veröffentlicht am:</p>
+                        <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+                `;
+            };
+            
+            // Start the loading process
+            img.src = imageUrl;
+        }
+
+        /**
+         * Hides the modal.
+         */
+        function hideItemDetails() {
+            itemDetailsModal.classList.add('hidden');
+        }
+
+        /**
+         * Helper function to get the correct Tailwind text color for the rarity.
+         * @param {string} rarity - The rarity of the item.
+         * @returns {string} - The corresponding Tailwind class.
+         */
+        function getRarityColor(rarity) {
+            const colors = {
+                'common': 'text-gray-400',
+                'uncommon': 'text-lime-400',
+                'rare': 'text-blue-400',
+                'epic': 'text-purple-400',
+                'legendary': 'text-orange-400',
+                'mythic': 'text-red-400',
+                'crew': 'text-zinc-500', // Added 'Crew' rarity
+                'marvel': 'text-red-600',
+                'dc': 'text-blue-600',
+                'starwars': 'text-cyan-400',
+                'gaminglegends': 'text-emerald-400',
+                'icon': 'text-teal-400',
+                'shadowseries': 'text-gray-800',
+                'slurp': 'text-blue-200',
+                'lavaseries': 'text-red-500',
+                'frozenseries': 'text-blue-300'
+            };
+            return colors[rarity.toLowerCase()] || 'text-white';
+        }
+
+        /**
+         * Updates the UI texts based on the selected language.
+         */
+        function updateUIForLanguage() {
+            if (currentCosmetics.length > 0) {
+                applyFiltersAndSort();
+            }
+        }
+
+        // --- Initial app start ---
         /**
          * Initializes the app on page load.
          */
         async function initializeApp() {
-            // Set initial state from HTML selects
+            // Set initial state from the HTML select elements
             currentLanguage = languageSelect.value;
             currentSortOrder = sortSelect.value;
             currentFilterRarity = rarityFilterSelect.value;
 
             appVersionDisplay.textContent = appVersion;
 
-            // Load initial category ('outfit') and set UI state
+            // Loads the initial category ('outfit') and sets the UI state
             await loadCosmeticsCategory('outfit');
-            updateUIForLanguage();
+
+            // Observes the sentinel element to start lazy loading
+            observer.observe(lazyLoadSentinel);
         }
 
         initializeApp();
