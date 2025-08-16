@@ -429,7 +429,7 @@
          */
         function createItemCard(item) {
             const card = document.createElement('div');
-            card.className = 'item-card bg-gray-800 rounded-xl p-2 md:p-4 cursor-pointer transition-colors duration-200 overflow-hidden shadow-md relative group hover:scale-[1.03] active:scale-[0.97] transition-all duration-200';
+            card.className = 'item-card bg-gray-800 rounded-xl p-1 md:p-2 cursor-pointer transition-colors duration-200 overflow-hidden shadow-md relative group hover:scale-[1.03] active:scale-[0.97] transition-all duration-200';
             card.dataset.id = item.id;
             
             // Add a class for the loading state to enable the animation
@@ -441,7 +441,8 @@
 
             // Image container to hold both skeleton and image
             const imageContainer = document.createElement('div');
-            imageContainer.className = 'relative w-full h-32 rounded-lg mb-2 overflow-hidden';
+            // Using a square aspect ratio to ensure consistent image sizing across devices
+            imageContainer.className = 'relative w-full aspect-square rounded-lg mb-2 overflow-hidden';
 
             // Skeleton element
             const skeleton = document.createElement('div');
