@@ -9,11 +9,30 @@
     <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS for the card loading animation (shine effect) */
+        /* Simple pulse animation for the 'New' badge */
+        @keyframes pulse {
+            50% {
+                opacity: .5;
+            }
+        }
+        .animate-pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Shine animation for loading skeletons */
         @keyframes shine {
             to {
-                background-position: 200% 0; /* Moves the shine effect across the element */
+                /* Moves the shine diagonally from bottom-right to top-left */
+                background-position: 0% 0%;
             }
+        }
+        .animate-shine {
+            /* Creates the diagonal gradient going from bottom-right to top-left */
+            background-image: linear-gradient(135deg, #374151 0%, #4b5563 50%, #374151 100%);
+            /* Adjusted size to make the shine effect narrower */
+            background-size: 150% 150%;
+            background-position: 100% 100%;
+            animation: shine 1.5s infinite linear;
         }
         
         /* Apply the Inter font to the entire body */
@@ -91,20 +110,6 @@
         /* Base card style */
         .item-card {
             background-color: #2d3748; /* Base background color */
-        }
-        
-        /* Applies shine animation only when the card is in the loading state */
-        .item-card.is-loading {
-            background-image: linear-gradient(
-                135deg,
-                transparent 0%,
-                transparent 40%,
-                rgba(255, 255, 255, 0.1) 50%,
-                transparent 60%,
-                transparent 100%
-            );
-            background-size: 200% 100%;
-            animation: shine 1.5s infinite ease-in-out;
         }
     </style>
 </head>
@@ -432,9 +437,6 @@
             card.className = 'item-card bg-gray-800 rounded-xl p-1 md:p-2 cursor-pointer transition-colors duration-200 overflow-hidden shadow-md relative group hover:scale-[1.03] active:scale-[0.97] transition-all duration-200';
             card.dataset.id = item.id;
             
-            // Add a class for the loading state to enable the animation
-            card.classList.add('is-loading');
-
             const rarityColorClass = getRarityColor(item.rarity.value);
             const rarityBorderClass = rarityColorClass.replace('text-', 'border-');
             const imageUrl = item.images.smallIcon || item.images.icon || item.images.featured || 'https://placehold.co/128x128/374151/d1d5db?text=Image';
@@ -446,7 +448,8 @@
 
             // Skeleton element
             const skeleton = document.createElement('div');
-            skeleton.className = 'loading-skeleton absolute inset-0 bg-gray-700';
+            // Use the shine animation on the skeleton
+            skeleton.className = 'loading-skeleton absolute inset-0 rounded-lg animate-shine';
             imageContainer.appendChild(skeleton);
 
             // Image element
@@ -458,8 +461,6 @@
             img.onload = () => {
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
-                // Remove the loading class from the card once the image is loaded
-                card.classList.remove('is-loading');
             };
             
             // Onerror handler
@@ -467,7 +468,6 @@
                 img.src = 'https://placehold.co/128x128/374151/d1d5db?text=Image';
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
-                card.classList.remove('is-loading');
             };
 
             // Set the src AFTER listeners are attached
@@ -515,14 +515,14 @@
             // First, show a loading animation
             modalContent.innerHTML = `
                 <div class="w-full md:w-1/2">
-                    <div class="shine-animation w-full h-64 rounded-lg shadow-lg"></div>
+                    <div class="w-full h-64 rounded-lg shadow-lg animate-shine"></div>
                 </div>
                 <div class="w-full md:w-1/2 mt-4 md:mt-0">
-                    <div class="shine-animation h-8 w-3/4 mb-4 rounded"></div>
-                    <div class="shine-animation h-4 w-1/2 mb-4 rounded"></div>
-                    <div class="shine-animation h-3 w-full mb-2 rounded"></div>
-                    <div class="shine-animation h-3 w-full mb-4 rounded"></div>
-                    <div class="shine-animation h-3 w-1/2 rounded"></div>
+                    <div class="h-8 w-3/4 mb-4 rounded animate-shine"></div>
+                    <div class="h-4 w-1/2 mb-4 rounded animate-shine"></div>
+                    <div class="h-3 w-full mb-2 rounded animate-shine"></div>
+                    <div class="h-3 w-full mb-4 rounded animate-shine"></div>
+                    <div class="h-3 w-1/2 rounded animate-shine"></div>
                 </div>
             `;
             itemDetailsModal.classList.remove('hidden');
