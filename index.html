@@ -9,7 +9,7 @@
     <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Einfache Puls-Animation für das 'Neu'-Abzeichen */
+        /* Simple pulse animation for the 'New' badge */
         @keyframes pulse {
             50% {
                 opacity: .5;
@@ -19,7 +19,7 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* Glanz-Animation für die Ladeskelette, die diagonal von Ecke zu Ecke verläuft */
+        /* Shine animation for loading skeletons, running diagonally from corner to corner */
         @keyframes improvedShine {
             0% {
                 background-position: -200% -200%;
@@ -28,7 +28,7 @@
                 background-position: 200% 200%;
             }
         }
-        /* Die Animationsdauer wurde auf 3 Sekunden erhöht, um sie zu verlangsamen */
+        /* Animation duration increased to 3 seconds to slow it down */
         .animate-shine {
             background: #2d3748;
             background-image: linear-gradient(
@@ -41,14 +41,14 @@
             animation: improvedShine 3s infinite linear;
         }
         
-        /* Wendet die Inter-Schriftart auf den gesamten Body an */
+        /* Apply the Inter font to the entire body */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Ein etwas anderer dunkler Hintergrund */
+            background-color: #1a202c; /* A slightly different dark background */
             color: #e2e8f0;
         }
 
-        /* Benutzerdefinierte Scrollbar für eine bessere Ästhetik */
+        /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -63,28 +63,28 @@
             background: #6a728a;
         }
 
-        /* Stellt sicher, dass das Modal den gesamten Bildschirm abdeckt */
+        /* Ensure the modal covers the entire screen */
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
         }
 
-        /* Zeigt den "Nach oben scrollen"-Button an */
+        /* Show the "Scroll to top" button */
         .scroll-to-top-btn.visible {
             opacity: 1;
             transform: translateY(0);
         }
         
-        /* Verbirgt das Modal standardmäßig */
+        /* Hide the modal by default */
         .modal.hidden {
             display: none;
         }
         
         /*
-         * CSS für den Bild-Ladeübergang
-         * Das Skelett ist anfangs sichtbar, dann wechselt seine Deckkraft auf 0
-         * Das Bild ist anfangs bei 0 Deckkraft und wechselt dann auf 1
+         * CSS for the image loading transition
+         * The skeleton is initially visible, then its opacity transitions to 0
+         * The image is initially at 0 opacity and then transitions to 1
          */
         .loading-image {
             opacity: 0;
@@ -108,78 +108,78 @@
             z-index: 1;
         }
 
-        /* Angepasste Skelettgröße für Konsistenz */
+        /* Adjusted skeleton size for consistency */
         .loading-skeleton-image {
-            height: 8rem; /* Entspricht w-full h-32 */
+            height: 8rem; /* Corresponds to w-full h-32 */
         }
         
-        /* Basis-Kartenstil */
+        /* Base card style */
         .item-card {
-            background-color: #2d3748; /* Basis-Hintergrundfarbe */
+            background-color: #2d3748; /* Base background color */
         }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
 
-    <!-- Header mit Titel und Version sowie neuem Einstellungen-Icon -->
+    <!-- Header with title and version as well as new settings icon -->
     <header class="bg-gray-800 p-4 shadow-xl sticky top-0 z-50">
         <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
             <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fortnite Asset Explorer</h1>
             <div class="flex items-center space-x-4 mt-2 sm:mt-0 relative">
-                <span class="text-sm text-gray-400">Version <span id="app-version">1.0.1</span></span>
-                <!-- Einstellungen-Icon-Button -->
+                <span class="text-sm text-gray-400">Version <span id="app-version">1.0.4</span></span>
+                <!-- Settings icon button -->
                 <button id="settings-icon-btn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.527.292 1.085.498 1.638.6z" />
                     </svg>
                 </button>
-                <!-- Dropdown-Menü für Einstellungen -->
+                <!-- Dropdown menu for settings -->
                 <div id="settings-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-gray-800 rounded-xl shadow-lg z-20 hidden transform transition-all scale-95 duration-200 origin-top-right">
                     <div class="p-4">
-                        <span class="text-sm text-gray-400 block mb-2">Kachelgröße:</span>
-                        <button data-cols="2" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Groß</button>
-                        <button data-cols="4" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Mittel</button>
-                        <button data-cols="6" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Klein</button>
+                        <span class="text-sm text-gray-400 block mb-2">Tile Size:</span>
+                        <button data-cols="2" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Large</button>
+                        <button data-cols="4" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Medium</button>
+                        <button data-cols="6" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Small</button>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hauptinhalt und Steuerelemente -->
+    <!-- Main content and controls -->
     <main class="container mx-auto p-4 md:p-8">
 
-        <!-- Filter- und Sortiersteuerelemente -->
+        <!-- Filter and sort controls -->
         <div class="bg-gray-800 p-4 rounded-xl shadow-inner mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <!-- Kategorie-Tabs -->
+            <!-- Category tabs -->
             <div class="flex flex-wrap justify-center gap-2">
                 <button data-category="outfit" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 shadow-lg">Outfit</button>
-                <button data-category="backpack" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Rucksack</button>
-                <button data-category="pickaxe" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Spitzhacke</button>
+                <button data-category="backpack" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Backpack</button>
+                <button data-category="pickaxe" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Pickaxe</button>
                 <button data-category="emote" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Emote</button>
-                <button data-category="wrap" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Lackierung</button>
+                <button data-category="wrap" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Wrap</button>
             </div>
             
-            <!-- Sortierung und Filter -->
+            <!-- Sort and filter -->
             <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto mt-4 md:mt-0">
                 <div class="w-full sm:w-auto">
-                    <label for="sort-select" class="sr-only">Sortierung</label>
+                    <label for="sort-select" class="sr-only">Sort</label>
                     <select id="sort-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
                         <option value="name">Name</option>
-                        <option value="added">Zuletzt Hinzugefügt</option>
+                        <option value="added">Recently Added</option>
                     </select>
                 </div>
                 <div class="w-full sm:w-auto">
-                    <label for="rarity-filter-select" class="sr-only">Seltenheit</label>
+                    <label for="rarity-filter-select" class="sr-only">Rarity</label>
                     <select id="rarity-filter-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
-                        <option value="all">Alle Seltenheiten</option>
-                        <option value="new">Neu</option>
-                        <option value="Common">Gewöhnlich</option>
-                        <option value="Uncommon">Ungewöhnlich</option>
-                        <option value="Rare">Selten</option>
-                        <option value="Epic">Episch</option>
-                        <option value="Legendary">Legendär</option>
-                        <option value="Mythic">Mythisch</option>
+                        <option value="all">All Rarities</option>
+                        <option value="new">New</option>
+                        <option value="Common">Common</option>
+                        <option value="Uncommon">Uncommon</option>
+                        <option value="Rare">Rare</option>
+                        <option value="Epic">Epic</option>
+                        <option value="Legendary">Legendary</option>
+                        <option value="Mythic">Mythic</option>
                         <option value="Crew">Crew</option>
                         <option value="Marvel">Marvel</option>
                         <option value="DC">DC</option>
@@ -193,7 +193,7 @@
                     </select>
                 </div>
                 <div class="w-full sm:w-auto">
-                    <label for="language-select" class="sr-only">Sprache</label>
+                    <label for="language-select" class="sr-only">Language</label>
                     <select id="language-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
                         <option value="de">Deutsch</option>
                         <option value="en">English</option>
@@ -202,29 +202,29 @@
             </div>
         </div>
 
-        <!-- Suchleiste und Zähler -->
+        <!-- Search bar and counter -->
         <div class="mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div class="relative w-full flex-grow">
-                <input type="text" id="search-input" placeholder="Nach Artikeln suchen..." class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
+                <input type="text" id="search-input" placeholder="Search for items..." class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
             </div>
-            <span id="result-count" class="text-sm text-gray-400 whitespace-nowrap">0 Ergebnisse</span>
+            <span id="result-count" class="text-sm text-gray-400 whitespace-nowrap">0 Results</span>
         </div>
 
-        <!-- Kosmetik-Gitter -->
+        <!-- Cosmetics grid -->
         <div id="item-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            <!-- Platzhalter-Karten werden hier dynamisch eingefügt, wenn die Daten geladen werden. -->
+            <!-- Placeholder cards will be dynamically inserted here when data is loading. -->
         </div>
 
-        <!-- Sentinel-Element für Lazy Loading -->
+        <!-- Sentinel element for lazy loading -->
         <div id="lazy-load-sentinel" class="w-full h-1 my-8"></div>
     </main>
 
-    <!-- Modal für Artikeldetails (standardmäßig versteckt) -->
+    <!-- Modal for item details (hidden by default) -->
     <div id="item-details-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
         <div class="modal-backdrop absolute inset-0"></div>
         <div class="bg-gray-800 rounded-xl shadow-2xl relative z-10 p-6 max-w-2xl w-full mx-auto transform transition-all scale-95 duration-200">
@@ -234,12 +234,12 @@
                 </svg>
             </button>
             <div id="modal-content" class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                <!-- Bild und Details werden hier eingefügt -->
+                <!-- Image and details will be inserted here -->
             </div>
         </div>
     </div>
 
-    <!-- "Nach oben scrollen"-Button (standardmäßig versteckt) -->
+    <!-- "Scroll to top" button (hidden by default) -->
     <button id="scroll-to-top-btn" class="scroll-to-top-btn fixed bottom-6 right-6 p-3 bg-purple-600 text-white rounded-full shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 z-50 hover:scale-110 active:scale-95">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -247,11 +247,11 @@
     </button>
 
     <script>
-        // Allgemeine App-Variablen
-        const appVersion = "1.0.1";
+        // General app variables
+        const appVersion = "1.0.4";
         const apiUrl = "https://fortnite-api.com/v2/cosmetics/br";
         
-        // DOM-Elemente
+        // DOM elements
         const appVersionDisplay = document.getElementById('app-version');
         const itemGrid = document.getElementById('item-grid');
         const tabButtons = document.querySelectorAll('.tab-btn');
@@ -267,45 +267,46 @@
         const searchInput = document.getElementById('search-input');
         const resultCountSpan = document.getElementById('result-count');
         
-        // Neue DOM-Elemente für das Einstellungen-Dropdown
+        // New DOM elements for the settings dropdown
         const settingsIconBtn = document.getElementById('settings-icon-btn');
         const settingsDropdown = document.getElementById('settings-dropdown');
         const colButtons = document.querySelectorAll('.col-btn');
 
-        // Globale Statusvariablen
+        // Global state variables
         let allCosmetics = {};
         let currentCosmetics = [];
+        let newItemsIds = []; // Array to store the IDs of the 15 newest items
         let currentLanguage = 'de';
         let currentSortOrder = 'added';
         let currentFilterRarity = 'all';
         let currentSearchTerm = '';
-        let currentColumns = 4; // Standardmäßig 4 Spalten
+        let currentColumns = 4; // Default to 4 columns
 
-        // Variablen für Lazy Loading
-        const itemsPerPage = 50; // Anzahl der Elemente pro Block
-        let allFilteredItems = []; // Speichert alle gefilterten & sortierten Elemente
-        let currentIndex = 0; // Aktueller Index der gerenderten Elemente
+        // Variables for lazy loading
+        const itemsPerPage = 50; // Number of items per block
+        let allFilteredItems = []; // Stores all filtered & sorted items
+        let currentIndex = 0; // Current index of rendered items
 
-        // IntersectionObserver für Lazy Loading
+        // IntersectionObserver for lazy loading
         const observer = new IntersectionObserver(entries => {
-            // Prüft, ob das Sentinel-Element sichtbar ist
+            // Checks if the sentinel element is visible
             if (entries[0].isIntersecting) {
                 renderNextChunk();
             }
         }, {
-            root: null, // Verwendet den Viewport als Root
+            root: null, // Use the viewport as root
             rootMargin: '0px',
-            threshold: 1.0 // Löst aus, wenn 100 % des Elements sichtbar sind
+            threshold: 1.0 // Trigger when 100% of the element is visible
         });
 
-        // Event-Listener für die Kategorie-Tabs
+        // Event listener for the category tabs
         tabButtons.forEach(button => {
             button.addEventListener('click', async () => {
                 const category = button.dataset.category;
-                // Deaktiviert den Observer, bevor neue Daten geladen werden
+                // Deactivate the observer before new data is loaded
                 observer.unobserve(lazyLoadSentinel); 
                 await loadCosmeticsCategory(category);
-                // Aktualisiert die Benutzeroberfläche für den aktiven Tab
+                // Update the UI for the active tab
                 tabButtons.forEach(btn => btn.classList.remove('bg-purple-600', 'hover:bg-purple-700'));
                 tabButtons.forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
                 button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
@@ -313,14 +314,14 @@
             });
         });
         
-        // Event-Listener für das Einstellungen-Icon, um das Dropdown umzuschalten
+        // Event listener for the settings icon to toggle the dropdown
         settingsIconBtn.addEventListener('click', (event) => {
             settingsDropdown.classList.toggle('hidden');
-            // Verhindert, dass der Klick zum Dokument-Listener unten weitergeleitet wird
+            // Prevent the click from bubbling up to the document listener below
             event.stopPropagation();
         });
 
-        // Event-Listener, um das Dropdown zu schließen, wenn man außerhalb klickt
+        // Event listener to close the dropdown when clicking outside
         document.addEventListener('click', (event) => {
             const isClickInside = settingsDropdown.contains(event.target) || settingsIconBtn.contains(event.target);
             if (!isClickInside && !settingsDropdown.classList.contains('hidden')) {
@@ -328,7 +329,7 @@
             }
         });
 
-        // Event-Listener für die Spalten-/Kachelgrößen-Buttons im Dropdown
+        // Event listener for the column/tile size buttons in the dropdown
         colButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const newCols = parseInt(button.dataset.cols, 10);
@@ -336,12 +337,12 @@
                     currentColumns = newCols;
                     updateGridColumns();
                     updateColButtonStyles();
-                    settingsDropdown.classList.add('hidden'); // Schließt das Dropdown nach der Auswahl
+                    settingsDropdown.classList.add('hidden'); // Close the dropdown after selection
                 }
             });
         });
 
-        // Event-Listener für Sortierung, Filter, Sprache und Suche
+        // Event listener for sorting, filtering, language, and search
         sortSelect.addEventListener('change', () => {
             currentSortOrder = sortSelect.value;
             applyFiltersAndSort();
@@ -362,19 +363,19 @@
             applyFiltersAndSort();
         });
 
-        // Event-Listener für das Modal
+        // Event listener for the modal
         closeModalBtn.addEventListener('click', hideItemDetails);
 
-        // Fügt einen Event-Listener hinzu, um den "Nach oben scrollen"-Button anzuzeigen/auszublenden
+        // Add an event listener to show/hide the "Scroll to top" button
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 200) { // Zeigt den Button nach 200px Scrollen an
+            if (window.scrollY > 200) { // Show the button after scrolling 200px
                 scrollToTopBtn.classList.add('visible');
             } else {
                 scrollToTopBtn.classList.remove('visible');
             }
         });
 
-        // Event-Listener, um nach oben zu scrollen, wenn der Button geklickt wird
+        // Event listener to scroll to the top when the button is clicked
         scrollToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
@@ -382,21 +383,21 @@
             });
         });
         
-        // Schließt das Modal beim Klicken auf den Hintergrund
+        // Close the modal when clicking on the backdrop
         modalBackdrop.addEventListener('click', (e) => {
             if (e.target === modalBackdrop) {
                 hideItemDetails();
             }
         });
 
-        // --- Hauptfunktionen ---
+        // --- Main functions ---
 
         /**
-         * Zeigt Platzhalter-Skelette im Gitter an.
+         * Displays placeholder skeletons in the grid.
          */
         function renderPlaceholderSkeletons() {
             itemGrid.innerHTML = '';
-            // Erzeugt eine Reihe von Platzhalterkarten
+            // Create a series of placeholder cards
             for (let i = 0; i < 50; i++) {
                 const skeleton = createSkeletonCard();
                 itemGrid.appendChild(skeleton);
@@ -404,8 +405,8 @@
         }
 
         /**
-         * Erzeugt eine einzelne Platzhalter-Skelettkarte.
-         * @returns {HTMLElement} - Das DOM-Element der Platzhalterkarte.
+         * Creates a single placeholder skeleton card.
+         * @returns {HTMLElement} - The DOM element of the placeholder card.
          */
         function createSkeletonCard() {
             const card = document.createElement('div');
@@ -425,15 +426,15 @@
         }
 
         /**
-         * Ruft Kosmetikartikel einer bestimmten Kategorie von der API ab oder lädt sie aus dem Cache.
-         * @param {string} category - Die zu ladende Kategorie (z. B. 'outfit').
+         * Fetches cosmetic items of a specific category from the API or loads them from the cache.
+         * @param {string} category - The category to load (e.g., 'outfit').
          */
         async function loadCosmeticsCategory(category) {
-            // Zeigt die Platzhalter sofort an, um ein Lade-Feedback zu geben
+            // Display placeholders immediately to provide loading feedback
             renderPlaceholderSkeletons();
             
             try {
-                // Ruft Daten von der API ab
+                // Fetch data from the API
                 const response = await fetch(`${apiUrl}?language=${currentLanguage}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok.');
@@ -441,31 +442,37 @@
                 const data = await response.json();
                 allCosmetics = data.data;
 
+                // Filter cosmetics by the selected category
                 currentCosmetics = allCosmetics.filter(item => item.type.value === category);
-                applyFiltersAndSort(); // Wendet Filter und Sortierung an und rendert dann den ersten Block
+                
+                // IMPORTANT FIX: Identify the IDs of the 15 newest items within the CURRENT category
+                const sortedByCategory = [...currentCosmetics].sort((a, b) => new Date(b.added) - new Date(a.added));
+                newItemsIds = sortedByCategory.slice(0, 15).map(item => item.id);
+                
+                applyFiltersAndSort(); // Apply filters and sort, then render the first chunk
             } catch (error) {
                 console.error("Error fetching data:", error);
-                itemGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.</p>`;
+                itemGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Error loading data. Please try again later.</p>`;
             }
         }
 
         /**
-         * Wendet die aktuellen Filter und die Sortierung auf die Daten an und rendert den ersten Block.
+         * Applies the current filters and sorting to the data and renders the first chunk.
          */
         function applyFiltersAndSort() {
-            // Kopiert die Kosmetikdaten, um sie zu bearbeiten
+            // Copy the cosmetics data to be processed
             allFilteredItems = [...currentCosmetics];
             
-            // Filter anwenden
+            // If the 'New' filter is active, we apply it here
             if (currentFilterRarity === 'new') {
-                const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-                const now = new Date();
-                allFilteredItems = allFilteredItems.filter(item => (now - new Date(item.added)) < oneWeekInMs);
+                allFilteredItems.sort((a, b) => new Date(b.added) - new Date(a.added));
+                allFilteredItems = allFilteredItems.slice(0, 15);
             } else if (currentFilterRarity !== 'all') {
-                // Konvertiert beide Werte in Kleinbuchstaben, um die Groß-/Kleinschreibung zu ignorieren
+                // Convert both values to lowercase to be case-insensitive
                 allFilteredItems = allFilteredItems.filter(item => item.rarity.value.toLowerCase() === currentFilterRarity.toLowerCase());
             }
-            // Suche anwenden
+
+            // Apply search
             if (currentSearchTerm) {
                 allFilteredItems = allFilteredItems.filter(item => 
                     item.name.toLowerCase().includes(currentSearchTerm) ||
@@ -473,31 +480,34 @@
                 );
             }
 
-            // Sortierung anwenden
-            allFilteredItems.sort((a, b) => {
-                if (currentSortOrder === 'name') {
-                    return a.name.localeCompare(b.name, currentLanguage);
-                } else if (currentSortOrder === 'added') {
-                    return new Date(b.added) - new Date(a.added);
-                }
-            });
+            // Apply sorting
+            // Skip sorting if the 'New' filter is active, as they are already sorted
+            if (currentFilterRarity !== 'new') {
+                allFilteredItems.sort((a, b) => {
+                    if (currentSortOrder === 'name') {
+                        return a.name.localeCompare(b.name, currentLanguage);
+                    } else if (currentSortOrder === 'added') {
+                        return new Date(b.added) - new Date(a.added);
+                    }
+                });
+            }
 
-            // Zähler aktualisieren
-            resultCountSpan.textContent = `${allFilteredItems.length} Ergebnisse`;
+            // Update counter
+            resultCountSpan.textContent = `${allFilteredItems.length} Results`;
 
-            // Setzt den Index zurück und leert das Gitter, bevor der erste Block gerendert wird
+            // Reset the index and clear the grid before rendering the first chunk
             currentIndex = 0;
             itemGrid.innerHTML = '';
 
-            // Beginnt mit Lazy Loading, indem der erste Block gerendert wird
+            // Start lazy loading by rendering the first chunk
             renderNextChunk();
         }
         
         /**
-         * Rendert den nächsten Block von Elementen und fügt ihn an das Gitter an.
+         * Renders the next chunk of items and appends it to the grid.
          */
         function renderNextChunk() {
-            // Prüfen, ob noch Elemente zum Laden vorhanden sind
+            // Check if there are still items to load
             if (currentIndex >= allFilteredItems.length) {
                 observer.unobserve(lazyLoadSentinel);
                 return;
@@ -512,49 +522,49 @@
             
             currentIndex += itemsPerPage;
 
-            // Beobachtet das Sentinel-Element, falls der Observer es noch nicht beobachtet
+            // Observe the sentinel element if the observer is not already observing it
             if (currentIndex < allFilteredItems.length) {
                 observer.observe(lazyLoadSentinel);
             }
         }
 
         /**
-         * Aktualisiert dynamisch die Spaltenklassen des Gitters basierend auf dem aktuellen Spaltenstatus.
+         * Dynamically updates the grid's column classes based on the current column state.
          */
         function updateGridColumns() {
-            // Entfernt vorhandene grid-cols-Klassen
+            // Remove existing grid-cols- classes
             itemGrid.className = itemGrid.className.replace(/grid-cols-\d+/g, '');
 
-            // Ruft die entsprechende Klasse basierend auf den aktuellen Spalten ab und fügt sie hinzu
+            // Get the appropriate class based on the current columns and add it
             if (currentColumns === 2) {
                 itemGrid.classList.add('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4');
             } else if (currentColumns === 4) {
-                // Für 'mittel' setzen wir verschiedene Klassen für verschiedene Bildschirmgrößen
+                // For 'medium', we set different classes for different screen sizes
                 itemGrid.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'lg:grid-cols-5', 'xl:grid-cols-6');
             } else if (currentColumns === 6) {
-                // Für 'klein' setzen wir die höchstmögliche Spaltenanzahl
+                // For 'small', we set the highest possible column count
                 itemGrid.classList.add('grid-cols-4', 'sm:grid-cols-5', 'md:grid-cols-6', 'lg:grid-cols-7', 'xl:grid-cols-8');
             }
         }
         
         /**
-         * Aktualisiert den visuellen Zustand der Spalten-Buttons.
+         * Updates the visual state of the column buttons.
          */
         function updateColButtonStyles() {
             colButtons.forEach(btn => {
                 const cols = parseInt(btn.dataset.cols, 10);
-                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Entfernt den aktiven Zustand
+                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Remove active state
                 if (cols === currentColumns) {
-                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Fügt den aktiven Zustand hinzu
+                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Add active state
                 }
             });
         }
 
         /**
-         * Erstellt eine einzelne Artikelkarte mit einem Ladeskelett.
-         * Das Skelett wird standardmäßig angezeigt und ausgeblendet, wenn das Bild geladen ist.
-         * @param {object} item - Das Artikelobjekt.
-         * @returns {HTMLElement} - Das DOM-Element der Artikelkarte.
+         * Creates a single item card with a loading skeleton.
+         * The skeleton is displayed by default and hides when the image is loaded.
+         * @param {object} item - The item object.
+         * @returns {HTMLElement} - The DOM element of the item card.
          */
         function createItemCard(item) {
             const card = document.createElement('div');
@@ -565,43 +575,43 @@
             const rarityBorderClass = rarityColorClass.replace('text-', 'border-');
             const imageUrl = item.images.smallIcon || item.images.icon || item.images.featured || 'https://placehold.co/128x128/374151/d1d5db?text=Image';
 
-            // Bild-Container, um sowohl Skelett als auch Bild zu halten
+            // Image container to hold both skeleton and image
             const imageContainer = document.createElement('div');
-            // Verwendet ein quadratisches Seitenverhältnis, um eine konsistente Bildgröße auf allen Geräten zu gewährleisten
+            // Use a square aspect ratio to ensure consistent image size on all devices
             imageContainer.className = 'relative w-full aspect-square rounded-lg mb-2 overflow-hidden';
 
-            // Skelett-Element
+            // Skeleton element
             const skeleton = document.createElement('div');
-            // Verwendet die Glanz-Animation auf dem Skelett
+            // Apply the shine animation to the skeleton
             skeleton.className = 'loading-skeleton absolute inset-0 rounded-lg animate-shine';
             imageContainer.appendChild(skeleton);
 
-            // Bild-Element
+            // Image element
             const img = document.createElement('img');
             img.alt = item.name;
             img.className = 'loading-image w-full h-auto rounded-lg transform transition-transform duration-300 group-hover:scale-105'; 
             
-            // Lade-Handler
+            // Load handler
             img.onload = () => {
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
             };
             
-            // Fehler-Handler
+            // Error handler
             img.onerror = () => {
                 img.src = 'https://placehold.co/128x128/374151/d1d5db?text=Image';
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
             };
 
-            // Setzt das src-Attribut, NACHDEM die Listener angehängt wurden
+            // Set the src attribute AFTER the listeners have been attached
             img.src = imageUrl;
             imageContainer.appendChild(img);
 
-            // Fügt den Container zur Karte hinzu
+            // Add the container to the card
             card.appendChild(imageContainer);
 
-            // Textinhalt
+            // Text content
             const textContainer = document.createElement('div');
             textContainer.className = 'text-center truncate';
             textContainer.innerHTML = `
@@ -610,16 +620,13 @@
             `;
             card.appendChild(textContainer);
 
-            // Rand
+            // Border
             const border = document.createElement('div');
             border.className = `absolute inset-0 border-2 ${rarityBorderClass} rounded-xl transition-all duration-300 pointer-events-none`;
             card.appendChild(border);
             
-            // Prüft, ob der Artikel in den letzten 7 Tagen hinzugefügt wurde
-            const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-            const now = new Date();
-            const itemAddedDate = new Date(item.added);
-            if (now - itemAddedDate < oneWeekInMs) {
+            // Check if the item ID is in the newItemsIds array to show the 'New' badge
+            if (newItemsIds.includes(item.id)) {
                 const newBadge = document.createElement('span');
                 newBadge.textContent = 'Neu';
                 newBadge.className = 'absolute top-2 right-2 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg transform rotate-6 animate-pulse';
@@ -632,11 +639,11 @@
         }
 
         /**
-         * Zeigt die Details eines Artikels in einem Modal an.
-         * @param {object} item - Das Artikelobjekt.
+         * Shows the details of an item in a modal.
+         * @param {object} item - The item object.
          */
         function showItemDetails(item) {
-            // Zuerst eine Ladeanimation anzeigen
+            // First, show a loading animation
             modalContent.innerHTML = `
                 <div class="w-full md:w-1/2">
                     <div class="w-full h-64 rounded-lg shadow-lg animate-shine"></div>
@@ -654,10 +661,10 @@
             const rarityColor = getRarityColor(item.rarity.value);
             const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
 
-            // Erstellt ein neues Image-Objekt, um das Laden zu überwachen
+            // Create a new Image object to monitor loading
             const img = new Image();
             img.onload = () => {
-                // Sobald das Bild geladen ist, den Modal-Inhalt aktualisieren
+                // Once the image is loaded, update the modal content
                 modalContent.innerHTML = `
                     <div class="w-full md:w-1/2">
                         <img src="${imageUrl}" alt="${item.name}" class="w-full h-auto rounded-lg shadow-lg">
@@ -665,46 +672,46 @@
                     <div class="w-full md:w-1/2 mt-4 md:mt-0">
                         <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
                         <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
-                        <p class="text-gray-400 mb-2">Beschreibung:</p>
-                        <p class="text-gray-300 mb-4">${item.description || 'Keine Beschreibung verfügbar.'}</p>
-                        <p class="text-gray-400">Veröffentlicht am:</p>
+                        <p class="text-gray-400 mb-2">Description:</p>
+                        <p class="text-gray-300 mb-4">${item.description || 'No description available.'}</p>
+                        <p class="text-gray-400">Released on:</p>
                         <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                 `;
             };
             img.onerror = () => {
-                // Bei einem Fehler ein Fallback-Bild anzeigen
+                // On error, show a fallback image
                 const fallbackImageUrl = 'https://placehold.co/512x512/374151/d1d5db?text=Image+Not+Found';
                 modalContent.innerHTML = `
                     <div class="w-full md:w-1/2">
-                        <img src="${fallbackImageUrl}" alt="Bild nicht gefunden" class="w-full h-auto rounded-lg shadow-lg">
+                        <img src="${fallbackImageUrl}" alt="Image not found" class="w-full h-auto rounded-lg shadow-lg">
                     </div>
                     <div class="w-full md:w-1/2 mt-4 md:mt-0">
                         <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
                         <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
-                        <p class="text-gray-400 mb-2">Beschreibung:</p>
-                        <p class="text-gray-300 mb-4">${item.description || 'Keine Beschreibung verfügbar.'}</p>
-                        <p class="text-gray-400">Veröffentlicht am:</p>
+                        <p class="text-gray-400 mb-2">Description:</p>
+                        <p class="text-gray-300 mb-4">${item.description || 'No description available.'}</p>
+                        <p class="text-gray-400">Released on:</p>
                         <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                 `;
             };
             
-            // Startet den Ladevorgang
+            // Start the loading process
             img.src = imageUrl;
         }
 
         /**
-         * Versteckt das Modal.
+         * Hides the modal.
          */
         function hideItemDetails() {
             itemDetailsModal.classList.add('hidden');
         }
 
         /**
-         * Hilfsfunktion, um die richtige Tailwind-Textfarbe für die Seltenheit zu erhalten.
-         * @param {string} rarity - Die Seltenheit des Artikels.
-         * @returns {string} - Die entsprechende Tailwind-Klasse.
+         * Helper function to get the correct Tailwind text color for the rarity.
+         * @param {string} rarity - The rarity of the item.
+         * @returns {string} - The corresponding Tailwind class.
          */
         function getRarityColor(rarity) {
             const colors = {
@@ -714,7 +721,7 @@
                 'epic': 'text-purple-400',
                 'legendary': 'text-orange-400',
                 'mythic': 'text-red-400',
-                'crew': 'text-zinc-500', // Hinzugefügte 'Crew'-Seltenheit
+                'crew': 'text-zinc-500', // Added 'Crew' rarity
                 'marvel': 'text-red-600',
                 'dc': 'text-blue-600',
                 'starwars': 'text-cyan-400',
@@ -729,34 +736,53 @@
         }
 
         /**
-         * Aktualisiert die UI-Texte basierend auf der ausgewählten Sprache.
+         * Updates UI texts based on the selected language.
          */
         function updateUIForLanguage() {
+            // This function's main purpose is to re-render with the new language.
+            // Since `applyFiltersAndSort` already re-renders everything, we can just call it.
             if (currentCosmetics.length > 0) {
                 applyFiltersAndSort();
             }
+            // Update static texts
+            document.querySelector('h1').textContent = currentLanguage === 'de' ? 'Fortnite Asset Explorer' : 'Fortnite Asset Explorer';
+            document.querySelector('#search-input').placeholder = currentLanguage === 'de' ? 'Nach Artikeln suchen...' : 'Search for items...';
+            document.querySelector('#sort-select option[value="name"]').textContent = currentLanguage === 'de' ? 'Name' : 'Name';
+            document.querySelector('#sort-select option[value="added"]').textContent = currentLanguage === 'de' ? 'Zuletzt Hinzugefügt' : 'Recently Added';
+            document.querySelector('#rarity-filter-select option[value="all"]').textContent = currentLanguage === 'de' ? 'Alle Seltenheiten' : 'All Rarities';
+            document.querySelector('#rarity-filter-select option[value="new"]').textContent = currentLanguage === 'de' ? 'Neu' : 'New';
+            document.querySelector('.tab-btn[data-category="outfit"]').textContent = currentLanguage === 'de' ? 'Outfit' : 'Outfit';
+            document.querySelector('.tab-btn[data-category="backpack"]').textContent = currentLanguage === 'de' ? 'Rucksack' : 'Backpack';
+            document.querySelector('.tab-btn[data-category="pickaxe"]').textContent = currentLanguage === 'de' ? 'Spitzhacke' : 'Pickaxe';
+            document.querySelector('.tab-btn[data-category="emote"]').textContent = currentLanguage === 'de' ? 'Emote' : 'Emote';
+            document.querySelector('.tab-btn[data-category="wrap"]').textContent = currentLanguage === 'de' ? 'Lackierung' : 'Wrap';
+            // Update dropdown texts
+            document.querySelector('#settings-dropdown span').textContent = currentLanguage === 'de' ? 'Kachelgröße:' : 'Tile Size:';
+            document.querySelector('.col-btn[data-cols="2"]').textContent = currentLanguage === 'de' ? 'Groß' : 'Large';
+            document.querySelector('.col-btn[data-cols="4"]').textContent = currentLanguage === 'de' ? 'Mittel' : 'Medium';
+            document.querySelector('.col-btn[data-cols="6"]').textContent = currentLanguage === 'de' ? 'Klein' : 'Small';
         }
 
-        // --- Initialer App-Start ---
+        // --- Initial App Start ---
         /**
-         * Initialisiert die App beim Laden der Seite.
+         * Initializes the app when the page loads.
          */
         async function initializeApp() {
-            // Setzt den Anfangszustand aus den HTML-Auswahlelementen
+            // Set the initial state from the HTML select elements
             currentLanguage = languageSelect.value;
             currentSortOrder = sortSelect.value;
             currentFilterRarity = rarityFilterSelect.value;
 
             appVersionDisplay.textContent = appVersion;
 
-            // Lädt die anfängliche Kategorie ('outfit') und setzt den UI-Zustand
+            // Load the initial category ('outfit') and set the UI state
             await loadCosmeticsCategory('outfit');
 
-            // Setzt das anfängliche Spaltenlayout und die Button-Stile
+            // Set the initial column layout and button styles
             updateGridColumns();
             updateColButtonStyles();
 
-            // Beobachtet das Sentinel-Element, um mit Lazy Loading zu beginnen
+            // Observe the sentinel element to begin lazy loading
             observer.observe(lazyLoadSentinel);
         }
 
