@@ -138,6 +138,7 @@
                 rarityCommon: 'Gewöhnlich',
                 appTitle: 'Fortnite Asset Explorer',
                 noItemsFound: 'Keine Artikel gefunden.',
+                noPriceInfo: 'Keine Preisinformation'
             },
             'en': {
                 outfits: 'Outfits',
@@ -164,6 +165,7 @@
                 rarityCommon: 'Common',
                 appTitle: 'Fortnite Asset Explorer',
                 noItemsFound: 'No items found.',
+                noPriceInfo: 'No price information'
             }
         };
 
@@ -174,7 +176,7 @@
         let currentFilterRarity = 'all';
         let isFilteringNew = false;
         let cosmeticData = {}; // Cache for fetched data
-        const appVersion = 'V2.38';
+        const appVersion = 'V2.39';
 
         // --- DOM Elements ---
         const navButtons = document.querySelectorAll('.nav-btn');
@@ -185,6 +187,20 @@
         const filterNewBtn = document.getElementById('filter-new-btn');
         const toggleLobbyBtn = document.getElementById('toggle-loading-screen-btn');
         const appVersionDisplay = document.getElementById('app-version-display');
+
+        // --- SVG Icons ---
+        // V-Bucks icon (simple SVG for a clean look)
+        const vbucksIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-purple-400">
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 4v8m-4-4h8"/>
+            </svg>
+        `;
+        // Battle Pass icon (simple SVG)
+        const battlePassIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-orange-400">
+                <path d="M4 14.5a8.5 8.5 0 1 0 16.99 0A8.5 8.5 0 0 0 4 14.5zM12 4v8"/>
+            </svg>
+        `;
 
         // --- Core Functions ---
         
@@ -225,6 +241,32 @@
             const rarityClass = getRarityColor(rarity);
             const imageUrl = item.images.icon;
             
+            // Determine the icon and price text to display
+            let purchaseInfo = '';
+            if (item.price && item.price.price > 0 && item.price.currency === 'VBuck') {
+                // Item is purchasable with V-Bucks, show the price and icon
+                purchaseInfo = `
+                    <div class="absolute bottom-2 right-2 flex items-center space-x-1 bg-gray-900/70 backdrop-blur-sm rounded-full px-2 py-1">
+                        <span class="text-xs font-bold text-gray-100">${item.price.price}</span>
+                        ${vbucksIcon}
+                    </div>
+                `;
+            } else if (item.battlepass) {
+                // Item is from a Battle Pass
+                purchaseInfo = `
+                    <div class="absolute bottom-2 right-2 flex items-center space-x-1 bg-gray-900/70 backdrop-blur-sm rounded-full px-2 py-1">
+                        ${battlePassIcon}
+                    </div>
+                `;
+            } else {
+                // Display a message if no price or battlepass info is found
+                purchaseInfo = `
+                    <div class="absolute bottom-2 right-2 flex items-center bg-gray-900/70 backdrop-blur-sm rounded-full px-2 py-1">
+                        <span class="text-xs font-bold text-gray-400">${translations[currentLanguage].noPriceInfo}</span>
+                    </div>
+                `;
+            }
+
             return `
                 <div class="bg-gray-800 rounded-xl p-4 shadow-lg transform transition-transform duration-200 hover:scale-105 relative border-2 ${rarityClass}">
                     <!-- The loading="lazy" attribute tells the browser to only load the image when it is near the viewport -->
@@ -232,6 +274,7 @@
                     <h3 class="text-sm font-semibold truncate">${item.name}</h3>
                     <p class="text-xs text-gray-400 capitalize">${rarity}</p>
                     ${isNewBadge}
+                    ${purchaseInfo}
                 </div>
             `;
         }
