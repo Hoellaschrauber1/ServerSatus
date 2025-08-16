@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Asset Explorer</title>
+    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Apply the Inter font to the entire body */
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom scrollbar for better aesthetics */
+
+        /* Custom scrollbar for better aesthetics, mimicking the original design */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -24,6 +28,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
+
         /* Simple pulse animation for loading skeletons */
         @keyframes pulse {
             50% {
@@ -33,1694 +38,412 @@
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        /* Styling for the version display */
-        .version-display {
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            font-size: 0.875rem; /* text-sm */
-            color: #9ca3af; /* gray-400 */
-            background-color: #1f2937; /* gray-800 */
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem; /* rounded-lg */
-            z-index: 1000;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        /* Styling for the toggle button container */
-        .filter-buttons-container {
-            display: flex;
-            justify-content: center;
-            gap: 1rem; /* Space between buttons */
-            margin-bottom: 1.5rem; /* mb-6 */
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-        }
-        /* Styling for the main navigation bar to allow wrapping */
-        .main-nav {
-            flex-wrap: wrap;
-            gap: 0.5rem; /* Adjust gap for wrapped items */
-        }
-        /* Scroll to top button styling */
-        #scroll-to-top-btn {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            background-color: #06b6d4; /* cyan-500 */
-            color: white;
-            padding: 0.75rem; /* Smaller padding */
-            border-radius: 9999px; /* Fully rounded */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-            display: none; /* Hidden by default */
-            transition: background-color 0.3s ease;
-            z-index: 999;
-        }
-        #scroll-to-top-btn:hover {
-            background-color: #0891b2; /* cyan-600 */
-        }
-        /* Style for the sort dropdown */
-        .sort-dropdown, .filter-dropdown {
-            background-color: #1f2937; /* gray-800 */
-            border: 2px solid #374151; /* gray-700 */
-            color: #f3f4f6; /* gray-100 */
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            appearance: none; /* Remove default dropdown arrow */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' class='w-4 h-4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3Csvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1rem;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-        .sort-dropdown:focus, .filter-dropdown:focus {
-            outline: none;
-            border-color: #06b6d4; /* cyan-500 */
-        }
-
-        /* Modal specific styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: #1f2937; /* gray-800 */
-            border-radius: 0.75rem; /* rounded-xl */
-            padding: 1.5rem;
-            max-width: 700px; /* Feste maximale Breite für Konsistenz */
-            max-height: 90vh; /* Maximale Höhe relativ zum Viewport */
-            width: auto; /* Ermöglicht das Schrumpfen auf kleineren Bildschirmen */
-            overflow-y: auto;
-            color: white;
-            position: relative;
-            transform: translateY(20px);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .modal-close-btn {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #9ca3af;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-        .modal-close-btn:hover {
-            color: #f3f4f6;
-        }
-        .modal-image-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-        .modal-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            flex-shrink: 0; /* Prevent image from shrinking */
-        }
-        .modal-image-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 9999px;
-            cursor: pointer;
-            font-size: 1.5rem;
-            line-height: 1;
-            z-index: 10;
-            opacity: 0.7;
-            transition: opacity 0.2s ease, background-color 0.2s ease;
-        }
-        .modal-image-nav-btn:hover {
-            opacity: 1;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        .modal-image-nav-btn.left {
-            left: 0.5rem;
-        }
-        .modal-image-nav-btn.right {
-            right: 0.5rem;
-        }
-
-
-        /* Audio Visualizer Canvas */
-        .audio-visualizer {
-            display: block;
-            width: 100%;
-            height: 30px; /* Fixed height for the visualizer */
-            background-color: #0f172a; /* slate-900 */
-            border-radius: 0.25rem;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Clickable set name in modal */
-        .set-link {
-            color: #06b6d4; /* cyan-500 */
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: 600;
-        }
-        .set-link:hover {
-            color: #0891b2; /* cyan-600 */
-        }
-
-        /* Rarity Colors */
-        .rarity-common { background-color: #b0b0b0; } /* Grau */
-        .rarity-uncommon { background-color: #64bc36; } /* Grün */
-        .rarity-rare { background-color: #4393e0; } /* Blau */
-        .rarity-epic { background-color: #a140da; } /* Lila */
-        .rarity-legendary { background-color: #d19a27; } /* Orange */
-        .rarity-mythic { background-color: #ff69b4; } /* Pink */
-        .rarity-exotic { background-color: #1a9e88; } /* Türkis */
-        .rarity-icon { background-color: #66CCFF; } /* Icon Hellblau/Cyan */
-        .rarity-shadow { background-color: #3b3b3b; } /* Dunkelgrau */
-        .rarity-dark { background-color: #212121; } /* Schwarz */
-        .rarity-marvel { background-color: #cf3434; } /* Rot */
-        .rarity-dc { background-color: #3b5998; } /* DC Blau */
-        .rarity-gaminglegends { background-color: #7240a1; } /* Gaming Legends Lila */
-        .rarity-slurp { background-color: #00e4ff; } /* Slurp Hellblau */
-        .rarity-frozen { background-color: #92d4f2; } /* Gefroren Hellblau */
-        .rarity-lava { background-color: #ff6600; } /* Lava Orange */
-        .rarity-creator { background-color: #c0c0c0; } /* Creator Silber */
-        .rarity-starwars { background-color: #ffe81f; } /* Star Wars Gelb */
-        .rarity-platform { background-color: #808080; } /* Plattform Grau */
-        
-        /* New Badge Styling */
-        .new-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background-color: #10b981; /* Emerald 500 */
-            color: white;
-            font-size: 0.75rem; /* text-xs */
-            font-weight: bold;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem; /* rounded-md */
-            z-index: 10;
-        }
-
-        /* Class to prevent body scrolling */
-        .no-scroll {
-            overflow: hidden;
-        }
-
-        /* Settings icon container for positioning */
-        .settings-icon-container {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 100;
-        }
-        /* Rotation for the gear icon */
-        .rotate-on-click {
-            transform: rotate(90deg);
-            transition: transform 0.3s ease-out;
-        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
-
-    <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative to container for settings icon positioning -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-cyan-400">Fortnite Asset Explorer</h1>
-            <p class="text-gray-400 mt-2"></p> <!-- Subtitle will be set by JS -->
-            
-            <!-- Settings Icon and Language Dropdown -->
-            <div class="settings-icon-container">
-                <svg id="settings-gear" class="w-8 h-8 text-gray-400 cursor-pointer transition-transform duration-300 hover:rotate-90" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M11.078 2.298a.75.75 0 01.844 0L12 2.5l.078-.202a.75.75 0 01.844 0l.976.255a.75.75 0 01.52.52l.255.976a.75.75 0 010 .844L14.5 12l.202.078a.75.75 0 010 .844l-.255.976a.75.75 0 01-.52.52l-.976.255a.75.75 0 01-.844 0L12 21.5l-.078.202a.75.75 0 01-.844 0l-.976-.255a.75.75 0 01-.52-.52l-.255-.976a.75.75 0 010-.844L9.5 12l-.202-.078a.75.75 0 010-.844l.255-.976a.75.75 0 01.52-.52l.976-.255zM12 10.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd" />
-                </svg>
-                <div id="language-dropdown" class="absolute hidden bg-gray-800 rounded-lg shadow-lg py-2 mt-2 right-0 top-full z-20 border border-gray-700">
-                    <button class="lang-option w-full text-left px-4 py-2 hover:bg-gray-700 text-white" data-lang="de">Deutsch</button>
-                    <button class="lang-option w-full text-left px-4 py-2 hover:bg-gray-700 text-white" data-lang="en">English</button>
-                </div>
+<body class="bg-gray-900 text-gray-100 p-4 md:p-8 min-h-screen">
+    <!-- Main container for the entire application, centered on the page -->
+    <div class="max-w-7xl mx-auto">
+        <!-- Header with title and navigation -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 space-y-4 md:space-y-0">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+                Fortnite Asset Explorer
+            </h1>
+            <!-- Language and Version display in the header -->
+            <div class="flex items-center space-x-4">
+                <span id="app-version-display" class="text-xs text-gray-400"></span>
+                <select id="language-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
+                    <option value="de">Deutsch</option>
+                    <option value="en">English</option>
+                </select>
             </div>
         </header>
 
-        <!-- Navigation -->
-        <nav class="flex justify-center mb-8 bg-gray-800 rounded-lg p-2 main-nav">
-            <button id="show-outfits" class="nav-button active px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-emotes" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-pickaxes" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-gliders" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-wraps" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-backblings" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-lobby-backgrounds" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-jam-tracks" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="show-cosmetics" class="nav-button px-4 py-2 font-semibold rounded-md"></button>
+        <!-- Navigation Buttons -->
+        <nav class="flex flex-wrap justify-center sm:justify-start gap-3 mb-6">
+            <button id="show-outfits-btn" data-category="outfit" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Outfits</button>
+            <button id="show-backpacks-btn" data-category="backpack" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Rucksäcke</button>
+            <button id="show-pickaxes-btn" data-category="pickaxe" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Spitzhacken</button>
+            <button id="show-gliders-btn" data-category="glider" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Hängegleiter</button>
+            <button id="show-emotes-btn" data-category="emote" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Emotes</button>
+            <button id="show-wraps-btn" data-category="wrap" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Lackierungen</button>
+            <button id="show-music-btn" data-category="music" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Musik</button>
+            <button id="show-lobby-backgrounds-btn" data-category="loading_screen" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Lobby-Hintergründe</button>
         </nav>
-        
-        <!-- Search and Filter -->
-        <div class="mb-4"> <!-- Reduced margin-bottom to make space for count -->
-            <input type="text" id="search-input" class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors">
-            <div class="text-right text-sm text-gray-400 mt-2">
-                <span id="item-count"></span>
+
+        <!-- Filter and Sort Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <!-- Sort dropdown -->
+            <div class="flex items-center space-x-2">
+                <label for="sort-select" class="text-gray-400">Sortieren:</label>
+                <select id="sort-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="rarity">Seltenheit</option>
+                </select>
             </div>
-        </div>
-
-        <!-- New container for the toggle, new filter, and sort buttons -->
-        <div class="filter-buttons-container">
-            <button id="toggle-loading-screen-view" class="hidden nav-button px-4 py-2 font-semibold rounded-md"></button>
-            <button id="filter-new-btn" class="nav-button px-4 py-2 font-semibold rounded-md bg-gray-700 hover:bg-gray-600"></button>
-            
-            <!-- Rarity Filter Dropdown -->
-            <select id="rarity-filter-select" class="filter-dropdown">
-                <option value="all"></option>
-                <option value="common"></option>
-                <option value="uncommon"></option>
-                <option value="rare"></option>
-                <option value="epic"></option>
-                <option value="legendary"></option>
-                <option value="mythic"></option>
-                <option value="exotic"></option>
-                <option value="icon"></option>
-                <option value="shadow"></option>
-                <option value="dark"></option>
-                <option value="marvel"></option>
-                <option value="dc"></option>
-                <option value="gaminglegends"></option>
-                <option value="slurp"></option>
-                <option value="frozen"></option>
-                <option value="lava"></option>
-                <option value="creator"></option>
-                <option value="starwars"></option>
-                <option value="platform"></option>
-            </select>
-
-            <!-- New Sort Dropdown -->
-            <select id="sort-select" class="sort-dropdown">
-                <option value="default"></option>
-                <option value="name-asc"></option>
-                <option value="name-desc"></option>
-                <option value="rarity-asc"></option>
-                <option value="rarity-desc"></option>
-                <option value="added-desc"></option>
-                <option value="added-asc"></option>
-            </select>
-        </div>
-
-        <!-- Content Area -->
-        <main id="content-area">
-            <!-- Content will be injected here by JavaScript -->
-        </main>
-
-        <!-- Loading Indicator -->
-        <div id="loading-indicator" class="hidden text-center py-10">
-            <svg class="animate-spin h-8 w-8 text-cyan-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p class="mt-4 text-gray-400"></p>
-        </div>
-        
-        <!-- Error Message -->
-        <div id="error-message" class="hidden text-center py-10 bg-red-900/50 border border-red-500 rounded-lg">
-            <h3 class="text-xl text-red-400"></h3>
-            <p id="error-text" class="text-red-300 mt-2"></p>
-        </div>
-
-    </div>
-
-    <!-- Audio Player Element (hidden) -->
-    <audio id="audio-player"></audio>
-    
-    <!-- Notification Modal -->
-    <div id="notification-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm mx-auto text-center">
-            <p id="notification-message" class="text-white"></p>
-            <button id="notification-close" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg">
-                OK
+            <!-- Rarity filter dropdown -->
+            <div class="flex items-center space-x-2">
+                <label for="rarity-filter-select" class="text-gray-400">Seltenheit:</label>
+                <select id="rarity-filter-select" class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors">
+                    <option value="all">Alle</option>
+                    <option value="legendary">Legendär</option>
+                    <option value="epic">Episch</option>
+                    <option value="rare">Selten</option>
+                    <option value="uncommon">Ungewöhnlich</option>
+                    <option value="common">Gewöhnlich</option>
+                </select>
+            </div>
+            <!-- New items filter button -->
+            <button id="filter-new-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">
+                Neue Artikel filtern
+            </button>
+            <!-- Show/hide loading screen button -->
+            <button id="toggle-loading-screen-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">
+                Ladebildschirm
             </button>
         </div>
-    </div>
 
-    <!-- Version Display -->
-    <div id="app-version" class="version-display"></div>
-
-    <!-- Scroll to Top Button -->
-    <button id="scroll-to-top-btn" title="">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-        </svg>
-    </button>
-
-    <!-- Item Detail Modal -->
-    <div id="item-detail-modal-overlay" class="modal-overlay">
-        <div id="item-detail-modal-content" class="modal-content">
-            <button id="item-detail-modal-close" class="modal-close-btn">&times;</button>
-            <div class="modal-image-container">
-                <button id="modal-image-prev" class="modal-image-nav-btn left hidden">&lsaquo;</button>
-                <img id="modal-item-image" class="modal-image" src="" alt="Item Image">
-                <button id="modal-image-next" class="modal-image-nav-btn right hidden">&rsaquo;</button>
-            </div>
-            <h2 id="modal-item-name" class="text-2xl font-bold mb-2"></h2>
-            <p id="modal-item-type" class="text-gray-400 text-sm mb-1"></p>
-            <p id="modal-item-rarity" class="text-gray-400 text-sm mb-1"></p>
-            <p id="modal-item-set" class="text-gray-400 text-sm mb-1"></p>
-            <p id="modal-item-season" class="text-gray-400 text-sm mb-1"></p> <!-- Season info -->
-            <p id="modal-item-added" class="text-gray-400 text-sm mb-4"></p>
-            <p id="modal-item-description" class="text-gray-300 text-base"></p>
+        <!-- Main content area where items are displayed -->
+        <div id="item-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <!-- Items will be dynamically inserted here -->
         </div>
     </div>
 
+    <!-- JavaScript for all application logic -->
     <script>
-        // --- DOM Elements ---
-        const contentArea = document.getElementById('content-area');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const errorMessage = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        const searchInput = document.getElementById('search-input');
-        const jamTracksBtn = document.getElementById('show-jam-tracks');
-        const cosmeticsBtn = document.getElementById('show-cosmetics'); // Now "Andere Kosmetik"
-        const lobbyBackgroundsBtn = document.getElementById('show-lobby-backgrounds');
-        const toggleLoadingScreenViewBtn = document.getElementById('toggle-loading-screen-view');
-        const filterNewBtn = document.getElementById('filter-new-btn');
-        const rarityFilterSelect = document.getElementById('rarity-filter-select'); // New element reference for rarity filter
-        const sortSelect = document.getElementById('sort-select'); // New element reference for sort dropdown
-        const audioPlayer = document.getElementById('audio-player');
-        const notificationModal = document.getElementById('notification-modal');
-        const notificationMessage = document.getElementById('notification-message');
-        const notificationCloseBtn = document.getElementById('notification-close');
-        const appVersionDisplay = document.getElementById('app-version');
-        const itemCountDisplay = document.getElementById('item-count');
-        const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
-
-        // New category buttons
-        const outfitsBtn = document.getElementById('show-outfits');
-        const emotesBtn = document.getElementById('show-emotes');
-        const pickaxesBtn = document.getElementById('show-pickaxes');
-        const glidersBtn = document.getElementById('show-gliders');
-        const wrapsBtn = document.getElementById('show-wraps');
-        const backblingsBtn = document.getElementById('show-backblings');
-
-        // Item Detail Modal Elements
-        const itemDetailModalOverlay = document.getElementById('item-detail-modal-overlay');
-        const itemDetailModalCloseBtn = document.getElementById('item-detail-modal-close');
-        const modalItemImage = document.getElementById('modal-item-image');
-        const modalItemName = document.getElementById('modal-item-name');
-        const modalItemType = document.getElementById('modal-item-type');
-        const modalItemRarity = document.getElementById('modal-item-rarity');
-        const modalItemSet = document.getElementById('modal-item-set');
-        const modalItemSeason = document.getElementById('modal-item-season'); // Season info element
-        const modalItemAdded = document.getElementById('modal-item-added');
-        const modalItemDescription = document.getElementById('modal-item-description');
-        const modalImagePrevBtn = document.getElementById('modal-image-prev'); // New nav button
-        const modalImageNextBtn = document.getElementById('modal-image-next'); // New nav button
-
-        // Language elements
-        const settingsGear = document.getElementById('settings-gear');
-        const languageDropdown = document.getElementById('language-dropdown');
-
-        // --- State Management ---
-        let currentLanguage = localStorage.getItem('fortnite_explorer_lang') || 'de'; // Load from localStorage or default to German
-        let currentView = 'outfit'; // Changed initial view to 'outfit'
-        let allJamTracks = [];
-        let allCosmeticsData = []; // Stores ALL cosmetic data from the API
-        let allLobbyBackgrounds = [];
-        let loadingScreenViewMode = 'detailed'; // Default to 'detailed'
-        let showNewItemsOnly = false; // Filter state for "Neu"
-        let currentSortOrder = 'default'; // New state for sorting order
-        let currentFilterRarity = 'all'; // New state for rarity filter
-        let currentFilterSetId = null; // New state for set filter (stores set.value)
-
-        // New state for modal variant navigation
-        let currentModalVariantsOptions = []; // Stores options of the currently active variant type
-        let currentModalVariantOptionIndex = 0; // Current index within currentModalVariantsOptions
-
-        let currentAudio = {
-            button: null,
-            trackId: null
-        };
-
-        // --- Audio Visualization Variables ---
-        let audioContext = null;
-        let analyser = null;
-        let source = null;
-        let animationFrameId = null; // To store the ID of the requestAnimationFrame
-        let currentVisualizerCanvas = null; // To store the canvas element of the currently playing track
-
-        // --- Translations ---
+        // --- Configuration & State ---
+        // A simple object to store translated UI strings
         const translations = {
-            de: {
-                title: "Fortnite Asset Explorer",
-                subtitle: "Durchsuche, höre und lade Jam-Tracks und kosmetische Gegenstände herunter.",
-                outfits: "Outfits",
-                emotes: "Emotes",
-                pickaxes: "Spitzhacken",
-                gliders: "Hängegleiter",
-                wraps: "Lackierungen",
-                backblings: "Rücken-Accessoires",
-                lobbyBackgrounds: "Ladebildschirme",
-                jamTracks: "Jam Tracks",
-                otherCosmetics: "Andere Kosmetik",
-                searchPlaceholder: "Suche nach Name, Beschreibung, Set...",
-                itemCount: "Anzahl der Funde:",
-                toggleViewDetails: "Ansicht umschalten: Details",
-                toggleViewImage: "Ansicht umschalten: Bild",
-                new: "Neu",
-                newActive: "Neu (aktiv)",
-                allRarities: "Alle Seltenheiten",
-                rarityCommon: "Gewöhnlich",
-                rarityUncommon: "Ungewöhnlich",
-                rarityRare: "Selten",
-                rarityEpic: "Episch",
-                rarityLegendary: "Legendär",
-                rarityMythic: "Mythisch",
-                rarityExotic: "Exotisch",
-                rarityIcon: "Icon",
-                rarityShadow: "Schatten",
-                rarityDark: "Dunkel",
-                rarityMarvel: "Marvel",
-                rarityDC: "DC",
-                rarityGamingLegends: "Gaming Legends",
-                raritySlurp: "Slurp",
-                rarityFrozen: "Gefroren",
-                rarityLava: "Lava",
-                rarityCreator: "Creator",
-                rarityStarWars: "Star Wars",
-                rarityPlatform: "Plattform",
-                defaultSort: "Standard Sortierung",
-                nameAsc: "Name (A-Z)",
-                nameDesc: "Name (Z-A)",
-                rarityAsc: "Seltenheit (aufsteigend)",
-                rarityDesc: "Seltenheit (absteigend)",
-                addedDesc: "Hinzugefügt (neueste)",
-                addedAsc: "Hinzugefügt (älteste)",
-                loadingContent: "Lade Inhalte...",
-                errorTitle: "Fehler",
-                errorMessage: "Die Inhalte konnten nicht geladen werden. Bitte versuche es später erneut.",
-                noJamTracksFound: "Keine Jam-Tracks gefunden.",
-                noCosmeticsFound: "Keine kosmetischen Gegenstände gefunden.",
-                noAudioAvailable: "Kein Audio verfügbar",
-                play: "Play",
-                pause: "Pause",
-                download: "Download",
-                imageMissing: "Bild fehlt",
-                downloading: "wird heruntergeladen.",
-                downloadBlocked: "Der automatische Download wurde möglicherweise blockiert. Das Asset wurde in einem neuen Tab geöffnet. Bitte speichere es von dort manuell (Rechtsklick > Speichern unter...).",
-                modalType: "Typ:",
-                modalRarity: "Seltenheit:",
-                modalYear: "Jahr:",
-                modalSet: "Set:",
-                modalSeason: "Saison:",
-                modalAdded: "Hinzugefügt:",
-                modalNoDescription: "Keine Beschreibung verfügbar.",
-                scrollToTop: "Nach oben scrollen",
-                ok: "OK"
+            'de': {
+                outfits: 'Outfits',
+                backpacks: 'Rucksäcke',
+                pickaxes: 'Spitzhacken',
+                gliders: 'Hängegleiter',
+                emotes: 'Emotes',
+                wraps: 'Lackierungen',
+                music: 'Musik',
+                lobbyBackgrounds: 'Lobby-Hintergründe',
+                filterNewBtn: 'Neue Artikel filtern',
+                toggleLobbyBtn: 'Lobby-Hintergründe',
+                filterNewBtnActive: 'Alle Artikel anzeigen',
+                toggleLobbyBtnActive: 'Zurück zur Kategorie',
+                sortLabel: 'Sortieren:',
+                rarityLabel: 'Seltenheit:',
+                sortName: 'Name (A-Z)',
+                sortRarity: 'Seltenheit',
+                rarityAll: 'Alle',
+                rarityLegendary: 'Legendär',
+                rarityEpic: 'Episch',
+                rarityRare: 'Selten',
+                rarityUncommon: 'Ungewöhnlich',
+                rarityCommon: 'Gewöhnlich',
+                appTitle: 'Fortnite Asset Explorer',
+                noItemsFound: 'Keine Artikel gefunden.',
             },
-            en: {
-                title: "Fortnite Asset Explorer",
-                subtitle: "Browse, listen to, and download Jam Tracks and cosmetic items.",
-                outfits: "Outfits",
-                emotes: "Emotes",
-                pickaxes: "Pickaxes",
-                gliders: "Gliders",
-                wraps: "Wraps",
-                backblings: "Back Blings",
-                lobbyBackgrounds: "Loading Screens",
-                jamTracks: "Jam Tracks",
-                otherCosmetics: "Other Cosmetics",
-                searchPlaceholder: "Search by name, description, set...",
-                itemCount: "Items found:",
-                toggleViewDetails: "Toggle View: Details",
-                toggleViewImage: "Toggle View: Image",
-                new: "New",
-                newActive: "New (active)",
-                allRarities: "All Rarities",
-                rarityCommon: "Common",
-                rarityUncommon: "Uncommon",
-                rarityRare: "Rare",
-                rarityEpic: "Epic",
-                rarityLegendary: "Legendary",
-                rarityMythic: "Mythic",
-                rarityExotic: "Exotic",
-                rarityIcon: "Icon",
-                rarityShadow: "Shadow",
-                rarityDark: "Dark",
-                rarityMarvel: "Marvel",
-                rarityDC: "DC",
-                rarityGamingLegends: "Gaming Legends",
-                raritySlurp: "Slurp",
-                rarityFrozen: "Frozen",
-                rarityLava: "Lava",
-                rarityCreator: "Creator",
-                rarityStarWars: "Star Wars",
-                rarityPlatform: "Platform",
-                defaultSort: "Default Sort",
-                nameAsc: "Name (A-Z)",
-                nameDesc: "Name (Z-A)",
-                rarityAsc: "Rarity (Asc)",
-                rarityDesc: "Rarity (Desc)",
-                addedDesc: "Added (Newest)",
-                addedAsc: "Added (Oldest)",
-                loadingContent: "Loading content...",
-                errorTitle: "Error",
-                errorMessage: "Failed to load content. Please try again later.",
-                noJamTracksFound: "No Jam Tracks found.",
-                noCosmeticsFound: "No cosmetic items found.",
-                noAudioAvailable: "No audio available",
-                play: "Play",
-                pause: "Pause",
-                download: "Download",
-                imageMissing: "Image missing",
-                downloading: "downloading.",
-                downloadBlocked: "Automatic download might have been blocked. The asset was opened in a new tab. Please save it manually from there (Right-click > Save As...).",
-                modalType: "Type:",
-                modalRarity: "Rarity:",
-                modalYear: "Year:",
-                modalSet: "Set:",
-                modalSeason: "Season:",
-                modalAdded: "Added:",
-                modalNoDescription: "No description available.",
-                scrollToTop: "Scroll to top",
-                ok: "OK"
+            'en': {
+                outfits: 'Outfits',
+                backpacks: 'Backpacks',
+                pickaxes: 'Pickaxes',
+                gliders: 'Gliders',
+                emotes: 'Emotes',
+                wraps: 'Wraps',
+                music: 'Music',
+                lobbyBackgrounds: 'Lobby Backgrounds',
+                filterNewBtn: 'Filter New Items',
+                toggleLobbyBtn: 'Show Lobby Backgrounds',
+                filterNewBtnActive: 'Show All Items',
+                toggleLobbyBtnActive: 'Back to Categories',
+                sortLabel: 'Sort:',
+                rarityLabel: 'Rarity:',
+                sortName: 'Name (A-Z)',
+                sortRarity: 'Rarity',
+                rarityAll: 'All',
+                rarityLegendary: 'Legendary',
+                rarityEpic: 'Epic',
+                rarityRare: 'Rare',
+                rarityUncommon: 'Uncommon',
+                rarityCommon: 'Common',
+                appTitle: 'Fortnite Asset Explorer',
+                noItemsFound: 'No items found.',
             }
         };
 
+        // Current application state
+        let currentLanguage = 'de';
+        let currentView = 'outfit';
+        let currentSortOrder = 'name';
+        let currentFilterRarity = 'all';
+        let isFilteringNew = false;
+        let cosmeticData = {}; // Cache for fetched data
+        const appVersion = 'V2.38';
 
-        // --- Utility Functions ---
+        // --- DOM Elements ---
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const itemGrid = document.getElementById('item-grid');
+        const languageSelect = document.getElementById('language-select');
+        const sortSelect = document.getElementById('sort-select');
+        const rarityFilterSelect = document.getElementById('rarity-filter-select');
+        const filterNewBtn = document.getElementById('filter-new-btn');
+        const toggleLobbyBtn = document.getElementById('toggle-loading-screen-btn');
+        const appVersionDisplay = document.getElementById('app-version-display');
+
+        // --- Core Functions ---
+        
         /**
-         * Fetches data from a given API endpoint with error handling.
-         * @param {string} baseUrl - The base API URL to fetch from.
-         * @returns {Promise<any>} - The JSON response data.
+         * Fetches real cosmetic data from the Fortnite-API.com.
+         * @param {string} category The category to fetch data for.
+         * @returns {Promise<Object[]>} A promise that resolves with the data.
          */
-        async function fetchData(baseUrl) {
-            loadingIndicator.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
-            contentArea.innerHTML = '';
-            itemCountDisplay.textContent = ''; // Clear count while loading
-            
-            const url = new URL(baseUrl);
-            url.searchParams.set('language', currentLanguage); // Set language parameter based on currentLanguage
-            
-            console.log(`Fetching from: ${url.toString()}`); // Log the URL for debugging
+        async function fetchRealCosmeticData(category) {
             try {
-                const response = await fetch(url.toString());
+                // Construct the API URL with the correct language and category
+                const apiUrl = `https://fortnite-api.com/v2/cosmetics/br/search/all?type=${category}&language=${currentLanguage}`;
+                
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`API-Fehler: ${response.statusText}`);
                 }
-                const json = await response.json();
-                return json.data;
+                const data = await response.json();
+                
+                // The API response has a "data" property containing the array of cosmetics
+                return data.data || [];
             } catch (error) {
-                console.error(`Failed to fetch data from ${url.toString()}:`, error);
-                document.querySelector('#error-message h3').textContent = translations[currentLanguage].errorTitle; // Fixed: Target h3
-                errorText.textContent = translations[currentLanguage].errorMessage;
-                errorMessage.classList.remove('hidden');
-                return null;
-            } finally {
-                loadingIndicator.classList.add('hidden');
+                console.error("Fehler beim Abrufen der Daten von der API:", error);
+                itemGrid.innerHTML = `<p class="col-span-full text-center text-red-400 text-lg py-12">Es gab ein Problem beim Laden der Daten. Bitte versuchen Sie es später erneut.</p>`;
+                return [];
+            }
+        }
+
+        /**
+         * Generates the HTML for a single cosmetic item card.
+         * @param {Object} item The cosmetic item data from the API.
+         * @returns {string} The HTML string for the item card.
+         */
+        function createItemCard(item) {
+            const isNew = item.introduction && item.introduction.text.toLowerCase().includes('new');
+            const isNewBadge = isNew ? `<span class="absolute top-2 right-2 bg-purple-500 text-xs font-bold px-2 py-1 rounded-full text-white">Neu</span>` : '';
+            const rarity = item.rarity ? item.rarity.value : 'common';
+            const rarityClass = getRarityColor(rarity);
+            const imageUrl = item.images.icon;
+            
+            return `
+                <div class="bg-gray-800 rounded-xl p-4 shadow-lg transform transition-transform duration-200 hover:scale-105 relative border-2 ${rarityClass}">
+                    <!-- The loading="lazy" attribute tells the browser to only load the image when it is near the viewport -->
+                    <img src="${imageUrl}" loading="lazy" alt="${item.name}" class="rounded-lg w-full mb-3" onerror="this.onerror=null; this.src='https://placehold.co/200x200/374151/D1D5DB?text=Image+Not+Found';">
+                    <h3 class="text-sm font-semibold truncate">${item.name}</h3>
+                    <p class="text-xs text-gray-400 capitalize">${rarity}</p>
+                    ${isNewBadge}
+                </div>
+            `;
+        }
+
+        /**
+         * Gets the Tailwind color class for a given rarity.
+         * @param {string} rarity The rarity of the item.
+         * @returns {string} The Tailwind class for the border color.
+         */
+        function getRarityColor(rarity) {
+            switch (rarity) {
+                case 'legendary': return 'border-orange-500';
+                case 'epic': return 'border-purple-500';
+                case 'rare': return 'border-blue-500';
+                case 'uncommon': return 'border-green-500';
+                case 'common': return 'border-gray-500';
+                default: return 'border-gray-500';
             }
         }
         
         /**
-         * Shows a custom notification message.
-         * @param {string} message - The message to display.
+         * Displays a loading skeleton in the grid.
          */
-        function showNotification(message) {
-            notificationMessage.textContent = message;
-            notificationModal.classList.remove('hidden');
-        }
-
-        /**
-         * Triggers a browser download. Tries direct download first, then falls back to opening in a new tab.
-         * @param {string} url - The URL of the file to download.
-         * @param {string} filename - The desired name for the downloaded file.
-         */
-        async function downloadFile(url, filename) {
-            try {
-                // Attempt direct download using fetch and Blob
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch file: ${response.statusText}`);
-                }
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = blobUrl;
-                a.download = filename; // Set the download attribute
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(blobUrl);
-                a.remove();
-                
-                console.log(`Direkter Download gestartet für: ${filename}`);
-                showNotification(`"${filename}" ${translations[currentLanguage].downloading}`);
-            } catch (e) {
-                console.warn('Direkter Download fehlgeschlagen, Fallback auf Öffnen in neuem Tab:', e);
-                // Fallback: Open in a new tab if direct download is blocked
-                window.open(url, '_blank');
-                showNotification(translations[currentLanguage].downloadBlocked);
-            }
-        }
-
-
-        /**
-         * Checks if an item was added recently (e.g., in the last 7 days).
-         * @param {object} item - The item object from the API.
-         * @returns {boolean} - True if the item is considered new, false otherwise.
-         */
-        function isItemNew(item) {
-            if (!item.added) return false;
-            const addedDate = new Date(item.added);
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // Set to 7 days ago
-            return addedDate >= sevenDaysAgo;
-        }
-
-        /**
-         * Maps rarity values to a numerical scale for consistent sorting.
-         * Higher number means higher rarity.
-         * @param {string} rarityValue - The rarity value (e.g., 'common', 'legendary').
-         * @returns {number} - Numerical representation of rarity.
-         */
-        function getRarityOrder(rarityValue) {
-            switch (rarityValue) {
-                case 'common': return 1;
-                case 'uncommon': return 2;
-                case 'rare': return 3;
-                case 'epic': return 4;
-                case 'legendary': return 5;
-                case 'mythic': return 6;
-                case 'exotic': return 7;
-                case 'icon': return 8;
-                case 'shadow': return 9;
-                case 'dark': return 10;
-                case 'marvel': return 11;
-                case 'dc': return 12;
-                case 'gaminglegends': return 13;
-                case 'slurp': return 14;
-                case 'frozen': return 15;
-                case 'lava': return 16;
-                case 'creator': return 17;
-                case 'starwars': return 18;
-                case 'platform': return 19;
-                default: return 0; // For unknown rarities
+        function showLoadingState() {
+            itemGrid.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                itemGrid.innerHTML += `
+                    <div class="bg-gray-800 rounded-xl p-4 shadow-lg animate-pulse h-48 flex flex-col justify-end">
+                        <div class="bg-gray-700 h-4 w-3/4 rounded-lg mb-2"></div>
+                        <div class="bg-gray-700 h-3 w-1/2 rounded-lg"></div>
+                    </div>
+                `;
             }
         }
 
         /**
-         * Applies sorting to an array of items based on the currentSortOrder.
-         * @param {Array} items - The array of items to sort.
-         * @param {string} sortOrder - The current sorting order (e.g., 'name-asc', 'rarity-desc').
-         * @returns {Array} - The sorted array.
+         * Updates the UI to show the list of items based on current filters and sorting.
          */
-        function applySorting(items, sortOrder) {
-            const sortedItems = [...items]; // Create a shallow copy to avoid modifying the original array
-
-            sortedItems.sort((a, b) => {
-                switch (sortOrder) {
-                    case 'name-asc':
-                        return a.name.localeCompare(b.name);
-                    case 'name-desc':
-                        return b.name.localeCompare(a.name);
-                    case 'rarity-asc':
-                        return getRarityOrder(a.rarity?.value) - getRarityOrder(b.rarity?.value);
-                    case 'rarity-desc':
-                        return getRarityOrder(b.rarity?.value) - getRarityOrder(a.rarity?.value);
-                    case 'added-asc':
-                        return new Date(a.added) - new Date(b.added);
-                    case 'added-desc':
-                        return new Date(b.added) - new Date(a.added);
-                    case 'default':
-                    default:
-                        return 0; // No specific sort order, maintain original order
-                }
+        function updateGrid() {
+            const data = cosmeticData[currentView] || [];
+            
+            // Filter data based on selected rarity and "new" status
+            const filteredData = data.filter(item => {
+                const rarityMatch = currentFilterRarity === 'all' || (item.rarity && item.rarity.value === currentFilterRarity);
+                const isNew = item.introduction && item.introduction.text.toLowerCase().includes('new');
+                const newMatch = !isFilteringNew || isNew;
+                return rarityMatch && newMatch;
             });
-            return sortedItems;
-        }
 
-        /**
-         * Updates the displayed image in the modal based on the current variant option.
-         */
-        function updateModalImageForVariant() {
-            if (currentModalVariantsOptions.length > 0) {
-                const imageUrl = currentModalVariantsOptions[currentModalVariantOptionIndex].image;
-                modalItemImage.src = imageUrl || `https://placehold.co/400x400/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}`;
-            }
-            // Show/hide navigation buttons
-            if (currentModalVariantsOptions.length > 1) {
-                modalImagePrevBtn.classList.remove('hidden');
-                modalImageNextBtn.classList.remove('hidden');
+            // Sort data based on selected sort order
+            filteredData.sort((a, b) => {
+                if (currentSortOrder === 'name') {
+                    return a.name.localeCompare(b.name, currentLanguage);
+                }
+                // Sort by rarity (this is a simplified rarity order)
+                const rarityOrder = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
+                const rarityA = a.rarity ? a.rarity.value : 'common';
+                const rarityB = b.rarity ? b.rarity.value : 'common';
+                return rarityOrder.indexOf(rarityA) - rarityOrder.indexOf(rarityB);
+            });
+
+            // Generate HTML for each item and insert into the grid
+            if (filteredData.length > 0) {
+                itemGrid.innerHTML = filteredData.map(createItemCard).join('');
             } else {
-                modalImagePrevBtn.classList.add('hidden');
-                modalImageNextBtn.classList.add('hidden');
+                itemGrid.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg py-12">${translations[currentLanguage].noItemsFound}</p>`;
             }
         }
 
         /**
-         * Shows the item detail modal with provided item data.
-         * @param {object} item - The item object to display details for.
+         * Loads cosmetic data for a given category and updates the UI.
+         * @param {string} category The category to load.
          */
-        function showItemDetailsModal(item) {
-            // Prevent body scrolling
-            document.body.classList.add('no-scroll');
+        async function loadCosmeticsCategory(category) {
+            currentView = category;
+            updateNavButtons(category);
+            showLoadingState();
 
-            // Reset variant state
-            currentModalVariantsOptions = [];
-            currentModalVariantOptionIndex = 0;
+            if (!cosmeticData[category]) {
+                const data = await fetchRealCosmeticData(category);
+                cosmeticData[category] = data;
+            }
 
-            // Find relevant variants for display (e.g., clothing styles)
-            if (item.variants && item.variants.length > 0) {
-                const clothingVariant = item.variants.find(v => v.type === 'clothing');
-                if (clothingVariant && clothingVariant.options && clothingVariant.options.length > 0) {
-                    currentModalVariantsOptions = clothingVariant.options;
+            updateGrid();
+        }
+
+        /**
+         * Updates the active state of the navigation buttons.
+         * @param {string} activeCategory The category to mark as active.
+         */
+        function updateNavButtons(activeCategory) {
+            navButtons.forEach(btn => {
+                const category = btn.getAttribute('data-category');
+                if (category === activeCategory) {
+                    btn.classList.add('bg-purple-600', 'text-white');
+                    btn.classList.remove('bg-gray-800');
                 } else {
-                    // Fallback to the first variant's options if no clothing variant is found
-                    // or if the first variant is the only one
-                    currentModalVariantsOptions = item.variants[0].options || [];
+                    btn.classList.remove('bg-purple-600', 'text-white');
+                    btn.classList.add('bg-gray-800');
                 }
-            }
-            
-            // Determine the best image URL for the modal, prioritizing higher resolutions
-            let imageUrl = `https://placehold.co/400x400/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}`; // Default fallback
-
-            if (item.albumArt) {
-                imageUrl = item.albumArt;
-            } else {
-                if (item.type && item.type.value === 'loading_screen' && item.images.full_background) {
-                    imageUrl = item.images.full_background;
-                } else if (item.images.featured) {
-                    imageUrl = item.images.featured;
-                } else if (item.images.render) { // Some items have a 'render' image which is also high quality
-                    imageUrl = item.images.render;
-                } else if (item.images.icon) {
-                    imageUrl = item.images.icon;
-                } else if (item.images.smallIcon) {
-                    imageUrl = item.images.smallIcon;
-                }
-            }
-
-            // Set initial image
-            if (currentModalVariantsOptions.length > 0) {
-                // If variants exist, use the variant image, which should also be high-res
-                modalItemImage.src = currentModalVariantsOptions[currentModalVariantOptionIndex].image || imageUrl;
-            } else {
-                modalItemImage.src = imageUrl;
-            }
-            modalItemImage.alt = item.name;
-
-            // Update other modal details
-            modalItemName.textContent = item.name;
-            if(item.albumArt) {
-                modalItemType.textContent = "Jam Track";
-                modalItemRarity.textContent = item.releaseYear ? `${translations[currentLanguage].modalYear} ${item.releaseYear}` : `${translations[currentLanguage].modalRarity} N/A`;
-            } else {
-                modalItemType.textContent = `${translations[currentLanguage].modalType} ${item.type?.displayValue || 'N/A'}`;
-                modalItemRarity.textContent = item.rarity ? `${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}` : `${translations[currentLanguage].modalRarity} N/A`;
-            }
-            
-            // Make set name clickable
-            if (item.set && item.set.value && item.set.text) {
-                modalItemSet.innerHTML = `${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span>`;
-            } else {
-                modalItemSet.textContent = ''; // Clear if no set
-            }
-
-            modalItemSeason.textContent = item.season ? `${translations[currentLanguage].modalSeason} ${item.season.text}` : ''; // Display season info
-            modalItemAdded.textContent = item.added ? `${translations[currentLanguage].modalAdded} ${new Date(item.added).toLocaleDateString(currentLanguage === 'de' ? 'de-DE' : 'en-US')}` : `${translations[currentLanguage].modalAdded} N/A`;
-            if(item.albumArt) {
-                modalItemDescription.textContent = item.artist || translations[currentLanguage].modalNoDescription;
-            } else {
-                modalItemDescription.textContent = item.description || translations[currentLanguage].modalNoDescription;
-            }
-
-            updateModalImageForVariant(); // Ensure buttons are correctly shown/hidden
-            itemDetailModalOverlay.classList.add('active');
-        }
-
-        /**
-         * Hides the item detail modal.
-         */
-        function hideItemDetailsModal() {
-            // Re-enable body scrolling
-            document.body.classList.remove('no-scroll');
-
-            itemDetailModalOverlay.classList.remove('active');
-            // Hide navigation buttons when modal closes
-            modalImagePrevBtn.classList.add('hidden');
-            modalImageNextBtn.classList.add('hidden');
-        }
-
-        // --- Audio Visualization Functions ---
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256; // Smaller FFT size for quicker visualization
-                source = audioContext.createMediaElementSource(audioPlayer);
-                source.connect(analyser);
-                analyser.connect(audioContext.destination);
-            }
-        }
-
-        function drawVisualization(canvas) {
-            if (!analyser || !canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            animationFrameId = requestAnimationFrame(() => drawVisualization(canvas));
-
-            analyser.getByteFrequencyData(dataArray);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = (canvas.width / bufferLength) * 2.5; // Adjust width for better visuals
-            let x = 0;
-
-            for (let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i] / 255 * canvas.height; // Normalize height
-                ctx.fillStyle = `rgb(${barHeight + 100}, 50, 150)`; // Color based on height
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1; // Space between bars
-            }
-        }
-
-        function stopVisualization() {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-            if (currentVisualizerCanvas) {
-                const ctx = currentVisualizerCanvas.getContext('2d');
-                ctx.clearRect(0, 0, currentVisualizerCanvas.width, currentVisualizerCanvas.height);
-                currentVisualizerCanvas.classList.add('hidden'); // Hide the canvas
-                currentVisualizerCanvas = null;
-            }
-        }
-
-
-        // --- Rendering Functions ---
-        /**
-         * Renders a grid of Jam Tracks.
-         * @param {Array} tracks - An array of jam track objects.
-         */
-        function renderJamTracks(tracks) {
-            contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${tracks.length}`; // Update count
-            if (!tracks || tracks.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noJamTracksFound}</p>`;
-                return;
-            }
-            const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'; /* Adjusted for more columns on larger screens */
-            
-            tracks.forEach(track => {
-                const hasAudio = track.audio && track.audio.preview && track.audio.full;
-                const isNew = isItemNew(track); // Check if item is new
-                const rarityClass = track.rarity ? `rarity-${track.rarity.value}` : ''; // Get rarity class
-
-                const card = document.createElement('div');
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col cursor-pointer relative'; // Added relative for badge positioning
-                card.dataset.itemId = track.id; // Store item ID for modal lookup
-                card.dataset.itemType = 'jam'; // Store item type for modal lookup
-                card.innerHTML = `
-                    <img src="${track.albumArt}" alt="${track.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
-                    ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
-                    <div class="p-4 flex-grow flex flex-col">
-                        <h3 class="text-lg font-semibold truncate">${track.title}</h3>
-                        <p class="text-sm text-gray-400">${track.artist || translations[currentLanguage].unknownArtist}</p>
-                        ${hasAudio ? `<canvas class="audio-visualizer hidden"></canvas>` : ''} <!-- Audio Visualizer Canvas -->
-                        <div class="mt-auto pt-4 flex items-center justify-between">
-                            ${hasAudio ? `
-                                <button class="play-pause-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-full flex items-center" data-track-id="${track.id}" data-audio-url="${track.audio.preview}" onclick="event.stopPropagation()">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                                    <span class="ml-2">${translations[currentLanguage].play}</span>
-                                </button>
-                                <button class="download-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full" data-download-url="${track.audio.full}" data-filename="${track.title.replace(/[^a-z0-9]/gi, '_')}.ogg" onclick="event.stopPropagation()">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8z"></path><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"></path></svg>
-                                </button>
-                            ` : `
-                                <span class="text-gray-500 text-sm">${translations[currentLanguage].noAudioAvailable}</span>
-                            `}
-                        </div>
-                    </div>
-                    <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
-                `;
-                grid.appendChild(card);
             });
-            contentArea.appendChild(grid);
-        }
-        
-        /**
-         * Renders a grid of Cosmetics.
-         * @param {Array} cosmetics - An array of cosmetic objects.
-         */
-        function renderCosmetics(cosmetics) {
-            contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${cosmetics.length}`; // Update count
-             if (!cosmetics || cosmetics.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noCosmeticsFound}</p>`;
-                return;
-            }
-            const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4'; /* Adjusted for more columns on larger screens */
-
-            cosmetics.forEach(item => {
-                // Prioritize icon, then smallIcon, then featured for card images (reverted to V2.21 logic)
-                const imageUrl = item.images.icon || item.images.smallIcon || item.images.featured;
-                if (!imageUrl) return;
-
-                const isNew = isItemNew(item); // Check if item is new
-                const rarityClass = item.rarity ? `rarity-${item.rarity.value}` : ''; // Get rarity class
-
-                const card = document.createElement('div');
-                // Added flex flex-col to ensure consistent height and pushing rarity strip to bottom
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer relative flex flex-col'; 
-                card.dataset.itemId = item.id; // Store item ID for modal lookup
-                card.dataset.itemType = 'cosmetic'; // Store item type for modal lookup
-                card.innerHTML = `
-                    <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
-                        ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
-                        <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                             <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                ${translations[currentLanguage].download}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
-                        <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
-                        ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}</p>` : ''}
-                        ${item.set ? `<p class="text-xs text-gray-500">${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
-                    </div>
-                    <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
-                `;
-                grid.appendChild(card);
-            });
-            contentArea.appendChild(grid);
         }
 
         /**
-         * Renders a grid of Lobby Backgrounds (now Ladebildschirme).
-         * This function renders based on the loadingScreenViewMode.
-         * @param {Array} backgrounds - An array of lobby background objects.
-         */
-        function renderLobbyBackgrounds(backgrounds) {
-            contentArea.innerHTML = '';
-            itemCountDisplay.textContent = `${translations[currentLanguage].itemCount} ${backgrounds.length}`; // Update count
-            if (!backgrounds || backgrounds.length === 0) {
-                contentArea.innerHTML = `<p class="text-center text-gray-500">${translations[currentLanguage].noCosmeticsFound}</p>`;
-                return;
-            }
-            const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4'; /* Adjusted for more columns on larger screens */
-
-            backgrounds.forEach(item => {
-                // For loading screens, prioritize full_background, then featured, then icon
-                // Reverted image selection for loading screens to prioritize full_background as it's usually higher quality
-                const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
-                if (!imageUrl) return;
-
-                const isNew = isItemNew(item); // Check if item is new
-                const rarityClass = item.rarity ? `rarity-${item.rarity.value}` : ''; // Get rarity class
-
-                const card = document.createElement('div');
-                // Added flex flex-col to ensure consistent height and pushing rarity strip to bottom
-                card.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 group cursor-pointer relative flex flex-col'; 
-                card.dataset.itemId = item.id; // Store item ID for modal lookup
-                card.dataset.itemType = 'lobbyBackground'; // Store item type for modal lookup
-                
-                if (loadingScreenViewMode === 'imageOnly') {
-                    card.innerHTML = `
-                        <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 sm:h-64 md:h-72 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
-                            ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
-                            <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                    ${translations[currentLanguage].download}
-                                </button>
-                            </div>
-                        </div>
-                        <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
-                    `;
-                } else { // 'detailed' view
-                    card.innerHTML = `
-                        <div class="relative flex-grow"> <!-- Added flex-grow here -->
-                            <img src="${imageUrl}" alt="${item.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1f2937/9ca3af?text=${translations[currentLanguage].imageMissing.replace(/ /g, '+')}';">
-                            ${isNew ? `<span class="new-badge">${translations[currentLanguage].new}</span>` : ''} <!-- New badge -->
-                            <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                 <button class="download-btn text-white py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500" data-download-url="${imageUrl}" data-filename="${item.name.replace(/[^a-z0-9]/gi, '_')}.png" onclick="event.stopPropagation()">
-                                    ${translations[currentLanguage].download}
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="text-sm font-semibold truncate" title="${item.name}">${item.name}</h3>
-                            <p class="text-xs text-gray-400 capitalize">${item.type.displayValue}</p>
-                            ${item.rarity ? `<p class="text-xs text-gray-500 capitalize">${translations[currentLanguage].modalRarity} ${item.rarity.displayValue}</p>` : ''}
-                            ${item.set ? `<p class="text-xs text-gray-500">${translations[currentLanguage].modalSet} <span class="set-link" data-set-value="${item.set.value}">${item.set.text}</span></p>` : ''}
-                        </div>
-                        <div class="h-2 ${rarityClass}"></div> <!-- Rarity strip -->
-                    `;
-                }
-                grid.appendChild(card);
-            });
-            contentArea.appendChild(grid);
-        }
-
-        // --- Event Handling ---
-        contentArea.addEventListener('click', function(e) {
-            const playBtn = e.target.closest('.play-pause-btn');
-            const downloadBtn = e.target.closest('.download-btn'); 
-            const card = e.target.closest('[data-item-id]'); // Listen for clicks on the card itself
-
-            if (playBtn) {
-                const trackId = playBtn.dataset.trackId;
-                const audioUrl = playBtn.dataset.audioUrl;
-                togglePlay(trackId, audioUrl, playBtn);
-            } else if (downloadBtn) { 
-                const url = downloadBtn.dataset.downloadUrl;
-                const filename = downloadBtn.dataset.filename;
-                downloadFile(url, filename);
-            } else if (card) { // If a card was clicked (and not a button inside it)
-                const itemId = card.dataset.itemId;
-                const itemType = card.dataset.itemType;
-                let item = null;
-
-                // Find the item in the correct global array
-                if (itemType === 'jam') {
-                    item = allJamTracks.find(t => t.id === itemId);
-                } else if (itemType === 'cosmetic') {
-                    item = allCosmeticsData.find(c => c.id === itemId);
-                } else if (itemType === 'lobbyBackground') {
-                    item = allLobbyBackgrounds.find(lb => lb.id === itemId);
-                }
-
-                if (item) {
-                    showItemDetailsModal(item);
-                }
-            }
-        });
-
-        notificationCloseBtn.addEventListener('click', () => {
-            notificationModal.classList.add('hidden');
-        });
-
-        // Close item detail modal
-        itemDetailModalCloseBtn.addEventListener('click', hideItemDetailsModal);
-        itemDetailModalOverlay.addEventListener('click', (e) => {
-            if (e.target === itemDetailModalOverlay) { // Close only if clicking on the overlay, not the content
-                hideItemDetailsModal();
-            }
-        });
-
-        // Event listener for clickable set names in the modal
-        itemDetailModalOverlay.addEventListener('click', (e) => {
-            const setLink = e.target.closest('.set-link');
-            if (setLink) {
-                const setValue = setLink.dataset.setValue;
-                if (setValue) {
-                    currentFilterSetId = setValue; // Set the filter
-                    hideItemDetailsModal(); // Close the modal
-                    
-                    // Manually activate the 'Andere Kosmetik' button
-                    document.querySelectorAll('.nav-button').forEach(button => {
-                        button.classList.remove('active', 'bg-cyan-500');
-                    });
-                    document.getElementById('show-cosmetics').classList.add('active', 'bg-cyan-500');
-
-                    // Reset search and rarity filters only, as the set filter is intended to be kept.
-                    searchInput.value = '';
-                    rarityFilterSelect.value = 'all';
-                    currentFilterRarity = 'all';
-                    
-                    // Set currentView to 'cosmetics' to ensure the correct rendering function is called
-                    currentView = 'cosmetics';
-                    loadCosmeticsCategory('cosmetics'); // Reload with set filter
-                }
-            }
-        });
-
-        // Event listeners for modal image navigation
-        modalImagePrevBtn.addEventListener('click', () => {
-            if (currentModalVariantsOptions.length > 0) {
-                currentModalVariantOptionIndex = (currentModalVariantOptionIndex - 1 + currentModalVariantsOptions.length) % currentModalVariantsOptions.length;
-                updateModalImageForVariant();
-            }
-        });
-
-        modalImageNextBtn.addEventListener('click', () => {
-            if (currentModalVariantsOptions.length > 0) {
-                currentModalVariantOptionIndex = (currentModalVariantOptionIndex + 1) % currentModalVariantsOptions.length;
-                updateModalImageForVariant();
-            }
-        });
-
-
-        function togglePlay(trackId, audioUrl, button) {
-            // Stop any existing visualization and audio
-            stopVisualization();
-            audioPlayer.pause();
-            if (currentAudio.button) {
-                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].play}</span>`;
-            }
-
-
-            if (audioPlayer.src !== audioUrl) {
-                audioPlayer.src = audioUrl;
-            }
-
-            if (audioPlayer.paused || audioPlayer.currentTime === 0) {
-                initAudioContext(); // Initialize audio context if not already
-                audioPlayer.play().then(() => {
-                    button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].pause}</span>`;
-                    currentAudio = { button, trackId, audioUrl };
-                    
-                    // Start visualization for the current track
-                    currentVisualizerCanvas = button.closest('.flex-col').querySelector('.audio-visualizer');
-                    if (currentVisualizerCanvas) {
-                        currentVisualizerCanvas.classList.remove('hidden');
-                        drawVisualization(currentVisualizerCanvas);
-                    }
-                }).catch(e => console.error("Audio Play Error:", e));
-            } else {
-                audioPlayer.pause();
-            }
-        }
-        
-        audioPlayer.onpause = () => {
-            stopVisualization(); // Stop visualization when audio pauses
-            if (currentAudio.button) {
-                currentAudio.button.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg><span class="ml-2">${translations[currentLanguage].play}</span>`;
-                currentAudio = { button: null, trackId: null, audioUrl: null };
-            }
-        };
-        
-        audioPlayer.onended = () => {
-            stopVisualization(); // Stop visualization when audio ends
-            audioPlayer.onpause();
-        };
-
-        searchInput.addEventListener('input', () => {
-            // Reset set filter when searching
-            currentFilterSetId = null;
-            if (currentView === 'music') {
-                loadJamTracks();
-            } else if (currentView === 'cosmetics') {
-                loadCosmeticsCategory('cosmetics');
-            } else if (currentView === 'loading_screen') {
-                loadLobbyBackgrounds();
-            } else { // All other specific cosmetic types
-                loadCosmeticsCategory(currentView);
-            }
-        });
-
-        sortSelect.addEventListener('change', (e) => {
-            currentSortOrder = e.target.value;
-            // Reset set filter when sorting
-            currentFilterSetId = null;
-            if (currentView === 'music') {
-                loadJamTracks();
-            } else if (currentView === 'loading_screen') {
-                loadLobbyBackgrounds();
-            } else { // All other cosmetic types
-                loadCosmeticsCategory(currentView);
-            }
-        });
-
-        rarityFilterSelect.addEventListener('change', (e) => {
-            currentFilterRarity = e.target.value;
-            // Reset set filter when applying rarity filter
-            currentFilterSetId = null;
-            if (currentView === 'music') { // Rarity filter applies to all cosmetic types, including music
-                loadJamTracks();
-            } else if (currentView === 'loading_screen') {
-                loadLobbyBackgrounds();
-            } else { // All other cosmetic types
-                loadCosmeticsCategory(currentView);
-            }
-        });
-
-
-        // --- Page Initialization and Navigation ---
-        function updateNavButtons(activeButtonId) {
-            document.querySelectorAll('.nav-button').forEach(button => {
-                button.classList.remove('active', 'bg-cyan-500');
-            });
-            document.getElementById(activeButtonId).classList.add('active', 'bg-cyan-500');
-
-            // Show/hide the toggle button based on the active view
-            if (activeButtonId === 'show-lobby-backgrounds') {
-                toggleLoadingScreenViewBtn.classList.remove('hidden');
-            } else {
-                toggleLoadingScreenViewBtn.classList.add('hidden');
-            }
-
-            // Reset filters and sort when changing main categories
-            searchInput.value = '';
-            showNewItemsOnly = false;
-            currentSortOrder = 'default';
-            currentFilterRarity = 'all';
-            currentFilterSetId = null; // Reset set filter
-            
-            updateToggleLoadingScreenButtonText(); // Update button text and style
-            updateFilterNewButtonText(); // Update filter new button text and style
-            sortSelect.value = currentSortOrder; // Ensure sort dropdown reflects current state
-            rarityFilterSelect.value = currentFilterRarity; // Ensure rarity dropdown reflects current state
-
-            stopVisualization(); // Stop visualization when changing categories
-            audioPlayer.pause(); // Pause audio when changing categories
-        }
-
-        /**
-         * Fetches all cosmetic data if not already loaded.
-         */
-        async function ensureAllCosmeticsLoaded() {
-            // Only fetch if data is empty OR if language has changed from the last fetch
-            // To properly handle language changes, we need to re-fetch if the language changes.
-            // So, we'll always fetch when the language changes, and only fetch once per language.
-            // For simplicity, we'll re-fetch all data on language change for now.
-            // A more optimized approach would be to store data per language, but for this scale, re-fetching is fine.
-            const url = `https://fortnite-api.com/v2/cosmetics/br`; // Language is set in fetchData
-            const data = await fetchData(url);
-            if (data) {
-                allCosmeticsData = data;
-            }
-        }
-
-        /**
-         * Filters allCosmeticsData by type, search term, and applies the "new", "rarity", and "season" filters.
-         * @param {string} typeValue - The 'value' of the cosmetic type (e.g., 'outfit', 'emote').
-         * @returns {Array} - Filtered and sorted array of cosmetics.
-         */
-        function getFilteredCosmeticsByType(typeValue) {
-            const searchTerm = searchInput.value.toLowerCase();
-            let filtered = [];
-
-            // If a set filter is active, start with ALL cosmetic data, otherwise filter by type
-            if (currentFilterSetId) {
-                filtered = [...allCosmeticsData]; // Start with a copy of all cosmetics
-            } else if (typeValue === 'cosmetics') { // "Andere Kosmetik" (excluding specific types)
-                const excludedTypes = ['music', 'loading_screen', 'outfit', 'emote', 'pickaxe', 'glider', 'wrap', 'backpack'];
-                filtered = allCosmeticsData.filter(item => item.type && !excludedTypes.includes(item.type.value));
-            } else { // Specific cosmetic type (outfit, emote, etc.)
-                filtered = allCosmeticsData.filter(item => item.type && item.type.value === typeValue);
-            }
-
-            // Apply extended search filter (name, description, set name)
-            if (searchTerm) {
-                filtered = filtered.filter(item => 
-                    item.name.toLowerCase().includes(searchTerm) ||
-                    (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-                    (item.set && item.set.text && item.set.text.toLowerCase().includes(searchTerm))
-                );
-            }
-
-            // Apply "new" filter
-            if (showNewItemsOnly) {
-                filtered = filtered.filter(item => isItemNew(item));
-            }
-
-            // Apply rarity filter
-            if (currentFilterRarity !== 'all') {
-                filtered = filtered.filter(item => item.rarity?.value === currentFilterRarity);
-            }
-
-            // Apply set filter (this will now correctly filter from the broader 'filtered' array if currentFilterSetId is set)
-            if (currentFilterSetId) {
-                filtered = filtered.filter(item => item.set?.value === currentFilterSetId);
-            }
-
-            // Apply sorting
-            return applySorting(filtered, currentSortOrder);
-        }
-
-
-        async function loadJamTracks() {
-            const url = `https://fortnite-api.com/v2/cosmetics/tracks`;
-            const tracks = await fetchData(url);
-
-            console.log('Jam-Tracks:', tracks);
-            
-            if (tracks) {
-                let filteredData = tracks.filter(track => track.albumArt);
-                  
-                console.log(filteredData);                
-                
-                // if (searchTerm) {
-                //     filteredData = filteredData.filter(track => 
-                //         track.name.toLowerCase().includes(searchTerm) ||
-                //         (track.description && track.description.toLowerCase().includes(searchTerm))
-                //     );
-                // }
-    
-
-                allJamTracks = applySorting(filteredData, currentSortOrder);
-                renderJamTracks(allJamTracks);
-            }
-            
-        }
-
-        async function loadCosmeticsCategory(categoryType) {
-            await ensureAllCosmeticsLoaded();
-            const filteredData = getFilteredCosmeticsByType(categoryType); // getFilteredCosmeticsByType now handles search, sort, rarity, and set
-            renderCosmetics(filteredData);
-        }
-
-        async function loadLobbyBackgrounds() {
-            const url = `https://fortnite-api.com/v2/cosmetics/br`;
-            const data = await fetchData(url);
-            if (data) {
-                const searchTerm = searchInput.value.toLowerCase();
-                let filteredData = data.filter(item => 
-                    item.type && (
-                        item.type.value === 'loading_screen' || 
-                        (item.type.displayValue && (item.type.displayValue.toLowerCase().includes('ladebildschirm') || item.type.displayValue.toLowerCase().includes('loading screen')))
-                    )
-                );
-                
-                // Apply extended search filter (name, description, set name)
-                if (searchTerm) {
-                    filteredData = filteredData.filter(item => 
-                        item.name.toLowerCase().includes(searchTerm) ||
-                        (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-                        (item.set && item.set.text && item.set.text.toLowerCase().includes(searchTerm))
-                    );
-                }
-
-                if (showNewItemsOnly) {
-                    filteredData = filteredData.filter(item => isItemNew(item));
-                }
-                // Apply rarity filter
-                if (currentFilterRarity !== 'all') {
-                    filteredData = filteredData.filter(item => item.rarity?.value === currentFilterRarity);
-                }
-                // Apply set filter (though loading screens typically don't have sets, keep for consistency)
-                if (currentFilterSetId) {
-                    filteredData = filteredData.filter(item => item.set?.value === currentFilterSetId);
-                }
-
-                // Apply sorting
-                allLobbyBackgrounds = applySorting(filteredData, currentSortOrder);
-                renderLobbyBackgrounds(allLobbyBackgrounds); // Render with current mode
-                updateToggleLoadingScreenButtonText(); // Update button text
-            }
-        }
-
-        /**
-         * Updates all static UI text based on the currentLanguage.
+         * Updates all UI text elements based on the current language.
          */
         function updateUIForLanguage() {
-            const lang = currentLanguage;
-            const t = translations[lang];
+            const lang = translations[currentLanguage];
+            document.title = lang.appTitle;
 
-            // Header
-            document.querySelector('h1').textContent = t.title;
-            document.querySelector('header p').textContent = t.subtitle;
+            document.getElementById('show-outfits-btn').textContent = lang.outfits;
+            document.getElementById('show-backpacks-btn').textContent = lang.backpacks;
+            document.getElementById('show-pickaxes-btn').textContent = lang.pickaxes;
+            document.getElementById('show-gliders-btn').textContent = lang.gliders;
+            document.getElementById('show-emotes-btn').textContent = lang.emotes;
+            document.getElementById('show-wraps-btn').textContent = lang.wraps;
+            document.getElementById('show-music-btn').textContent = lang.music;
+            document.getElementById('show-lobby-backgrounds-btn').textContent = lang.lobbyBackgrounds;
 
-            // Navigation Buttons
-            document.getElementById('show-outfits').textContent = t.outfits;
-            document.getElementById('show-emotes').textContent = t.emotes;
-            document.getElementById('show-pickaxes').textContent = t.pickaxes;
-            document.getElementById('show-gliders').textContent = t.gliders;
-            document.getElementById('show-wraps').textContent = t.wraps;
-            document.getElementById('show-backblings').textContent = t.backblings;
-            document.getElementById('show-lobby-backgrounds').textContent = t.lobbyBackgrounds;
-            document.getElementById('show-jam-tracks').textContent = t.jamTracks;
-            document.getElementById('show-cosmetics').textContent = t.otherCosmetics;
+            document.querySelector('label[for="sort-select"]').textContent = lang.sortLabel;
+            document.getElementById('sort-select').options[0].textContent = lang.sortName;
+            document.getElementById('sort-select').options[1].textContent = lang.sortRarity;
 
-            // Search and Filters
-            searchInput.placeholder = t.searchPlaceholder;
-            toggleLoadingScreenViewBtn.textContent = loadingScreenViewMode === 'imageOnly' ? t.toggleViewImage : t.toggleViewDetails;
-            filterNewBtn.textContent = showNewItemsOnly ? t.newActive : t.new;
-
-            // Rarity Filter Dropdown
-            const rarityOptions = rarityFilterSelect.options;
-            rarityOptions[0].textContent = t.allRarities;
-            rarityOptions[1].textContent = t.rarityCommon;
-            rarityOptions[2].textContent = t.rarityUncommon;
-            rarityOptions[3].textContent = t.rarityRare;
-            rarityOptions[4].textContent = t.rarityEpic;
-            rarityOptions[5].textContent = t.rarityLegendary;
-            rarityOptions[6].textContent = t.rarityMythic;
-            rarityOptions[7].textContent = t.rarityExotic;
-            rarityOptions[8].textContent = t.rarityIcon;
-            rarityOptions[9].textContent = t.rarityShadow;
-            rarityOptions[10].textContent = t.rarityDark;
-            rarityOptions[11].textContent = t.rarityMarvel;
-            rarityOptions[12].textContent = t.rarityDC;
-            rarityOptions[13].textContent = t.rarityGamingLegends;
-            rarityOptions[14].textContent = t.raritySlurp;
-            rarityOptions[15].textContent = t.rarityFrozen;
-            rarityOptions[16].textContent = t.rarityLava;
-            rarityOptions[17].textContent = t.rarityCreator;
-            rarityOptions[18].textContent = t.rarityStarWars;
-            rarityOptions[19].textContent = t.rarityPlatform;
-
-            // Sort Dropdown
-            const sortOptions = sortSelect.options;
-            sortOptions[0].textContent = t.defaultSort;
-            sortOptions[1].textContent = t.nameAsc;
-            sortOptions[2].textContent = t.nameDesc;
-            sortOptions[3].textContent = t.rarityAsc;
-            sortOptions[4].textContent = t.rarityDesc;
-            sortOptions[5].textContent = t.addedDesc;
-            sortOptions[6].textContent = t.addedAsc;
-
-            // Loading/Error Messages
-            document.querySelector('#loading-indicator p').textContent = t.loadingContent;
-            document.querySelector('#error-message h3').textContent = t.errorTitle; // FIX HERE
-            document.getElementById('error-text').textContent = t.errorMessage; 
-
-            // Notification Modal
-            notificationCloseBtn.textContent = t.ok;
+            document.querySelector('label[for="rarity-filter-select"]').textContent = lang.rarityLabel;
+            document.getElementById('rarity-filter-select').options[0].textContent = lang.rarityAll;
+            document.getElementById('rarity-filter-select').options[1].textContent = lang.rarityLegendary;
+            document.getElementById('rarity-filter-select').options[2].textContent = lang.rarityEpic;
+            document.getElementById('rarity-filter-select').options[3].textContent = lang.rarityRare;
+            document.getElementById('rarity-filter-select').options[4].textContent = lang.rarityUncommon;
+            document.getElementById('rarity-filter-select').options[5].textContent = lang.rarityCommon;
             
-            // Scroll to Top Button
-            scrollToTopBtn.title = t.scrollToTop;
-
-            // Re-render current content to update dynamic text within cards (like "No Audio Available")
-            // This is crucial. We need to re-render the *current* category.
-            if (currentView === 'music') {
-                renderJamTracks(allJamTracks); // Re-render with potentially new audio button text
-            } else if (currentView === 'loading_screen') {
-                renderLobbyBackgrounds(allLobbyBackgrounds);
-            } else {
-                // For other cosmetic types, re-render with current filtered data (which is already localized)
-                renderCosmetics(getFilteredCosmeticsByType(currentView));
-            }
+            filterNewBtn.textContent = isFilteringNew ? lang.filterNewBtnActive : lang.filterNewBtn;
+            toggleLobbyBtn.textContent = (currentView === 'loading_screen') ? lang.toggleLobbyBtnActive : lang.toggleLobbyBtn;
         }
 
-
-        // Function to update the text and style of the toggle button
-        function updateToggleLoadingScreenButtonText() {
-            if (loadingScreenViewMode === 'imageOnly') {
-                toggleLoadingScreenViewBtn.textContent = translations[currentLanguage].toggleViewImage;
-                toggleLoadingScreenViewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
-                toggleLoadingScreenViewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
-            } else {
-                toggleLoadingScreenViewBtn.textContent = translations[currentLanguage].toggleViewDetails;
-                toggleLoadingScreenViewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
-                toggleLoadingScreenViewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
-            }
-        }
-
-        // Function to update the text and style of the "Neu" filter button
-        function updateFilterNewButtonText() {
-            if (showNewItemsOnly) {
-                filterNewBtn.textContent = translations[currentLanguage].newActive;
-                filterNewBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
-                filterNewBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
-            } else {
-                filterNewBtn.textContent = translations[currentLanguage].new;
-                filterNewBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
-                filterNewBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
-            }
-        }
-
-        // Event Listeners for new category buttons
-        outfitsBtn.addEventListener('click', () => {
-            if (currentView === 'outfit') return;
-            currentView = 'outfit';
-            updateNavButtons('show-outfits');
-            loadCosmeticsCategory('outfit');
-        });
-
-        emotesBtn.addEventListener('click', () => {
-            if (currentView === 'emote') return;
-            currentView = 'emote';
-            updateNavButtons('show-emotes');
-            loadCosmeticsCategory('emote');
-        });
-
-        pickaxesBtn.addEventListener('click', () => {
-            if (currentView === 'pickaxe') return;
-            currentView = 'pickaxe';
-            updateNavButtons('show-pickaxes');
-            loadCosmeticsCategory('pickaxe');
-        });
-
-        glidersBtn.addEventListener('click', () => {
-            if (currentView === 'glider') return;
-            currentView = 'glider';
-            updateNavButtons('show-gliders');
-            loadCosmeticsCategory('glider');
-        });
-
-        wrapsBtn.addEventListener('click', () => {
-            if (currentView === 'wrap') return;
-            currentView = 'wrap';
-            updateNavButtons('show-wraps');
-            loadCosmeticsCategory('wrap');
-        });
-
-        backblingsBtn.addEventListener('click', () => {
-            if (currentView === 'backpack') return;
-            currentView = 'backpack';
-            updateNavButtons('show-backblings');
-            loadCosmeticsCategory('backpack');
-        });
-
-
-        jamTracksBtn.addEventListener('click', () => {
-            if (currentView === 'music') return; // Changed to 'music' to match API type
-            currentView = 'music';
-            updateNavButtons('show-jam-tracks');
-            loadJamTracks();
-        });
-
-        cosmeticsBtn.addEventListener('click', () => {
-            if (currentView === 'cosmetics') return;
-            currentView = 'cosmetics';
-            updateNavButtons('show-cosmetics');
-            loadCosmeticsCategory('cosmetics'); // This will load "other" cosmetics
-        });
-
-        lobbyBackgroundsBtn.addEventListener('click', () => {
-            if (currentView === 'loading_screen') return; // Changed to 'loading_screen' to match API type
-            currentView = 'loading_screen';
-            updateNavButtons('show-lobby-backgrounds');
-            loadLobbyBackgrounds();
-        });
-
-        toggleLoadingScreenViewBtn.addEventListener('click', () => {
-            loadingScreenViewMode = (loadingScreenViewMode === 'imageOnly') ? 'detailed' : 'imageOnly';
-            renderLobbyBackgrounds(allLobbyBackgrounds); // Re-render with new mode
-            updateToggleLoadingScreenButtonText(); // Update button text
-        });
-
-        filterNewBtn.addEventListener('click', () => {
-            showNewItemsOnly = !showNewItemsOnly; // Toggle the filter state
-            updateFilterNewButtonText(); // Update button text and style
-
-            // Reset set filter when applying new filter
-            currentFilterSetId = null; 
-            
-            // Re-load content based on current view to apply the new filter
-            if (currentView === 'music') { // Changed to 'music'
-                loadJamTracks();
-            } else if (currentView === 'loading_screen') { // Changed to 'loading_screen'
-                loadLobbyBackgrounds();
-            } else { // All other cosmetic types
-                loadCosmeticsCategory(currentView);
-            }
-        });
-
-        // --- Scroll to Top Functionality ---
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 200) { // Show button after scrolling 200px down
-                scrollToTopBtn.style.display = 'block';
-            } else {
-                scrollToTopBtn.style.display = 'none';
-            }
-        });
-
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth' // Smooth scroll animation
-            });
-        });
-
-        // --- Language Switcher Events ---
-        settingsGear.addEventListener('click', () => {
-            languageDropdown.classList.toggle('hidden');
-            // Toggle rotation class on click
-            settingsGear.classList.toggle('rotate-on-click');
-        });
-
-        // Hide dropdown if clicked outside
-        document.addEventListener('click', (e) => {
-            if (!settingsGear.contains(e.target) && !languageDropdown.contains(e.target)) {
-                languageDropdown.classList.add('hidden');
-                settingsGear.classList.remove('rotate-on-click'); // Remove rotation when closing
-            }
-        });
-
-        document.querySelectorAll('.lang-option').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const selectedLang = e.target.dataset.lang;
-                if (currentLanguage !== selectedLang) {
-                    currentLanguage = selectedLang;
-                    localStorage.setItem('fortnite_explorer_lang', currentLanguage);
-                    languageDropdown.classList.add('hidden'); // Hide dropdown
-                    settingsGear.classList.remove('rotate-on-click'); // Remove rotation
-                    
-                    updateUIForLanguage(); // Update static UI text
-                    // Re-fetch data for the current category in the new language
-                    if (currentView === 'music') {
-                        await loadJamTracks();
-                    } else if (currentView === 'loading_screen') {
-                        await loadLobbyBackgrounds();
-                    } else {
-                        await loadCosmeticsCategory(currentView);
-                    }
+        // --- Event Listeners ---
+        
+        // Listen for clicks on navigation buttons
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Ensure the 'lobby screen' button does not toggle its view when already active
+                if (button.getAttribute('data-category') === 'loading_screen' && currentView === 'loading_screen') {
+                    return; // Do nothing
+                }
+                
+                const category = button.getAttribute('data-category');
+                loadCosmeticsCategory(category);
+                
+                // Update the state of the lobby button
+                if (category !== 'loading_screen') {
+                    toggleLobbyBtn.textContent = translations[currentLanguage].toggleLobbyBtn;
                 }
             });
         });
+        
+        // Listen for changes in the sort dropdown
+        sortSelect.addEventListener('change', (event) => {
+            currentSortOrder = event.target.value;
+            updateGrid();
+        });
 
+        // Listen for changes in the rarity filter dropdown
+        rarityFilterSelect.addEventListener('change', (event) => {
+            currentFilterRarity = event.target.value;
+            updateGrid();
+        });
+        
+        // Listen for changes in the language select
+        languageSelect.addEventListener('change', async (event) => {
+            currentLanguage = event.target.value;
+            // Clear cached data to force a re-fetch in the new language
+            cosmeticData = {};
+            updateUIForLanguage();
+            await loadCosmeticsCategory(currentView);
+        });
 
-        // --- Initial Load ---
+        // Toggle the "Filter New" state
+        filterNewBtn.addEventListener('click', () => {
+            isFilteringNew = !isFilteringNew;
+            filterNewBtn.textContent = isFilteringNew ? translations[currentLanguage].filterNewBtnActive : translations[currentLanguage].filterNewBtn;
+            updateGrid();
+        });
+
+        // Toggle between the current view and the loading screen view
+        toggleLobbyBtn.addEventListener('click', async () => {
+            if (currentView === 'loading_screen') {
+                // Return to the previously active category (or outfits if none)
+                await loadCosmeticsCategory('outfit');
+            } else {
+                await loadCosmeticsCategory('loading_screen');
+                toggleLobbyBtn.textContent = translations[currentLanguage].toggleLobbyBtnActive;
+            }
+        });
+
+        // --- Initial Application Load ---
+        /**
+         * Initializes the app on page load.
+         */
         async function initializeApp() {
-            // Ensure all cosmetic data is loaded in the current language
-            await ensureAllCosmeticsLoaded(); 
-            updateNavButtons('show-outfits'); // Set Outfits as active initially
-            loadCosmeticsCategory('outfit'); // Load Outfits initially
-            appVersionDisplay.textContent = 'V2.37'; // Set the version text
-            updateToggleLoadingScreenButtonText(); // Set initial toggle button text and style
-            updateFilterNewButtonText(); // Set initial filter new button text and style
-            sortSelect.value = currentSortOrder; // Set initial sort dropdown value
-            rarityFilterSelect.value = currentFilterRarity; // Set initial rarity filter dropdown value
-            updateUIForLanguage(); // Apply initial language settings to UI
+            // Set initial state from HTML selects
+            currentLanguage = languageSelect.value;
+            currentSortOrder = sortSelect.value;
+            currentFilterRarity = rarityFilterSelect.value;
+
+            appVersionDisplay.textContent = appVersion;
+
+            // Load initial category and set UI state
+            await loadCosmeticsCategory('outfit');
+            updateUIForLanguage();
         }
 
         initializeApp();
-
     </script>
 </body>
 </html>
