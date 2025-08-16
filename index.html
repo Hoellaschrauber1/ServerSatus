@@ -97,6 +97,41 @@
         .modal-backdrop.active .modal-content {
             transform: scale(1);
         }
+        
+        /* New styles for the shine animation on cards */
+        .shine-animation {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine-animation::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: translateY(-100%);
+            animation: shine 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateY(-100%);
+            }
+            50% {
+                transform: translateY(100%);
+            }
+            100% {
+                transform: translateY(-100%);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 p-4 md:p-8 min-h-screen">
@@ -119,6 +154,7 @@
 
         <!-- Navigation Buttons -->
         <nav class="flex flex-wrap justify-center sm:justify-start gap-3 mb-6">
+            <!-- Buttons for different cosmetic categories -->
             <button id="show-outfits-btn" data-category="outfit" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Outfits</button>
             <button id="show-backpacks-btn" data-category="backpack" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Rucksäcke</button>
             <button id="show-pickaxes-btn" data-category="pickaxe" class="nav-btn bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">Spitzhacken</button>
@@ -130,10 +166,13 @@
         </nav>
 
         <!-- Filter and Sort Controls -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <!-- The controls are always visible now -->
+        <div id="filter-sort-controls" class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <!-- Search input -->
             <input type="text" id="search-input" placeholder="Suchen Sie nach Artikeln..." class="bg-gray-800 text-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 transition-colors w-full sm:w-auto">
-            
+            <!-- Display search results count -->
+            <span id="search-results-count" class="text-gray-400 text-sm"></span>
+
             <!-- Sort dropdown -->
             <div class="flex items-center space-x-2">
                 <label for="sort-select" class="text-gray-400">Sortieren:</label>
@@ -157,10 +196,6 @@
             <!-- New items filter button -->
             <button id="filter-new-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">
                 Neue Artikel filtern
-            </button>
-            <!-- Show/hide loading screen button -->
-            <button id="toggle-loading-screen-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors">
-                Ladebildschirm
             </button>
         </div>
 
@@ -189,13 +224,14 @@
             <!-- Modal content will be populated here by JavaScript -->
         </div>
     </div>
-
+    
     <!-- JavaScript for all application logic -->
     <script>
         // --- Configuration & State ---
         // A simple object to store translated UI strings
         const translations = {
             'de': {
+                todayShop: 'Shop des Tages',
                 outfits: 'Outfits',
                 backpacks: 'Rucksäcke',
                 pickaxes: 'Spitzhacken',
@@ -205,9 +241,7 @@
                 music: 'Musik',
                 lobbyBackgrounds: 'Lobby-Hintergründe',
                 filterNewBtn: 'Neue Artikel filtern',
-                toggleLobbyBtn: 'Lobby-Hintergründe',
                 filterNewBtnActive: 'Alle Artikel anzeigen',
-                toggleLobbyBtnActive: 'Zurück zur Kategorie',
                 sortLabel: 'Sortieren:',
                 rarityLabel: 'Seltenheit:',
                 sortName: 'Name (A-Z)',
@@ -224,14 +258,25 @@
                 // Translations for modal content
                 description: 'Beschreibung',
                 source: 'Herkunft',
+                price: 'Preis',
                 noDescription: 'Keine Beschreibung verfügbar.',
                 noPriceInfo: 'Unbekannt',
                 // New translations for item origin
                 shop: 'Shop',
                 crew: 'Crew',
-                battlepass: 'Battle Pass'
+                battlepass: 'Battle Pass',
+                // Translation for last seen in shop
+                lastSeen: 'Zuletzt im Shop: Vor {days} Tagen',
+                lastSeenToday: 'Zuletzt im Shop: Heute',
+                // NEW: Translation for search results count
+                searchResultsCount: '{count} Artikel gefunden',
+                searchResultsCountOne: '1 Artikel gefunden',
+                searchResultsCountNone: 'Keine Artikel gefunden',
+                // NEW: Loading text
+                loading: 'Lade...',
             },
             'en': {
+                todayShop: 'Today\'s Shop',
                 outfits: 'Outfits',
                 backpacks: 'Backpacks',
                 pickaxes: 'Pickaxes',
@@ -241,9 +286,7 @@
                 music: 'Music',
                 lobbyBackgrounds: 'Lobby Backgrounds',
                 filterNewBtn: 'Filter New Items',
-                toggleLobbyBtn: 'Show Lobby Backgrounds',
                 filterNewBtnActive: 'Show All Items',
-                toggleLobbyBtnActive: 'Back to Categories',
                 sortLabel: 'Sort:',
                 rarityLabel: 'Rarity:',
                 sortName: 'Name (A-Z)',
@@ -260,12 +303,22 @@
                 // Translations for modal content
                 description: 'Description',
                 source: 'Source',
+                price: 'Price',
                 noDescription: 'No description available.',
                 noPriceInfo: 'Unknown',
                 // New translations for item origin
                 shop: 'Shop',
                 crew: 'Crew',
-                battlepass: 'Battle Pass'
+                battlepass: 'Battle Pass',
+                // Translation for last seen in shop
+                lastSeen: 'Last seen in shop: {days} days ago',
+                lastSeenToday: 'Last seen in shop: Today',
+                // NEW: Translation for search results count
+                searchResultsCount: '{count} items found',
+                searchResultsCountOne: '1 item found',
+                searchResultsCountNone: 'No items found',
+                // NEW: Loading text
+                loading: 'Loading...',
             }
         };
 
@@ -277,7 +330,7 @@
         let isFilteringNew = false;
         let currentSearchQuery = ''; 
         let cosmeticData = {}; // Cache for fetched data
-        const appVersion = 'V2.47';
+        const appVersion = 'V2.51';
 
         // --- DOM Elements ---
         const navButtons = document.querySelectorAll('.nav-btn');
@@ -286,16 +339,17 @@
         const sortSelect = document.getElementById('sort-select');
         const rarityFilterSelect = document.getElementById('rarity-filter-select');
         const filterNewBtn = document.getElementById('filter-new-btn');
-        const toggleLobbyBtn = document.getElementById('toggle-loading-screen-btn');
         const appVersionDisplay = document.getElementById('app-version-display');
         const searchInput = document.getElementById('search-input');
         const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
+        const filterSortControls = document.getElementById('filter-sort-controls');
+        const searchResultsCountDisplay = document.getElementById('search-results-count');
 
         // Modal elements
         const modalBackdrop = document.getElementById('item-details-modal-backdrop');
         const modalContent = document.getElementById('item-details-modal-content');
         const closeModalBtn = document.getElementById('close-modal-btn');
-
+        
         // --- SVG Icons ---
         // Unknown/no price info icon
         const unknownIcon = `
@@ -304,25 +358,31 @@
             </svg>
         `;
 
+        // V-Bucks icon (inline SVG)
+        const vbucksIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="#5DADE2" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.756a4.5 4.5 0 014.073 4.072M14.25 7.756a4.5 4.5 0 01-4.073 4.072m4.073-4.072A4.5 4.5 0 0118.75 12a4.5 4.5 0 01-4.427 4.928m-4.073-4.072a4.5 4.5 0 014.073-4.072m-4.073 4.072a4.5 4.5 0 01-4.427 4.928M18.75 12a4.5 4.5 0 01-4.5 4.5m4.5-4.5a4.5 4.5 0 01-4.5-4.5m-4.5 9a4.5 4.5 0 014.5-4.5m-4.5 4.5a4.5 4.5 0 014.5 4.5m-4.5-4.5v2.25" />
+            </svg>
+        `;
+
         // --- Core Functions ---
         
         /**
-         * Fetches real cosmetic data from the Fortnite-API.com.
+         * Fetches cosmetic data for a specific category from the Fortnite-API.com.
          * @param {string} category The category to fetch data for.
          * @returns {Promise<Object[]>} A promise that resolves with the data.
          */
         async function fetchRealCosmeticData(category) {
             try {
-                // Construct the API URL with the correct language and category
                 const apiUrl = `https://fortnite-api.com/v2/cosmetics/br/search/all?type=${category}&language=${currentLanguage}`;
                 
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
+                    console.error('API Error:', response.status, response.statusText);
                     throw new Error(`API-Fehler: ${response.statusText}`);
                 }
                 const data = await response.json();
                 
-                // The API response has a "data" property containing the array of cosmetics
                 return data.data || [];
             } catch (error) {
                 console.error("Fehler beim Abrufen der Daten von der API:", error);
@@ -349,43 +409,41 @@
 
         /**
          * Generates the HTML for a single cosmetic item card.
+         * The `onload` event on the image is used to remove the shine animation
+         * as soon as the image is loaded.
          * @param {Object} item The cosmetic item data from the API.
          * @returns {string} The HTML string for the item card.
          */
         function createItemCard(item) {
-            // Use the improved logic to check if the item is new
             const isNew = isNewItem(item);
-            // If it's new, create the 'Neu' badge
             const isNewBadge = isNew ? `<span class="absolute top-2 right-2 bg-purple-500 text-xs font-bold px-2 py-1 rounded-full text-white">Neu</span>` : '';
             
             const rarity = item.rarity ? item.rarity.value : 'common';
             const rarityClass = getRarityColor(rarity);
             const imageUrl = item.images.icon;
             
-            // Determine the source content to display (text or icon)
             let sourceContent = '';
             if (item.price && item.price.price > 0 && item.price.currency === 'VBuck') {
-                sourceContent = `<p class="text-xs font-bold text-gray-400">${translations[currentLanguage].shop}</p>`;
+                sourceContent = `<div class="flex items-center space-x-1">
+                                    ${vbucksIcon}
+                                    <p class="text-xs font-bold text-gray-400">${item.price.price}</p>
+                                </div>`;
             } else if (item.battlepass) {
                 sourceContent = `<p class="text-xs font-bold text-gray-400">${translations[currentLanguage].battlepass}</p>`;
             } else if (item.crew) {
                 sourceContent = `<p class="text-xs font-bold text-gray-400">${translations[currentLanguage].crew}</p>`;
             } else {
-                sourceContent = unknownIcon; // Use the SVG icon for unknown source
+                sourceContent = unknownIcon;
             }
-
-            // The main card div now has an onclick handler to show details
+            
+            // Add the `onload` attribute to the image to remove the animation when loaded
             return `
-                <!-- Main card container. We use flex-col to stack the content vertically. -->
-                <div onclick='showItemDetails(${JSON.stringify(item)})' class="bg-gray-800 rounded-xl p-4 shadow-lg transform transition-transform duration-200 hover:scale-105 relative border-2 ${rarityClass} flex flex-col cursor-pointer">
-                    <!-- This div will contain the image and title and will grow to push the footer down -->
+                <div onclick='showItemDetails(${JSON.stringify(item)})' class="bg-gray-800 rounded-xl p-4 shadow-lg transform transition-transform duration-200 hover:scale-105 relative border-2 ${rarityClass} flex flex-col cursor-pointer shine-animation">
                     <div class="flex-grow flex flex-col justify-start">
-                        <!-- The loading="lazy" attribute tells the browser to only load the image when it is near the viewport -->
-                        <img src="${imageUrl}" loading="lazy" alt="${item.name}" class="rounded-lg w-full mb-3" onerror="this.onerror=null; this.src='https://placehold.co/200x200/374151/D1D5DB?text=Image+Not+Found';">
+                        <img src="${imageUrl}" loading="lazy" alt="${item.name}" class="rounded-lg w-full mb-3" onload="this.closest('.shine-animation').classList.remove('shine-animation')" onerror="this.onerror=null; this.src='https://placehold.co/200x200/374151/D1D5DB?text=Image+Not+Found';">
                         <h3 class="text-sm font-semibold truncate">${item.name}</h3>
                     </div>
 
-                    <!-- Footer for rarity and source info. Now it's a fixed part of the bottom layout. -->
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-xs text-gray-400 capitalize">${rarity}</p>
                         ${sourceContent}
@@ -414,12 +472,13 @@
         
         /**
          * Displays a loading skeleton in the grid.
+         * The skeleton elements also have the shine animation class.
          */
         function showLoadingState() {
             itemGrid.innerHTML = '';
             for (let i = 0; i < 12; i++) {
                 itemGrid.innerHTML += `
-                    <div class="bg-gray-800 rounded-xl p-4 shadow-lg animate-pulse h-48 flex flex-col justify-end">
+                    <div class="bg-gray-800 rounded-xl p-4 shadow-lg animate-pulse h-48 flex flex-col justify-end shine-animation">
                         <div class="bg-gray-700 h-4 w-3/4 rounded-lg mb-2"></div>
                         <div class="bg-gray-700 h-3 w-1/2 rounded-lg"></div>
                     </div>
@@ -433,39 +492,44 @@
         function updateGrid() {
             const data = cosmeticData[currentView] || [];
             
-            // Filter data based on selected rarity, "new" status, and search query
             const filteredData = data.filter(item => {
                 const rarityMatch = currentFilterRarity === 'all' || (item.rarity && item.rarity.value === currentFilterRarity);
-                // Use the new date-based logic to check for new items
                 const isNew = isNewItem(item);
                 const newMatch = !isFilteringNew || isNew;
-                
-                // Filter by search query (case-insensitive)
                 const searchMatch = item.name.toLowerCase().includes(currentSearchQuery.toLowerCase());
 
                 return rarityMatch && newMatch && searchMatch;
             });
 
-            // Sort data based on selected sort order
             filteredData.sort((a, b) => {
                 if (currentSortOrder === 'name') {
                     return a.name.localeCompare(b.name, currentLanguage);
                 }
-                // Sort by rarity (this is a simplified rarity order)
                 const rarityOrder = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
                 const rarityA = a.rarity ? a.rarity.value : 'common';
                 const rarityB = b.rarity ? b.rarity.value : 'common';
                 return rarityOrder.indexOf(rarityA) - rarityOrder.indexOf(rarityB);
             });
 
-            // Generate HTML for each item and insert into the grid
             if (filteredData.length > 0) {
                 itemGrid.innerHTML = filteredData.map(createItemCard).join('');
             } else {
                 itemGrid.innerHTML = `<p class="col-span-full text-center text-gray-400 text-lg py-12">${translations[currentLanguage].noItemsFound}</p>`;
             }
-        }
 
+            // Update the search results count display
+            const count = filteredData.length;
+            if (currentSearchQuery.trim() === '') {
+                searchResultsCountDisplay.textContent = '';
+            } else if (count === 0) {
+                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCountNone;
+            } else if (count === 1) {
+                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCountOne;
+            } else {
+                searchResultsCountDisplay.textContent = translations[currentLanguage].searchResultsCount.replace('{count}', count);
+            }
+        }
+        
         /**
          * Loads cosmetic data for a given category and updates the UI.
          * @param {string} category The category to load.
@@ -473,8 +537,10 @@
         async function loadCosmeticsCategory(category) {
             currentView = category;
             updateNavButtons(category);
+            // Show the loading skeletons with the shine animation
             showLoadingState();
 
+            // Check if we already have the data in cache
             if (!cosmeticData[category]) {
                 const data = await fetchRealCosmeticData(category);
                 cosmeticData[category] = data;
@@ -528,9 +594,11 @@
             document.getElementById('rarity-filter-select').options[4].textContent = lang.rarityUncommon;
             document.getElementById('rarity-filter-select').options[5].textContent = lang.rarityCommon;
             
-            filterNewBtn.textContent = isFilteringNew ? lang.filterNewBtnActive : lang.filterNewBtn;
-            toggleLobbyBtn.textContent = (currentView === 'loading_screen') ? lang.toggleLobbyBtnActive : lang.toggleLobbyBtn;
+            filterNewBtn.textContent = isFilteringNew ? translations[currentLanguage].filterNewBtnActive : translations[currentLanguage].filterNewBtn;
             searchInput.placeholder = lang.searchInputPlaceholder;
+            
+            // Update search results count when language changes
+            updateGrid();
         }
 
         /**
@@ -544,14 +612,41 @@
 
             // Determine the source text to display
             let sourceText = lang.noPriceInfo;
+            let priceSection = '';
             if (item.price && item.price.price > 0 && item.price.currency === 'VBuck') {
                 sourceText = lang.shop;
+                priceSection = `<div class="mt-4">
+                                    <h3 class="text-lg font-semibold">${lang.price}</h3>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-300">
+                                        ${vbucksIcon}
+                                        <span>${item.price.price}</span>
+                                    </div>
+                                </div>`;
             } else if (item.battlepass) {
                 sourceText = lang.battlepass;
             } else if (item.crew) {
                 sourceText = lang.crew;
             }
-
+            
+            // Logic to determine how many days ago the item was last seen
+            let lastSeenSection = '';
+            if (item.shopHistory && item.shopHistory.length > 0) {
+                const lastSeenDate = new Date(item.shopHistory[0].date);
+                const today = new Date();
+                const diffInTime = today.getTime() - lastSeenDate.getTime();
+                const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+                
+                if (diffInDays === 0) {
+                    lastSeenSection = `<div class="mt-4">
+                                         <h3 class="text-lg font-semibold">${lang.lastSeenToday}</h3>
+                                     </div>`;
+                } else {
+                    lastSeenSection = `<div class="mt-4">
+                                         <h3 class="text-lg font-semibold">${lang.lastSeen.replace('{days}', diffInDays)}</h3>
+                                     </div>`;
+                }
+            }
+            
             modalContent.innerHTML = `
                 <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-100 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -574,6 +669,8 @@
                         <div>
                             <h3 class="text-lg font-semibold">${lang.source}</h3>
                             <p class="text-sm text-gray-300">${sourceText}</p>
+                            ${priceSection}
+                            ${lastSeenSection} <!-- Add the last seen section here -->
                         </div>
                     </div>
                 </div>
@@ -597,18 +694,10 @@
         // Listen for clicks on navigation buttons
         navButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Ensure the 'lobby screen' button does not toggle its view when already active
-                if (button.getAttribute('data-category') === 'loading_screen' && currentView === 'loading_screen') {
-                    return; // Do nothing
-                }
-                
                 const category = button.getAttribute('data-category');
-                loadCosmeticsCategory(category);
                 
-                // Update the state of the lobby button
-                if (category !== 'loading_screen') {
-                    toggleLobbyBtn.textContent = translations[currentLanguage].toggleLobbyBtn;
-                }
+                // Load the category
+                loadCosmeticsCategory(category);
             });
         });
         
@@ -644,17 +733,6 @@
             isFilteringNew = !isFilteringNew;
             filterNewBtn.textContent = isFilteringNew ? translations[currentLanguage].filterNewBtnActive : translations[currentLanguage].filterNewBtn;
             updateGrid();
-        });
-
-        // Toggle between the current view and the loading screen view
-        toggleLobbyBtn.addEventListener('click', async () => {
-            if (currentView === 'loading_screen') {
-                // Return to the previously active category (or outfits if none)
-                await loadCosmeticsCategory('outfit');
-            } else {
-                await loadCosmeticsCategory('loading_screen');
-                toggleLobbyBtn.textContent = translations[currentLanguage].toggleLobbyBtnActive;
-            }
         });
 
         // Event listener to show/hide the scroll-to-top button
@@ -693,7 +771,7 @@
 
             appVersionDisplay.textContent = appVersion;
 
-            // Load initial category and set UI state
+            // Load initial category ('outfit') and set UI state
             await loadCosmeticsCategory('outfit');
             updateUIForLanguage();
         }
