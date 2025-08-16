@@ -115,11 +115,28 @@
 </head>
 <body class="bg-gray-900 text-gray-200">
 
-    <!-- Header with title and version -->
+    <!-- Header with title and version and new settings icon -->
     <header class="bg-gray-800 p-4 shadow-xl sticky top-0 z-50">
         <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
             <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fortnite Asset Explorer</h1>
-            <span class="text-sm text-gray-400 mt-2 sm:mt-0">Version <span id="app-version">1.0.1</span></span>
+            <div class="flex items-center space-x-4 mt-2 sm:mt-0 relative">
+                <span class="text-sm text-gray-400">Version <span id="app-version">1.0.1</span></span>
+                <!-- Settings Icon Button -->
+                <button id="settings-icon-btn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.527.292 1.085.498 1.638.6z" />
+                    </svg>
+                </button>
+                <!-- Dropdown Menu for settings -->
+                <div id="settings-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-gray-800 rounded-xl shadow-lg z-20 hidden transform transition-all scale-95 duration-200 origin-top-right">
+                    <div class="p-4">
+                        <span class="text-sm text-gray-400 block mb-2">Kachelgröße:</span>
+                        <button data-cols="2" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Groß</button>
+                        <button data-cols="4" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Mittel</button>
+                        <button data-cols="6" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Klein</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -242,6 +259,11 @@
         const lazyLoadSentinel = document.getElementById('lazy-load-sentinel');
         const searchInput = document.getElementById('search-input');
         const resultCountSpan = document.getElementById('result-count');
+        
+        // New DOM elements for settings dropdown
+        const settingsIconBtn = document.getElementById('settings-icon-btn');
+        const settingsDropdown = document.getElementById('settings-dropdown');
+        const colButtons = document.querySelectorAll('.col-btn');
 
         // Global state variables
         let allCosmetics = {};
@@ -250,6 +272,7 @@
         let currentSortOrder = 'added';
         let currentFilterRarity = 'all';
         let currentSearchTerm = '';
+        let currentColumns = 4; // Default to 4 columns
 
         // Lazy loading variables
         const itemsPerPage = 50; // Number of items per chunk
@@ -268,7 +291,7 @@
             threshold: 1.0 // Triggers when 100% of the element is visible
         });
 
-        // Event listener for the tabs
+        // Event listener for the category tabs
         tabButtons.forEach(button => {
             button.addEventListener('click', async () => {
                 const category = button.dataset.category;
@@ -280,6 +303,34 @@
                 tabButtons.forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
                 button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
                 button.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            });
+        });
+        
+        // Event listener for the settings icon to toggle the dropdown
+        settingsIconBtn.addEventListener('click', (event) => {
+            settingsDropdown.classList.toggle('hidden');
+            // Stops the click from propagating to the document listener below
+            event.stopPropagation();
+        });
+
+        // Event listener to close the dropdown when clicking outside of it
+        document.addEventListener('click', (event) => {
+            const isClickInside = settingsDropdown.contains(event.target) || settingsIconBtn.contains(event.target);
+            if (!isClickInside && !settingsDropdown.classList.contains('hidden')) {
+                settingsDropdown.classList.add('hidden');
+            }
+        });
+
+        // Event listener for the column/tile size buttons inside the dropdown
+        colButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const newCols = parseInt(button.dataset.cols, 10);
+                if (!isNaN(newCols) && newCols !== currentColumns) {
+                    currentColumns = newCols;
+                    updateGridColumns();
+                    updateColButtonStyles();
+                    settingsDropdown.classList.add('hidden'); // Close dropdown after selection
+                }
             });
         });
 
@@ -424,6 +475,38 @@
             if (currentIndex < allFilteredItems.length) {
                 observer.observe(lazyLoadSentinel);
             }
+        }
+
+        /**
+         * Dynamically updates the grid column classes based on the currentColumns state.
+         */
+        function updateGridColumns() {
+            // Remove existing grid-cols classes
+            itemGrid.className = itemGrid.className.replace(/grid-cols-\d+/g, '');
+
+            // Get the appropriate class based on currentColumns and add it
+            if (currentColumns === 2) {
+                itemGrid.classList.add('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4');
+            } else if (currentColumns === 4) {
+                // For 'medium', we set different classes for different screen sizes
+                itemGrid.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'lg:grid-cols-5', 'xl:grid-cols-6');
+            } else if (currentColumns === 6) {
+                // For 'small', we set the highest possible column count
+                itemGrid.classList.add('grid-cols-4', 'sm:grid-cols-5', 'md:grid-cols-6', 'lg:grid-cols-7', 'xl:grid-cols-8');
+            }
+        }
+        
+        /**
+         * Updates the visual state of the column buttons.
+         */
+        function updateColButtonStyles() {
+            colButtons.forEach(btn => {
+                const cols = parseInt(btn.dataset.cols, 10);
+                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Remove active state
+                if (cols === currentColumns) {
+                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Add active state
+                }
+            });
         }
 
         /**
@@ -627,6 +710,10 @@
 
             // Loads the initial category ('outfit') and sets the UI state
             await loadCosmeticsCategory('outfit');
+
+            // Set initial column layout and button styles
+            updateGridColumns();
+            updateColButtonStyles();
 
             // Observes the sentinel element to start lazy loading
             observer.observe(lazyLoadSentinel);
