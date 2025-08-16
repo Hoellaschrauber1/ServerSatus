@@ -9,7 +9,7 @@
     <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Simple pulse animation for the 'New' badge */
+        /* Einfache Puls-Animation für das 'Neu'-Abzeichen */
         @keyframes pulse {
             50% {
                 opacity: .5;
@@ -19,30 +19,36 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* Shine animation for loading skeletons */
-        @keyframes shine {
-            to {
-                /* Moves the shine diagonally from bottom-right to top-left */
-                background-position: 0% 0%;
+        /* Glanz-Animation für die Ladeskelette, die diagonal von Ecke zu Ecke verläuft */
+        @keyframes improvedShine {
+            0% {
+                background-position: -200% -200%;
+            }
+            100% {
+                background-position: 200% 200%;
             }
         }
+        /* Die Animationsdauer wurde auf 3 Sekunden erhöht, um sie zu verlangsamen */
         .animate-shine {
-            /* Creates the diagonal gradient going from bottom-right to top-left */
-            background-image: linear-gradient(135deg, #374151 0%, #4b5563 50%, #374151 100%);
-            /* Adjusted size to make the shine effect narrower */
-            background-size: 150% 150%;
-            background-position: 100% 100%;
-            animation: shine 1.5s infinite linear;
+            background: #2d3748;
+            background-image: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 400% 400%;
+            animation: improvedShine 3s infinite linear;
         }
         
-        /* Apply the Inter font to the entire body */
+        /* Wendet die Inter-Schriftart auf den gesamten Body an */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* A slightly different dark background */
+            background-color: #1a202c; /* Ein etwas anderer dunkler Hintergrund */
             color: #e2e8f0;
         }
 
-        /* Custom scrollbar for better aesthetics */
+        /* Benutzerdefinierte Scrollbar für eine bessere Ästhetik */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -57,28 +63,28 @@
             background: #6a728a;
         }
 
-        /* Ensures the modal covers the entire screen */
+        /* Stellt sicher, dass das Modal den gesamten Bildschirm abdeckt */
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
         }
 
-        /* Shows the scroll-to-top button */
+        /* Zeigt den "Nach oben scrollen"-Button an */
         .scroll-to-top-btn.visible {
             opacity: 1;
             transform: translateY(0);
         }
         
-        /* Hides the modal by default */
+        /* Verbirgt das Modal standardmäßig */
         .modal.hidden {
             display: none;
         }
         
         /*
-         * CSS for the image loading transition
-         * The skeleton is initially visible, then its opacity transitions to 0
-         * The image is initially at opacity 0, and then transitions to 1
+         * CSS für den Bild-Ladeübergang
+         * Das Skelett ist anfangs sichtbar, dann wechselt seine Deckkraft auf 0
+         * Das Bild ist anfangs bei 0 Deckkraft und wechselt dann auf 1
          */
         .loading-image {
             opacity: 0;
@@ -102,32 +108,32 @@
             z-index: 1;
         }
 
-        /* Adjusted skeleton size for consistency */
+        /* Angepasste Skelettgröße für Konsistenz */
         .loading-skeleton-image {
-            height: 8rem; /* Equivalent to w-full h-32 */
+            height: 8rem; /* Entspricht w-full h-32 */
         }
         
-        /* Base card style */
+        /* Basis-Kartenstil */
         .item-card {
-            background-color: #2d3748; /* Base background color */
+            background-color: #2d3748; /* Basis-Hintergrundfarbe */
         }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
 
-    <!-- Header with title and version and new settings icon -->
+    <!-- Header mit Titel und Version sowie neuem Einstellungen-Icon -->
     <header class="bg-gray-800 p-4 shadow-xl sticky top-0 z-50">
         <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
             <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fortnite Asset Explorer</h1>
             <div class="flex items-center space-x-4 mt-2 sm:mt-0 relative">
                 <span class="text-sm text-gray-400">Version <span id="app-version">1.0.1</span></span>
-                <!-- Settings Icon Button -->
+                <!-- Einstellungen-Icon-Button -->
                 <button id="settings-icon-btn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.527.292 1.085.498 1.638.6z" />
                     </svg>
                 </button>
-                <!-- Dropdown Menu for settings -->
+                <!-- Dropdown-Menü für Einstellungen -->
                 <div id="settings-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-gray-800 rounded-xl shadow-lg z-20 hidden transform transition-all scale-95 duration-200 origin-top-right">
                     <div class="p-4">
                         <span class="text-sm text-gray-400 block mb-2">Kachelgröße:</span>
@@ -140,12 +146,12 @@
         </div>
     </header>
 
-    <!-- Main content and controls -->
+    <!-- Hauptinhalt und Steuerelemente -->
     <main class="container mx-auto p-4 md:p-8">
 
-        <!-- Filter and sort controls -->
+        <!-- Filter- und Sortiersteuerelemente -->
         <div class="bg-gray-800 p-4 rounded-xl shadow-inner mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <!-- Category Tabs -->
+            <!-- Kategorie-Tabs -->
             <div class="flex flex-wrap justify-center gap-2">
                 <button data-category="outfit" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 shadow-lg">Outfit</button>
                 <button data-category="backpack" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Rucksack</button>
@@ -154,7 +160,7 @@
                 <button data-category="wrap" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Lackierung</button>
             </div>
             
-            <!-- Sort and filter -->
+            <!-- Sortierung und Filter -->
             <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto mt-4 md:mt-0">
                 <div class="w-full sm:w-auto">
                     <label for="sort-select" class="sr-only">Sortierung</label>
@@ -196,7 +202,7 @@
             </div>
         </div>
 
-        <!-- Search bar and counter -->
+        <!-- Suchleiste und Zähler -->
         <div class="mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div class="relative w-full flex-grow">
                 <input type="text" id="search-input" placeholder="Nach Artikeln suchen..." class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
@@ -209,15 +215,16 @@
             <span id="result-count" class="text-sm text-gray-400 whitespace-nowrap">0 Ergebnisse</span>
         </div>
 
-        <!-- Cosmetics grid -->
+        <!-- Kosmetik-Gitter -->
         <div id="item-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <!-- Platzhalter-Karten werden hier dynamisch eingefügt, wenn die Daten geladen werden. -->
         </div>
 
-        <!-- Sentinel element for lazy loading -->
+        <!-- Sentinel-Element für Lazy Loading -->
         <div id="lazy-load-sentinel" class="w-full h-1 my-8"></div>
     </main>
 
-    <!-- Modal for item details (hidden by default) -->
+    <!-- Modal für Artikeldetails (standardmäßig versteckt) -->
     <div id="item-details-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
         <div class="modal-backdrop absolute inset-0"></div>
         <div class="bg-gray-800 rounded-xl shadow-2xl relative z-10 p-6 max-w-2xl w-full mx-auto transform transition-all scale-95 duration-200">
@@ -227,12 +234,12 @@
                 </svg>
             </button>
             <div id="modal-content" class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                <!-- Image and details will be inserted here -->
+                <!-- Bild und Details werden hier eingefügt -->
             </div>
         </div>
     </div>
 
-    <!-- Scroll-to-Top Button (hidden by default) -->
+    <!-- "Nach oben scrollen"-Button (standardmäßig versteckt) -->
     <button id="scroll-to-top-btn" class="scroll-to-top-btn fixed bottom-6 right-6 p-3 bg-purple-600 text-white rounded-full shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 z-50 hover:scale-110 active:scale-95">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -240,11 +247,11 @@
     </button>
 
     <script>
-        // General app variables
+        // Allgemeine App-Variablen
         const appVersion = "1.0.1";
         const apiUrl = "https://fortnite-api.com/v2/cosmetics/br";
         
-        // DOM elements
+        // DOM-Elemente
         const appVersionDisplay = document.getElementById('app-version');
         const itemGrid = document.getElementById('item-grid');
         const tabButtons = document.querySelectorAll('.tab-btn');
@@ -260,45 +267,45 @@
         const searchInput = document.getElementById('search-input');
         const resultCountSpan = document.getElementById('result-count');
         
-        // New DOM elements for settings dropdown
+        // Neue DOM-Elemente für das Einstellungen-Dropdown
         const settingsIconBtn = document.getElementById('settings-icon-btn');
         const settingsDropdown = document.getElementById('settings-dropdown');
         const colButtons = document.querySelectorAll('.col-btn');
 
-        // Global state variables
+        // Globale Statusvariablen
         let allCosmetics = {};
         let currentCosmetics = [];
         let currentLanguage = 'de';
         let currentSortOrder = 'added';
         let currentFilterRarity = 'all';
         let currentSearchTerm = '';
-        let currentColumns = 4; // Default to 4 columns
+        let currentColumns = 4; // Standardmäßig 4 Spalten
 
-        // Lazy loading variables
-        const itemsPerPage = 50; // Number of items per chunk
-        let allFilteredItems = []; // Stores all filtered & sorted items
-        let currentIndex = 0; // Current index of rendered items
+        // Variablen für Lazy Loading
+        const itemsPerPage = 50; // Anzahl der Elemente pro Block
+        let allFilteredItems = []; // Speichert alle gefilterten & sortierten Elemente
+        let currentIndex = 0; // Aktueller Index der gerenderten Elemente
 
-        // IntersectionObserver for lazy loading
+        // IntersectionObserver für Lazy Loading
         const observer = new IntersectionObserver(entries => {
-            // Checks if the sentinel element is visible
+            // Prüft, ob das Sentinel-Element sichtbar ist
             if (entries[0].isIntersecting) {
                 renderNextChunk();
             }
         }, {
-            root: null, // Uses the viewport as the root
+            root: null, // Verwendet den Viewport als Root
             rootMargin: '0px',
-            threshold: 1.0 // Triggers when 100% of the element is visible
+            threshold: 1.0 // Löst aus, wenn 100 % des Elements sichtbar sind
         });
 
-        // Event listener for the category tabs
+        // Event-Listener für die Kategorie-Tabs
         tabButtons.forEach(button => {
             button.addEventListener('click', async () => {
                 const category = button.dataset.category;
-                // Deactivates the observer before new data is loaded
+                // Deaktiviert den Observer, bevor neue Daten geladen werden
                 observer.unobserve(lazyLoadSentinel); 
                 await loadCosmeticsCategory(category);
-                // Update UI for active tab
+                // Aktualisiert die Benutzeroberfläche für den aktiven Tab
                 tabButtons.forEach(btn => btn.classList.remove('bg-purple-600', 'hover:bg-purple-700'));
                 tabButtons.forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
                 button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
@@ -306,14 +313,14 @@
             });
         });
         
-        // Event listener for the settings icon to toggle the dropdown
+        // Event-Listener für das Einstellungen-Icon, um das Dropdown umzuschalten
         settingsIconBtn.addEventListener('click', (event) => {
             settingsDropdown.classList.toggle('hidden');
-            // Stops the click from propagating to the document listener below
+            // Verhindert, dass der Klick zum Dokument-Listener unten weitergeleitet wird
             event.stopPropagation();
         });
 
-        // Event listener to close the dropdown when clicking outside of it
+        // Event-Listener, um das Dropdown zu schließen, wenn man außerhalb klickt
         document.addEventListener('click', (event) => {
             const isClickInside = settingsDropdown.contains(event.target) || settingsIconBtn.contains(event.target);
             if (!isClickInside && !settingsDropdown.classList.contains('hidden')) {
@@ -321,7 +328,7 @@
             }
         });
 
-        // Event listener for the column/tile size buttons inside the dropdown
+        // Event-Listener für die Spalten-/Kachelgrößen-Buttons im Dropdown
         colButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const newCols = parseInt(button.dataset.cols, 10);
@@ -329,12 +336,12 @@
                     currentColumns = newCols;
                     updateGridColumns();
                     updateColButtonStyles();
-                    settingsDropdown.classList.add('hidden'); // Close dropdown after selection
+                    settingsDropdown.classList.add('hidden'); // Schließt das Dropdown nach der Auswahl
                 }
             });
         });
 
-        // Event listener for sort, filter, language and search
+        // Event-Listener für Sortierung, Filter, Sprache und Suche
         sortSelect.addEventListener('change', () => {
             currentSortOrder = sortSelect.value;
             applyFiltersAndSort();
@@ -355,19 +362,19 @@
             applyFiltersAndSort();
         });
 
-        // Event listener for the modal
+        // Event-Listener für das Modal
         closeModalBtn.addEventListener('click', hideItemDetails);
 
-        // Adds an event listener to show/hide the scroll-to-top button
+        // Fügt einen Event-Listener hinzu, um den "Nach oben scrollen"-Button anzuzeigen/auszublenden
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 200) { // Shows button after scrolling 200px
+            if (window.scrollY > 200) { // Zeigt den Button nach 200px Scrollen an
                 scrollToTopBtn.classList.add('visible');
             } else {
                 scrollToTopBtn.classList.remove('visible');
             }
         });
 
-        // Event listener to scroll to the top when the button is clicked
+        // Event-Listener, um nach oben zu scrollen, wenn der Button geklickt wird
         scrollToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
@@ -375,24 +382,58 @@
             });
         });
         
-        // Closes the modal when clicking on the backdrop
+        // Schließt das Modal beim Klicken auf den Hintergrund
         modalBackdrop.addEventListener('click', (e) => {
             if (e.target === modalBackdrop) {
                 hideItemDetails();
             }
         });
 
-        // --- Main Functions ---
+        // --- Hauptfunktionen ---
 
         /**
-         * Fetches cosmetics of a specific category from the API or loads them from the cache.
-         * @param {string} category - The category to load (e.g., 'outfit').
+         * Zeigt Platzhalter-Skelette im Gitter an.
+         */
+        function renderPlaceholderSkeletons() {
+            itemGrid.innerHTML = '';
+            // Erzeugt eine Reihe von Platzhalterkarten
+            for (let i = 0; i < 50; i++) {
+                const skeleton = createSkeletonCard();
+                itemGrid.appendChild(skeleton);
+            }
+        }
+
+        /**
+         * Erzeugt eine einzelne Platzhalter-Skelettkarte.
+         * @returns {HTMLElement} - Das DOM-Element der Platzhalterkarte.
+         */
+        function createSkeletonCard() {
+            const card = document.createElement('div');
+            card.className = 'item-card bg-gray-800 rounded-xl p-1 md:p-2 overflow-hidden shadow-md relative group';
+            
+            card.innerHTML = `
+                <div class="relative w-full aspect-square rounded-lg mb-2 overflow-hidden">
+                    <div class="absolute inset-0 rounded-lg animate-shine"></div>
+                </div>
+                <div class="text-center truncate">
+                    <div class="h-4 w-3/4 mx-auto mb-2 rounded animate-shine"></div>
+                    <div class="h-3 w-1/2 mx-auto rounded animate-shine"></div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        /**
+         * Ruft Kosmetikartikel einer bestimmten Kategorie von der API ab oder lädt sie aus dem Cache.
+         * @param {string} category - Die zu ladende Kategorie (z. B. 'outfit').
          */
         async function loadCosmeticsCategory(category) {
-            itemGrid.innerHTML = '';
+            // Zeigt die Platzhalter sofort an, um ein Lade-Feedback zu geben
+            renderPlaceholderSkeletons();
             
             try {
-                // Fetches data from the API
+                // Ruft Daten von der API ab
                 const response = await fetch(`${apiUrl}?language=${currentLanguage}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok.');
@@ -401,7 +442,7 @@
                 allCosmetics = data.data;
 
                 currentCosmetics = allCosmetics.filter(item => item.type.value === category);
-                applyFiltersAndSort(); // Applies filters and sort, then renders the first chunk
+                applyFiltersAndSort(); // Wendet Filter und Sortierung an und rendert dann den ersten Block
             } catch (error) {
                 console.error("Error fetching data:", error);
                 itemGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.</p>`;
@@ -409,22 +450,22 @@
         }
 
         /**
-         * Applies the current filters and sorting to the data and renders the first chunk.
+         * Wendet die aktuellen Filter und die Sortierung auf die Daten an und rendert den ersten Block.
          */
         function applyFiltersAndSort() {
-            // Copies the cosmetics data to manipulate it
+            // Kopiert die Kosmetikdaten, um sie zu bearbeiten
             allFilteredItems = [...currentCosmetics];
             
-            // Apply filtering
+            // Filter anwenden
             if (currentFilterRarity === 'new') {
                 const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
                 const now = new Date();
                 allFilteredItems = allFilteredItems.filter(item => (now - new Date(item.added)) < oneWeekInMs);
             } else if (currentFilterRarity !== 'all') {
-                // Converts both values to lowercase to ignore case
+                // Konvertiert beide Werte in Kleinbuchstaben, um die Groß-/Kleinschreibung zu ignorieren
                 allFilteredItems = allFilteredItems.filter(item => item.rarity.value.toLowerCase() === currentFilterRarity.toLowerCase());
             }
-            // Apply search
+            // Suche anwenden
             if (currentSearchTerm) {
                 allFilteredItems = allFilteredItems.filter(item => 
                     item.name.toLowerCase().includes(currentSearchTerm) ||
@@ -432,7 +473,7 @@
                 );
             }
 
-            // Apply sorting
+            // Sortierung anwenden
             allFilteredItems.sort((a, b) => {
                 if (currentSortOrder === 'name') {
                     return a.name.localeCompare(b.name, currentLanguage);
@@ -441,22 +482,22 @@
                 }
             });
 
-            // Update counter
+            // Zähler aktualisieren
             resultCountSpan.textContent = `${allFilteredItems.length} Ergebnisse`;
 
-            // Resets the index and clears the grid before rendering the first chunk
+            // Setzt den Index zurück und leert das Gitter, bevor der erste Block gerendert wird
             currentIndex = 0;
             itemGrid.innerHTML = '';
 
-            // Starts lazy loading by rendering the first chunk
+            // Beginnt mit Lazy Loading, indem der erste Block gerendert wird
             renderNextChunk();
         }
         
         /**
-         * Renders the next chunk of items and appends it to the grid.
+         * Rendert den nächsten Block von Elementen und fügt ihn an das Gitter an.
          */
         function renderNextChunk() {
-            // Check if there are still items to load
+            // Prüfen, ob noch Elemente zum Laden vorhanden sind
             if (currentIndex >= allFilteredItems.length) {
                 observer.unobserve(lazyLoadSentinel);
                 return;
@@ -471,49 +512,49 @@
             
             currentIndex += itemsPerPage;
 
-            // Observe the sentinel element if the observer is not yet observing
+            // Beobachtet das Sentinel-Element, falls der Observer es noch nicht beobachtet
             if (currentIndex < allFilteredItems.length) {
                 observer.observe(lazyLoadSentinel);
             }
         }
 
         /**
-         * Dynamically updates the grid column classes based on the currentColumns state.
+         * Aktualisiert dynamisch die Spaltenklassen des Gitters basierend auf dem aktuellen Spaltenstatus.
          */
         function updateGridColumns() {
-            // Remove existing grid-cols classes
+            // Entfernt vorhandene grid-cols-Klassen
             itemGrid.className = itemGrid.className.replace(/grid-cols-\d+/g, '');
 
-            // Get the appropriate class based on currentColumns and add it
+            // Ruft die entsprechende Klasse basierend auf den aktuellen Spalten ab und fügt sie hinzu
             if (currentColumns === 2) {
                 itemGrid.classList.add('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4');
             } else if (currentColumns === 4) {
-                // For 'medium', we set different classes for different screen sizes
+                // Für 'mittel' setzen wir verschiedene Klassen für verschiedene Bildschirmgrößen
                 itemGrid.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'lg:grid-cols-5', 'xl:grid-cols-6');
             } else if (currentColumns === 6) {
-                // For 'small', we set the highest possible column count
+                // Für 'klein' setzen wir die höchstmögliche Spaltenanzahl
                 itemGrid.classList.add('grid-cols-4', 'sm:grid-cols-5', 'md:grid-cols-6', 'lg:grid-cols-7', 'xl:grid-cols-8');
             }
         }
         
         /**
-         * Updates the visual state of the column buttons.
+         * Aktualisiert den visuellen Zustand der Spalten-Buttons.
          */
         function updateColButtonStyles() {
             colButtons.forEach(btn => {
                 const cols = parseInt(btn.dataset.cols, 10);
-                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Remove active state
+                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Entfernt den aktiven Zustand
                 if (cols === currentColumns) {
-                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Add active state
+                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Fügt den aktiven Zustand hinzu
                 }
             });
         }
 
         /**
-         * Creates a single item card with a loading skeleton.
-         * The skeleton is shown by default and hides when the image is loaded.
-         * @param {object} item - The item object.
-         * @returns {HTMLElement} - The DOM element of the item card.
+         * Erstellt eine einzelne Artikelkarte mit einem Ladeskelett.
+         * Das Skelett wird standardmäßig angezeigt und ausgeblendet, wenn das Bild geladen ist.
+         * @param {object} item - Das Artikelobjekt.
+         * @returns {HTMLElement} - Das DOM-Element der Artikelkarte.
          */
         function createItemCard(item) {
             const card = document.createElement('div');
@@ -524,43 +565,43 @@
             const rarityBorderClass = rarityColorClass.replace('text-', 'border-');
             const imageUrl = item.images.smallIcon || item.images.icon || item.images.featured || 'https://placehold.co/128x128/374151/d1d5db?text=Image';
 
-            // Image container to hold both skeleton and image
+            // Bild-Container, um sowohl Skelett als auch Bild zu halten
             const imageContainer = document.createElement('div');
-            // Using a square aspect ratio to ensure consistent image sizing across devices
+            // Verwendet ein quadratisches Seitenverhältnis, um eine konsistente Bildgröße auf allen Geräten zu gewährleisten
             imageContainer.className = 'relative w-full aspect-square rounded-lg mb-2 overflow-hidden';
 
-            // Skeleton element
+            // Skelett-Element
             const skeleton = document.createElement('div');
-            // Use the shine animation on the skeleton
+            // Verwendet die Glanz-Animation auf dem Skelett
             skeleton.className = 'loading-skeleton absolute inset-0 rounded-lg animate-shine';
             imageContainer.appendChild(skeleton);
 
-            // Image element
+            // Bild-Element
             const img = document.createElement('img');
             img.alt = item.name;
             img.className = 'loading-image w-full h-auto rounded-lg transform transition-transform duration-300 group-hover:scale-105'; 
             
-            // Onload handler
+            // Lade-Handler
             img.onload = () => {
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
             };
             
-            // Onerror handler
+            // Fehler-Handler
             img.onerror = () => {
                 img.src = 'https://placehold.co/128x128/374151/d1d5db?text=Image';
                 skeleton.classList.add('loaded-skeleton');
                 img.classList.add('loaded-image');
             };
 
-            // Set the src AFTER listeners are attached
+            // Setzt das src-Attribut, NACHDEM die Listener angehängt wurden
             img.src = imageUrl;
             imageContainer.appendChild(img);
 
-            // Append the container to the card
+            // Fügt den Container zur Karte hinzu
             card.appendChild(imageContainer);
 
-            // Text content
+            // Textinhalt
             const textContainer = document.createElement('div');
             textContainer.className = 'text-center truncate';
             textContainer.innerHTML = `
@@ -569,12 +610,12 @@
             `;
             card.appendChild(textContainer);
 
-            // Border
+            // Rand
             const border = document.createElement('div');
             border.className = `absolute inset-0 border-2 ${rarityBorderClass} rounded-xl transition-all duration-300 pointer-events-none`;
             card.appendChild(border);
             
-            // Checks if the item was added in the last 7 days
+            // Prüft, ob der Artikel in den letzten 7 Tagen hinzugefügt wurde
             const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
             const now = new Date();
             const itemAddedDate = new Date(item.added);
@@ -591,11 +632,11 @@
         }
 
         /**
-         * Displays the details of an item in a modal.
-         * @param {object} item - The item object.
+         * Zeigt die Details eines Artikels in einem Modal an.
+         * @param {object} item - Das Artikelobjekt.
          */
         function showItemDetails(item) {
-            // First, show a loading animation
+            // Zuerst eine Ladeanimation anzeigen
             modalContent.innerHTML = `
                 <div class="w-full md:w-1/2">
                     <div class="w-full h-64 rounded-lg shadow-lg animate-shine"></div>
@@ -613,10 +654,10 @@
             const rarityColor = getRarityColor(item.rarity.value);
             const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
 
-            // Creates a new Image object to monitor loading
+            // Erstellt ein neues Image-Objekt, um das Laden zu überwachen
             const img = new Image();
             img.onload = () => {
-                // Once the image is loaded, update the modal content
+                // Sobald das Bild geladen ist, den Modal-Inhalt aktualisieren
                 modalContent.innerHTML = `
                     <div class="w-full md:w-1/2">
                         <img src="${imageUrl}" alt="${item.name}" class="w-full h-auto rounded-lg shadow-lg">
@@ -632,7 +673,7 @@
                 `;
             };
             img.onerror = () => {
-                // In case of an error, show a fallback image
+                // Bei einem Fehler ein Fallback-Bild anzeigen
                 const fallbackImageUrl = 'https://placehold.co/512x512/374151/d1d5db?text=Image+Not+Found';
                 modalContent.innerHTML = `
                     <div class="w-full md:w-1/2">
@@ -649,21 +690,21 @@
                 `;
             };
             
-            // Start the loading process
+            // Startet den Ladevorgang
             img.src = imageUrl;
         }
 
         /**
-         * Hides the modal.
+         * Versteckt das Modal.
          */
         function hideItemDetails() {
             itemDetailsModal.classList.add('hidden');
         }
 
         /**
-         * Helper function to get the correct Tailwind text color for the rarity.
-         * @param {string} rarity - The rarity of the item.
-         * @returns {string} - The corresponding Tailwind class.
+         * Hilfsfunktion, um die richtige Tailwind-Textfarbe für die Seltenheit zu erhalten.
+         * @param {string} rarity - Die Seltenheit des Artikels.
+         * @returns {string} - Die entsprechende Tailwind-Klasse.
          */
         function getRarityColor(rarity) {
             const colors = {
@@ -673,7 +714,7 @@
                 'epic': 'text-purple-400',
                 'legendary': 'text-orange-400',
                 'mythic': 'text-red-400',
-                'crew': 'text-zinc-500', // Added 'Crew' rarity
+                'crew': 'text-zinc-500', // Hinzugefügte 'Crew'-Seltenheit
                 'marvel': 'text-red-600',
                 'dc': 'text-blue-600',
                 'starwars': 'text-cyan-400',
@@ -688,7 +729,7 @@
         }
 
         /**
-         * Updates the UI texts based on the selected language.
+         * Aktualisiert die UI-Texte basierend auf der ausgewählten Sprache.
          */
         function updateUIForLanguage() {
             if (currentCosmetics.length > 0) {
@@ -696,26 +737,26 @@
             }
         }
 
-        // --- Initial app start ---
+        // --- Initialer App-Start ---
         /**
-         * Initializes the app on page load.
+         * Initialisiert die App beim Laden der Seite.
          */
         async function initializeApp() {
-            // Set initial state from the HTML select elements
+            // Setzt den Anfangszustand aus den HTML-Auswahlelementen
             currentLanguage = languageSelect.value;
             currentSortOrder = sortSelect.value;
             currentFilterRarity = rarityFilterSelect.value;
 
             appVersionDisplay.textContent = appVersion;
 
-            // Loads the initial category ('outfit') and sets the UI state
+            // Lädt die anfängliche Kategorie ('outfit') und setzt den UI-Zustand
             await loadCosmeticsCategory('outfit');
 
-            // Set initial column layout and button styles
+            // Setzt das anfängliche Spaltenlayout und die Button-Stile
             updateGridColumns();
             updateColButtonStyles();
 
-            // Observes the sentinel element to start lazy loading
+            // Beobachtet das Sentinel-Element, um mit Lazy Loading zu beginnen
             observer.observe(lazyLoadSentinel);
         }
 
