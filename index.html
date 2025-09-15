@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Call of Duty: Black Ops 7</title>
     <link rel="icon" href="https://media.tenor.com/1DHmHL3V7DgAAAAe/bo7-call-of-duty.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,9 +15,8 @@
             background-color: #0a0a0a; /* Dunklerer Hintergrund */
             letter-spacing: 1px;
         }
-        /* Fixed background image to prevent jumping */
-        body::before {
-            content: '';
+        /* Container for the fixed background image to prevent jumping and scrolling */
+        #background-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -26,16 +25,8 @@
             background-image: url('https://pbs.twimg.com/media/Gs8OvifWEAEK74u.jpg:large');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
             z-index: -1;
-        }
-        /* Tablet view adjustments for background */
-        @media (min-width: 768px) and (max-width: 1024px) {
-            body::before {
-                background-size: 100% auto;
-                background-repeat: no-repeat;
-                background-position: top center;
-            }
         }
         /* Black Ops Font für Überschriften und wichtige Elemente */
         h1, h2, h3, .btn-primary, .nav-link {
@@ -115,6 +106,8 @@
     </style>
 </head>
 <body class="text-white min-h-screen">
+
+    <div id="background-container"></div>
 
     <div class="bg-black bg-opacity-60 min-h-screen">
         <!-- Header & Navigation -->
