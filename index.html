@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Web Browser</title>
+    <title>Apollo Pierre</title>
     
     <!-- PWA Metadaten für iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Web Browser">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/0b193a/ffffff?text=WB">
+    <meta name="apple-mobile-web-app-title" content="Apollo Pierre">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/0b193a/ffffff?text=AP">
 
     <!-- Web App Manifest (als Data-URI eingebettet) -->
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIldlYiBCcm93c2VyIiwKICAic2hvcnRfbmFtZSI6ICJXZWJCcm93c2VyIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9wbGFjZWhvZC5jby8xOTJ4MTkyLzBiMTkzYS9mZmZmZmY/dGV4dD1XQiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3BsYWNlaG9kLmNvLzUxMng1MTIvMGIxOTNhL2ZmZmZmZj90ZXh0PVdCIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiCiAgICB9CiAgXSwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJ0aGVtZV9jb2xvciI6ICIjMGIxOTNhIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGIxOTNhIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiCn0=">
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFwb2xsbyBQaWVycmUiLAogICJzaG9ydF9uYW1lIjogIkFwb2xsbyBQaWVycmUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3BsYWNlaG9kLmNvLzE5MngxOTIvMGIxOTNhL2ZmZmZmZj90ZXh0PUFQIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2QuY28vNTEyeDUxMi8wYjE5M2EvZmZmZmZmP3RleHQ9QVAiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIKICAgIH0KICBdLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiMwYjE5M2EiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYjE5M2EiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIKfQ==">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Black+Ops+One&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -27,6 +27,11 @@
             font-family: 'Anton', sans-serif;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+        .font-bo6 {
+            font-family: 'Black Ops One', sans-serif;
+            letter-spacing: 0.08em;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
         }
         .loader {
             border: 4px solid rgba(255, 255, 255, 0.2);
@@ -50,25 +55,35 @@
     <div class="w-full h-full bg-transparent flex flex-col overflow-hidden">
         <!-- Kopfzeile mit Steuerelementen -->
         <header class="bg-[#0b193a]/80 backdrop-blur-sm p-2 shadow-lg z-10 flex-shrink-0">
-            <div class="flex items-center space-x-2">
-                <!-- Navigationsbuttons -->
-                <button id="backBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-                <button id="forwardBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-                <button id="reloadBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
-                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4"></path></svg>
-                </button>
-                 <button id="homeBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
-                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                </button>
+            <div class="flex items-center justify-between">
+                <!-- Linke Navigationsbuttons -->
+                <div class="flex items-center space-x-2">
+                    <button id="backBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button id="forwardBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                    <button id="reloadBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4"></path></svg>
+                    </button>
+                    <button id="homeBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    </button>
+                </div>
 
-                <!-- Adressleiste -->
-                <div class="relative flex-grow">
+                <!-- Mittige Adressleiste -->
+                <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
                     <svg class="w-5 h-5 text-blue-300 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <input type="text" id="urlInput" placeholder="Suchen oder Adresse eingeben" class="w-full bg-blue-900/70 text-white placeholder-blue-300 rounded-full py-2 pl-10 pr-4 border-2 border-transparent focus:outline-none focus:border-yellow-400 transition-all">
+                </div>
+
+                <!-- Rechter Platzhalter für Symmetrie -->
+                <div class="flex items-center space-x-2 invisible">
+                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
+                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
+                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
+                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
                 </div>
             </div>
         </header>
@@ -77,14 +92,14 @@
         <main id="contentArea" class="flex-grow relative bg-transparent">
             <!-- Willkommens-Ansicht -->
             <div id="welcomeView" class="w-full h-full flex flex-col items-center justify-center p-8 text-center">
-                <h1 class="font-fortnite text-5xl font-bold text-white tracking-wider">Web Browser</h1>
+                <h1 class="font-fortnite text-5xl font-bold text-white tracking-wider">Apollo Pierre</h1>
                 <p class="text-blue-200 mt-4">Gib oben eine Adresse ein, um loszulegen.</p>
             </div>
 
              <!-- Fehler-Ansicht -->
             <div id="errorView" class="w-full h-full flex-col items-center justify-center p-8 text-center hidden">
-                <h2 class="font-fortnite text-3xl font-bold text-yellow-400">Laden Fehlgeschlagen</h2>
-                <p class="text-blue-200 mt-2 max-w-md mx-auto">Diese Seite kann nicht angezeigt werden. Viele Webseiten blockieren die Einbettung aus Sicherheitsgründen. Versuch es mit einer anderen Adresse.</p>
+                <h2 class="font-bo6 text-4xl text-[#F26419]">Laden Fehlgeschlagen</h2>
+                <p class="text-blue-200 mt-4 max-w-md mx-auto">Diese Seite kann nicht angezeigt werden. Viele Webseiten blockieren die Einbettung aus Sicherheitsgründen. Versuch es mit einer anderen Adresse.</p>
             </div>
             
             <!-- Lade-Spinner -->
@@ -93,7 +108,7 @@
             </div>
             
             <!-- Iframe für Webseiten-Anzeige -->
-            <iframe id="browserFrame" class="w-full h-full border-none hidden bg-white" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"></iframe>
+            <iframe id="browserFrame" class="w-full h-full border-none hidden bg-transparent" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"></iframe>
         </main>
     </div>
 
@@ -178,10 +193,25 @@
         };
         
         browserFrame.onload = () => {
-            clearTimeout(loadingTimeout); // Erfolgreich geladen, Timeout abbrechen
-            loader.classList.add('hidden');
-            browserFrame.classList.remove('hidden');
-            errorView.classList.add('hidden');
+            clearTimeout(loadingTimeout); // Timeout abbrechen, da eine Antwort kam
+            try {
+                // Testet den Zugriff. Wirft bei cross-origin-Blockaden einen Fehler.
+                const href = browserFrame.contentWindow.location.href;
+                // Wenn die URL 'about:blank' ist und es nicht die Startseite ist, ist es auch ein Fehler.
+                if (href === 'about:blank' && history.length > 0) {
+                    showError();
+                    return;
+                }
+                
+                // Kein Fehler, Seite anzeigen
+                loader.classList.add('hidden');
+                browserFrame.classList.remove('hidden');
+                errorView.classList.add('hidden');
+            } catch (e) {
+                // Fehler beim Zugriff -> Seite ist blockiert.
+                console.log("Blocked by X-Frame-Options or other security policy.");
+                showError();
+            }
         };
 
         browserFrame.onerror = () => {
@@ -222,4 +252,8 @@
     </script>
 </body>
 </html>
+
+
+
+
 
