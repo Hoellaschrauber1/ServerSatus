@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Call of Duty: Black Ops 7</title>
     <link rel="icon" href="https://media.tenor.com/1DHmHL3V7DgAAAAe/bo7-call-of-duty.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,6 +28,14 @@
             background-position: center;
             background-attachment: fixed;
             z-index: -1;
+        }
+        /* Tablet view adjustments for background */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            body::before {
+                background-size: 100% auto;
+                background-repeat: no-repeat;
+                background-position: top center;
+            }
         }
         /* Black Ops Font für Überschriften und wichtige Elemente */
         h1, h2, h3, .btn-primary, .nav-link {
