@@ -2,258 +2,338 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Apollo Pierre</title>
-    
-    <!-- PWA Metadaten für iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Apollo Pierre">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/0b193a/ffffff?text=AP">
-
-    <!-- Web App Manifest (als Data-URI eingebettet) -->
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFwb2xsbyBQaWVycmUiLAogICJzaG9ydF9uYW1lIjogIkFwb2xsbyBQaWVycmUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3BsYWNlaG9kLmNvLzE5MngxOTIvMGIxOTNhL2ZmZmZmZj90ZXh0PUFQIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2QuY28vNTEyeDUxMi8wYjE5M2EvZmZmZmZmP3RleHQ9QVAiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIKICAgIH0KICBdLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiMwYjE5M2EiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYjE5M2EiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIKfQ==">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call of Duty: Black Ops 7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Black+Ops+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            overscroll-behavior: none;
+            background-color: #0a0a0a; /* Dunklerer Hintergrund */
         }
-        .font-fortnite {
-            font-family: 'Anton', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .header-glow {
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.7), 0 0 20px rgba(255, 165, 0, 0.5);
         }
-        .font-bo6 {
-            font-family: 'Black Ops One', sans-serif;
-            letter-spacing: 0.08em;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+        .section-card {
+            background-color: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
-        .loader {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top: 4px solid #ffc900;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1.2s linear infinite;
+        .btn-primary {
+            background: linear-gradient(90deg, #FF8C00, #FFA500);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 165, 0, 0.8);
         }
-        iframe::-webkit-scrollbar { display: none; }
-        iframe { -ms-overflow-style: none; scrollbar-width: none; }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FFA500;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active-link::after {
+            width: 100%;
+        }
+        .nav-link.active-link {
+            color: #FFA500; /* Orange color for active link */
+        }
+        /* Page Transition Styles */
+        .page-view {
+            transition: opacity 0.5s ease-in-out;
+        }
+        /* Fall-in Animation */
+        @keyframes fall-in {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fall {
+            animation: fall-in 0.7s ease-out forwards;
+            opacity: 0; /* Start hidden */
+        }
+        /* Platform Selector Styles */
+        .platform-btn {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-color: #4a4a4a;
+        }
+        .platform-btn:hover {
+            border-color: #FFA500;
+        }
+        .platform-btn.selected {
+            border-color: #FFA500;
+            background-color: rgba(255, 165, 0, 0.1);
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+            transform: scale(1.05);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#01091a] to-[#0151a0] flex items-center justify-center h-screen">
+<body class="text-white bg-cover bg-center bg-fixed" style="background-image: url('https://pbs.twimg.com/media/Gs8OvifWEAEK74u.jpg:large');">
 
-    <!-- Browser-UI -->
-    <div class="w-full h-full bg-transparent flex flex-col overflow-hidden">
-        <!-- Kopfzeile mit Steuerelementen -->
-        <header class="bg-[#0b193a]/80 backdrop-blur-sm p-2 shadow-lg z-10 flex-shrink-0">
-            <div class="flex items-center justify-between">
-                <!-- Linke Navigationsbuttons -->
-                <div class="flex items-center space-x-2">
-                    <button id="backBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button id="forwardBtn" class="p-2 rounded-full hover:bg-blue-800/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                    <button id="reloadBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
-                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4"></path></svg>
-                    </button>
-                    <button id="homeBtn" class="p-2 rounded-full hover:bg-blue-800/60 transition-colors">
-                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    </button>
+    <div class="bg-black bg-opacity-60 min-h-screen">
+        <!-- Header & Navigation -->
+        <header class="bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-800">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-black tracking-widest uppercase">
+                    <span class="text-orange-400">Black Ops</span> 7
+                </h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview-section" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="overview">Überblick</a>
+                    <a href="#campaign" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="campaign">Kampagne</a>
+                    <a href="#multiplayer" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="multiplayer">Multiplayer</a>
+                    <a href="#zombies" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="zombies">Zombies</a>
                 </div>
-
-                <!-- Mittige Adressleiste -->
-                <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
-                    <svg class="w-5 h-5 text-blue-300 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="urlInput" placeholder="Suchen oder Adresse eingeben" class="w-full bg-blue-900/70 text-white placeholder-blue-300 rounded-full py-2 pl-10 pr-4 border-2 border-transparent focus:outline-none focus:border-yellow-400 transition-all">
-                </div>
-
-                <!-- Rechter Platzhalter für Symmetrie -->
-                <div class="flex items-center space-x-2 invisible">
-                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
-                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
-                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
-                    <button class="p-2 rounded-full"><svg class="w-5 h-5"></svg></button>
-                </div>
-            </div>
+                <a href="https://www.callofduty.com/" target="_blank" class="btn-primary text-black font-bold py-2 px-6 rounded-lg uppercase tracking-wider">
+                    Jetzt vorbestellen
+                </a>
+            </nav>
         </header>
 
-        <!-- Inhaltsbereich -->
-        <main id="contentArea" class="flex-grow relative bg-transparent">
-            <!-- Willkommens-Ansicht -->
-            <div id="welcomeView" class="w-full h-full flex flex-col items-center justify-center p-8 text-center">
-                <h1 class="font-fortnite text-5xl font-bold text-white tracking-wider">Apollo Pierre</h1>
-                <p class="text-blue-200 mt-4">Gib oben eine Adresse ein, um loszulegen.</p>
+        <!-- Main View -->
+        <div id="main-view" class="page-view">
+            <!-- Hero Section -->
+            <main class="container mx-auto px-6 py-16 md:py-24 text-center">
+                <h2 class="text-5xl md:text-7xl font-black uppercase mb-4 header-glow tracking-wider animate-fall" style="animation-delay: 0.2s;">Die Zukunft ist unklar</h2>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 animate-fall" style="animation-delay: 0.4s;">
+                    Ein neuer, unvorhersehbarer Abschnitt im Black Ops-Universum beginnt. Die Grenzen zwischen Freund und Feind verschwimmen. Dies ist Call of Duty: Black Ops 7.
+                </p>
+                <div class="max-w-4xl mx-auto my-12 rounded-lg overflow-hidden border-2 border-orange-500 shadow-2xl shadow-orange-500/20 animate-fall" style="animation-delay: 0.6s;">
+                     <img src="https://image.api.playstation.com/vulcan/ap/rnd/202508/2217/72f2e0c0f755849ed370e2e312379845d427546cc8f7c561.jpg" alt="Bild von Black Ops 7 Key Art" class="w-full h-auto">
+                </div>
+            </main>
+
+            <!-- Game Modes Section -->
+            <div id="overview-section" class="py-16 md:py-24">
+                <div class="container mx-auto px-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Kampagne -->
+                        <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
+                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Spionage-Action-Kampagne</h3>
+                            <p class="text-gray-400">
+                               Black Ops 7 spielt in der nahen Zukunft und bietet eine packende Spionage-Thriller-Kampagne, in der technologische Kriegsführung eine neue, gefährliche Stufe erreicht.
+                            </p>
+                        </div>
+                        <!-- Multiplayer -->
+                        <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
+                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Wegweisender Multiplayer</h3>
+                            <p class="text-gray-400">
+                               Erlebe die nächste Stufe der Bewegung und des Kampfes mit neuen futuristischen Gadgets. Meistere 16 brandneue Karten am ersten Tag und zeige deine Fähigkeiten im beliebten Prestigesystem.
+                            </p>
+                        </div>
+                        <!-- Zombies -->
+                        <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
+                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Rundenbasierte Zombies</h3>
+                            <p class="text-gray-400">
+                                Die Zombies sind zurück, tödlicher als je zuvor! Stelle dich Horden von kybernetisch verbesserten Untoten in einem brandneuen, rundenbasierten Erlebnis auf zwei neuen Karten.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Release Date Section -->
+            <section class="py-16 text-center">
+                 <div class="container mx-auto px-6">
+                    <h3 class="text-4xl font-extrabold uppercase header-glow">Erhältlich am 24. Oktober 2025</h3>
+                    <p class="text-gray-400 mt-2">Auf Xbox, PlayStation und PC.</p>
+                 </div>
+            </section>
+
+            <!-- Pre-order Section -->
+            <section id="preorder" class="py-24 bg-black bg-opacity-50">
+                <div class="container mx-auto px-6 text-center">
+                    <h3 class="text-4xl font-bold mb-4">Wähle deine Plattform</h3>
+                    <p class="text-gray-300 max-w-2xl mx-auto mb-8">
+                        Bestelle jetzt vor und erhalte früheren Zugang zur offenen Beta sowie weitere exklusive Boni.
+                    </p>
+                    <!-- Platform Selection -->
+                    <div id="platform-selector" class="flex justify-center items-center flex-wrap gap-4 mb-8">
+                        <button data-platform="xbox" class="platform-btn flex items-center justify-center font-bold px-6 py-4 rounded-lg border-2 transition-all duration-300 w-40 h-16">
+                           <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor"><title>Xbox</title><path d="M12.001 2.4a9.6 9.6 0 1 0 0 19.2 9.6 9.6 0 0 0 0-19.2zm5.83 14.288-2.18-2.18-2.18-2.18-2.18-2.18-2.18-2.18L3.29 4.137a9.56 9.56 0 0 0-.889 3.992l5.122 5.122 2.18 2.18 2.18 2.18 2.18 2.18 4.014 4.014a9.56 9.56 0 0 0 1.95-6.077zM20.71 19.863a9.56 9.56 0 0 0 .888-3.992l-5.12-5.12-2.18-2.18-2.18-2.18-2.18-2.18-4.015-4.014a9.56 9.56 0 0 0-1.95 6.077l2.18 2.18 2.18 2.18 2.18 2.18 2.18 2.18z"/></svg>
+                        </button>
+                        <button data-platform="playstation" class="platform-btn flex items-center justify-center font-bold px-6 py-4 rounded-lg border-2 transition-all duration-300 w-40 h-16">
+                             <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor"><title>PlayStation</title><path d="M12.43.421c-5.303 0-9.454 2.233-9.454 2.233l6.545 4.962s3.133-1.921 4.54-.96c1.408.96 1.144 3.96 1.144 3.96s2.91-1.64 3.42-3.36c.51-1.72-1.22-4.04-2.5-5.12-1.28-1.08-3.69-1.715-3.695-1.715zm-2.14 9.12s-3.23-1.68-4.59-1.08c-1.36.6-1.57 3.04-1.57 3.04s-2.58-1.93-2.16-4.24c.42-2.31 3.32-4.48 3.32-4.48S.42 8.651.42 12.031c0 3.38 3.56 6.16 8.02 6.16 4.46 0 5.8-2.42 5.8-2.42s-2.4-2.02-5.93-3.6zM23.58 8.011s-4.32-2.56-8.24-2.56c-3.92 0-5.83 1.6-5.83 1.6s3.84 2.33 6.01 4.41c2.17 2.08 2.7 4.07 2.7 4.07s4.44-1.31 5.34-4.82c.9-3.51-1.46-6.3-1.46-6.3l1.48-1.4z"/></svg>
+                        </button>
+                        <button data-platform="pc" class="platform-btn flex items-center justify-center font-bold px-6 py-4 rounded-lg border-2 transition-all duration-300 w-40 h-16">
+                             <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor"><title>Battle.net</title><path d="M13.12 2.45h-2.24L2.45 13.12v2.24L10.88 24h2.24l8.43-8.64V13.1L13.12 2.45zM12 4.69l6.34 6.34h-4.08l-2.26-4.52zm0 14.62L5.66 12.97h4.08l2.26 4.52v.01zM4.69 12l2.25-2.25H10.5L8.24 12zm14.62 0l-2.25 2.25h-3.57L15.76 12l-2.25-2.25h3.57L19.31 12z"/></svg>
+                        </button>
+                    </div>
+                    <a id="platform-preorder-button" href="#" class="btn-primary text-black font-bold py-4 px-10 rounded-lg uppercase tracking-wider text-lg opacity-50 cursor-not-allowed">
+                        Plattform wählen
+                    </a>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Details View -->
+        <div id="details-view" class="page-view hidden opacity-0 container mx-auto px-6 py-16 md:py-24">
+            <!-- Campaign Details -->
+            <div id="detail-campaign" class="detail-section hidden">
+                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Kampagne: Operation Chimera</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                    <div class="animate-fall" style="animation-delay: 0.3s;">
+                        <h3 class="text-2xl font-bold text-orange-400 mb-4">Die Welt am Abgrund</h3>
+                        <p class="text-gray-300 mb-4">
+                           Im Jahr 2035 ist die Welt zunehmend von privaten Militärunternehmen (PMCs) abhängig. Als eine abtrünnige KI namens "Chimera" die Kontrolle über die globalen Drohnen- und Robotik-Netzwerke übernimmt, bricht Chaos aus. Die Grenzen zwischen den Nationen lösen sich auf und die Welt versinkt im Misstrauen.
+                        </p>
+                        <p class="text-gray-300">
+                           Du übernimmst die Rolle von "Orion", einem ehemaligen Black Ops-Agenten, der im Verborgenen lebt. Reaktiviert von deinem alten Kommandanten, musst du ein Team von Spezialisten zusammenstellen, um Chimera aufzuhalten, bevor die KI einen globalen Krieg auslöst. Die Mission führt dich an exotische Orte, von den neon-durchfluteten Straßen Neo-Tokios bis zu geheimen Unterwasserbasen im arktischen Meer.
+                        </p>
+                    </div>
+                    <div class="animate-fall" style="animation-delay: 0.5s;">
+                         <img src="https://blz-contentstack-images.akamaized.net/v3/assets/bltf408a0557f4e4998/blt707a9d52f04a64dd/689e4d306fc22c2929eda8c2/CODBO7-Screenshot_03-3840x2160.png?imwidth=1920&imdensity=2.625" alt="Ein actiongeladener Screenshot aus der Kampagne" class="rounded-lg shadow-lg border-2 border-orange-500">
+                    </div>
+                </div>
             </div>
 
-             <!-- Fehler-Ansicht -->
-            <div id="errorView" class="w-full h-full flex-col items-center justify-center p-8 text-center hidden">
-                <h2 class="font-bo6 text-4xl text-[#F26419]">Laden Fehlgeschlagen</h2>
-                <p class="text-blue-200 mt-4 max-w-md mx-auto">Diese Seite kann nicht angezeigt werden. Viele Webseiten blockieren die Einbettung aus Sicherheitsgründen. Versuch es mit einer anderen Adresse.</p>
+            <!-- Multiplayer Details -->
+            <div id="detail-multiplayer" class="detail-section hidden">
+                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Multiplayer: Neu Definiert</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                    <div class="animate-fall" style="animation-delay: 0.3s;">
+                         <img src="https://futurefive.co.nz/uploads/story/2025/08/25/BO7_Reveal_CP_01_BRANDED_Medium.webp" alt="Ein Screenshot aus dem Multiplayer-Modus von Black Ops 7" class="rounded-lg shadow-lg border-2 border-orange-500">
+                    </div>
+                    <div class="animate-fall" style="animation-delay: 0.5s;">
+                        <h3 class="text-2xl font-bold text-orange-400 mb-4">Der Kampf der Zukunft</h3>
+                        <p class="text-gray-300 mb-4">
+                           Der Multiplayer von Black Ops 7 definiert die Regeln des Kampfes neu. Mit einem überarbeiteten Bewegungssystem, das schnelle Rutschmanöver, Kletter-Boosts und taktische Sprünge ermöglicht, wird das Gameplay vertikaler und dynamischer als je zuvor. Meistere deine Umgebung auf 16 brandneuen Karten, von dichten städtischen Kampfzonen bis hin zu weitläufigen, strategischen Außenposten.
+                        </p>
+                        <h3 class="text-2xl font-bold text-orange-400 mt-6 mb-4">Dein Arsenal, deine Regeln</h3>
+                        <p class="text-gray-300">
+                           Das "Pick 10"-System für die Klassenerstellung kehrt in erweiterter Form zurück und bietet beispiellose Freiheit bei der Gestaltung deines Operators. Experimentiere mit futuristischen Waffenaufsätzen, kybernetischen Verbesserungen und spielverändernden Gadgets. Beweise dein Können und steige im beliebten Prestige-System auf, um exklusive Belohnungen freizuschalten und deinen Status als Elite-Soldat zu festigen.
+                        </p>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Lade-Spinner -->
-            <div id="loader" class="absolute inset-0 bg-black/50 flex items-center justify-center hidden">
-                <div class="loader"></div>
+
+            <!-- Zombies Details -->
+            <div id="detail-zombies" class="detail-section hidden">
+                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.2s;">Zombies Details</h2>
+                <p class="text-gray-300 animate-fall" style="animation-delay: 0.4s;">Weitere Details zum Zombies-Modus werden in Kürze bekannt gegeben.</p>
             </div>
-            
-            <!-- Iframe für Webseiten-Anzeige -->
-            <iframe id="browserFrame" class="w-full h-full border-none hidden bg-transparent" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"></iframe>
-        </main>
+        </div>
     </div>
 
     <script>
-        // Service Worker (unverändert)
-        if ('serviceWorker' in navigator) {
-            const swJS = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
-            const blob = new Blob([swJS], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).then(reg => console.log('SW registered', reg)).catch(err => console.log('SW error', err));
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainView = document.getElementById('main-view');
+            const detailsView = document.getElementById('details-view');
+            const navLinks = document.querySelectorAll('.main-nav-link');
+            const detailSections = document.querySelectorAll('.detail-section');
 
-        // DOM-Elemente
-        const urlInput = document.getElementById('urlInput');
-        const backBtn = document.getElementById('backBtn');
-        const forwardBtn = document.getElementById('forwardBtn');
-        const reloadBtn = document.getElementById('reloadBtn');
-        const homeBtn = document.getElementById('homeBtn');
-        const browserFrame = document.getElementById('browserFrame');
-        const welcomeView = document.getElementById('welcomeView');
-        const errorView = document.getElementById('errorView');
-        const loader = document.getElementById('loader');
-        
-        // Zustand
-        let history = [];
-        let currentIndex = -1;
-        let loadingTimeout;
-        
-        const updateNavButtons = () => {
-            backBtn.disabled = currentIndex <= 0;
-            forwardBtn.disabled = currentIndex >= history.length - 1;
-        };
-        
-        const resetToHome = () => {
-            clearTimeout(loadingTimeout);
-            browserFrame.src = 'about:blank';
-            urlInput.value = '';
-            welcomeView.classList.remove('hidden');
-            errorView.classList.add('hidden');
-            browserFrame.classList.add('hidden');
-            loader.classList.add('hidden');
-        };
+            const setActiveLink = (targetId) => {
+                navLinks.forEach(nav => {
+                    nav.classList.remove('active-link');
+                    if (nav.dataset.target === targetId) {
+                        nav.classList.add('active-link');
+                    }
+                });
+            };
 
-        const navigateTo = (url, isNavigatingHistory = false) => {
-            clearTimeout(loadingTimeout);
-            welcomeView.classList.add('hidden');
-            errorView.classList.add('hidden');
-            loader.classList.remove('hidden');
-            browserFrame.classList.add('hidden');
+            const switchView = (targetId) => {
+                const activeView = detailsView.classList.contains('hidden') ? mainView : detailsView;
+                activeView.classList.add('opacity-0');
 
-            let finalUrl = url;
-            if (!/^(https?:\/\/|file:|data:)/.test(finalUrl)) {
-                if (finalUrl.includes('.') && !finalUrl.includes(' ')) {
-                    finalUrl = 'https://' + finalUrl;
-                } else {
-                    finalUrl = `https://www.google.com/search?q=${encodeURIComponent(finalUrl)}`;
-                }
-            }
-            
-            urlInput.value = finalUrl;
-            browserFrame.src = finalUrl;
+                setTimeout(() => {
+                    activeView.classList.add('hidden');
+                    detailSections.forEach(section => section.classList.add('hidden'));
+                    
+                    const targetSection = document.getElementById(`detail-${targetId}`);
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                    
+                    detailsView.classList.remove('hidden');
+                    setTimeout(() => {
+                        detailsView.classList.remove('opacity-0');
+                        window.scrollTo(0, 0);
+                        setActiveLink(targetId);
+                    }, 20);
 
-            // Timeout, falls die Seite nicht lädt (z.B. wegen X-Frame-Options)
-            loadingTimeout = setTimeout(() => {
-                showError();
-            }, 10000); // 10 Sekunden
+                }, 500);
+            };
 
-            if (!isNavigatingHistory) {
-                history = history.slice(0, currentIndex + 1);
-                history.push(finalUrl);
-                currentIndex++;
-            }
-            
-            updateNavButtons();
-        };
+            const goBackToMain = () => {
+                detailsView.classList.add('opacity-0');
 
-        const showError = () => {
-            clearTimeout(loadingTimeout);
-            loader.classList.add('hidden');
-            browserFrame.classList.add('hidden');
-            browserFrame.src = 'about:blank'; // Stoppt den Ladeversuch
-            errorView.classList.remove('hidden');
-        };
-        
-        browserFrame.onload = () => {
-            clearTimeout(loadingTimeout); // Timeout abbrechen, da eine Antwort kam
-            try {
-                // Testet den Zugriff. Wirft bei cross-origin-Blockaden einen Fehler.
-                const href = browserFrame.contentWindow.location.href;
-                // Wenn die URL 'about:blank' ist und es nicht die Startseite ist, ist es auch ein Fehler.
-                if (href === 'about:blank' && history.length > 0) {
-                    showError();
-                    return;
-                }
-                
-                // Kein Fehler, Seite anzeigen
-                loader.classList.add('hidden');
-                browserFrame.classList.remove('hidden');
-                errorView.classList.add('hidden');
-            } catch (e) {
-                // Fehler beim Zugriff -> Seite ist blockiert.
-                console.log("Blocked by X-Frame-Options or other security policy.");
-                showError();
-            }
-        };
+                setTimeout(() => {
+                    detailsView.classList.add('hidden');
+                    mainView.classList.remove('hidden');
+                    setTimeout(() => {
+                        mainView.classList.remove('opacity-0');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setActiveLink('overview');
+                    }, 20);
+                }, 500);
+            };
 
-        browserFrame.onerror = () => {
-             showError();
-        };
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.dataset.target;
+                    
+                    if (targetId === 'overview') {
+                        if (!detailsView.classList.contains('hidden')) {
+                            goBackToMain();
+                        } else {
+                            document.getElementById('overview-section').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else {
+                        switchView(targetId);
+                    }
+                });
+            });
 
-        urlInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter' && urlInput.value.trim() !== '') {
-                navigateTo(urlInput.value.trim());
-            }
+            // Pre-order platform selection
+            const platformButtons = document.querySelectorAll('.platform-btn');
+            const preorderButton = document.getElementById('platform-preorder-button');
+            let selectedPlatform = null;
+
+            const preorderLinks = {
+                xbox: 'https://www.xbox.com/de-de/games/store/call-of-duty-black-ops-6/9P2V8F81P2D5',
+                playstation: 'https://store.playstation.com/de-de/concept/10009301',
+                pc: 'https://eu.shop.battle.net/de-de/product/call-of-duty-black-ops-6'
+            };
+
+            platformButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    platformButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedPlatform = button.dataset.platform;
+                    
+                    let platformName = selectedPlatform.toUpperCase();
+                    if(selectedPlatform === 'pc') platformName = 'BATTLE.NET'
+
+                    preorderButton.textContent = `Für ${platformName} vorbestellen`;
+                    preorderButton.href = preorderLinks[selectedPlatform];
+                    preorderButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    preorderButton.setAttribute('target', '_blank');
+                });
+            });
+
+            // Set initial active link
+            setActiveLink('overview');
         });
-
-        backBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                navigateTo(history[currentIndex], true);
-            }
-        });
-
-        forwardBtn.addEventListener('click', () => {
-            if (currentIndex < history.length - 1) {
-                currentIndex++;
-                navigateTo(history[currentIndex], true);
-            }
-        });
-        
-        homeBtn.addEventListener('click', resetToHome);
-
-        reloadBtn.addEventListener('click', () => {
-            if (browserFrame.src && browserFrame.src !== 'about:blank' && !browserFrame.classList.contains('hidden')) {
-                browserFrame.src = history[currentIndex];
-            }
-        });
-
-        // Initialer Zustand
-        updateNavButtons();
-
     </script>
 </body>
 </html>
-
-
-
-
 
