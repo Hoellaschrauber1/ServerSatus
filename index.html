@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Call of Duty: Black Ops 7</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAABCgAwAEAAAAAQAAABAAAAAAVMss2gAAAAlwSFlzAAALEwAACxMBAJqcGAAAAa5JREFUOE+tkz1rFUEUhb+7N3d3m3uZmUTQIEgQERTsBMXCTrJFsBBEsLKzsbKws5VEwU4QLOxsbO0HwcfAI8TCwoXgZ6xCEERE/JGcmXk7s/OdcxAR7a13vTtnnXPPOQORkZG/C2201bSwz3fP14b2D+hmg52xH30kKMAUehkQ5jY12AbtJ19qSUj25Y1pGg3NqKk0t6s6D+xO5PABVoP3KA6pSA10R0Q2tQDqf72wTdVXGjXJHP4BvQW2X4s0fM01sO9RChsNPUiMSp4W4Ae1W3Xk/9kAdBfKpmk8Pxe4QBt0V6q34/WlF5iB71y4/Uf+7H0W9l26a+j2hT160Pz3S2g1fJvQd3m8d2m7j+k1U3U1oDqQ/ZtA71gQ+tF/O+k95vM9t/88xts0S1XwR2emqM8Kcj3H07k5dAP3W3VlPZk/y6g8JwbMHU2Nqg9i1sZ1uM9PcrB6lT38x/0CB4Qh85O5PABXnjzhmB0W4P1x/v3T10b/Tj/31yA8JwbMAWd61c6hW5A+sozQ4+f5X9/b5b/ASdY91H4UaOMAAAAAElFTkSuQmCC">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0a0a0a; /* Dunklerer Hintergrund */
+        }
+        /* Black Ops Font für Überschriften und wichtige Elemente */
+        h1, h2, h3, .btn-primary, .nav-link {
+            font-family: 'Black Ops One', sans-serif;
+            letter-spacing: 1px;
         }
         .header-glow {
             text-shadow: 0 0 15px rgba(255, 165, 0, 0.7), 0 0 20px rgba(255, 165, 0, 0.5);
@@ -92,16 +98,16 @@
         <!-- Header & Navigation -->
         <header class="bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-800">
             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-black tracking-widest uppercase">
+                <h1 class="text-2xl tracking-widest uppercase">
                     <span class="text-orange-400">Black Ops</span> 7
                 </h1>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#overview-section" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="overview">Überblick</a>
-                    <a href="#campaign" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="campaign">Kampagne</a>
-                    <a href="#multiplayer" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="multiplayer">Multiplayer</a>
-                    <a href="#zombies" class="nav-link main-nav-link text-gray-300 hover:text-orange-400 font-semibold" data-target="zombies">Zombies</a>
+                    <a href="#overview-section" class="nav-link text-gray-300 hover:text-orange-400" data-target="overview">Überblick</a>
+                    <a href="#campaign" class="nav-link text-gray-300 hover:text-orange-400" data-target="campaign">Kampagne</a>
+                    <a href="#multiplayer" class="nav-link text-gray-300 hover:text-orange-400" data-target="multiplayer">Multiplayer</a>
+                    <a href="#zombies" class="nav-link text-gray-300 hover:text-orange-400" data-target="zombies">Zombies</a>
                 </div>
-                <a href="https://www.callofduty.com/" target="_blank" class="btn-primary text-black font-bold py-2 px-6 rounded-lg uppercase tracking-wider">
+                <a href="https://www.callofduty.com/" target="_blank" class="btn-primary text-black py-2 px-6 rounded-lg uppercase tracking-wider">
                     Jetzt vorbestellen
                 </a>
             </nav>
@@ -111,7 +117,7 @@
         <div id="main-view" class="page-view">
             <!-- Hero Section -->
             <main class="container mx-auto px-6 py-16 md:py-24 text-center">
-                <h2 class="text-5xl md:text-7xl font-black uppercase mb-4 header-glow tracking-wider animate-fall" style="animation-delay: 0.2s;">Die Zukunft ist unklar</h2>
+                <h2 class="text-5xl md:text-7xl uppercase mb-4 header-glow tracking-wider animate-fall" style="animation-delay: 0.2s;">Die Zukunft ist unklar</h2>
                 <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 animate-fall" style="animation-delay: 0.4s;">
                     Ein neuer, unvorhersehbarer Abschnitt im Black Ops-Universum beginnt. Die Grenzen zwischen Freund und Feind verschwimmen. Dies ist Call of Duty: Black Ops 7.
                 </p>
@@ -126,21 +132,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <!-- Kampagne -->
                         <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
-                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Spionage-Action-Kampagne</h3>
+                            <h3 class="text-2xl text-orange-400 mb-4 uppercase">Spionage-Action-Kampagne</h3>
                             <p class="text-gray-400">
                                Black Ops 7 spielt in der nahen Zukunft und bietet eine packende Spionage-Thriller-Kampagne, in der technologische Kriegsführung eine neue, gefährliche Stufe erreicht.
                             </p>
                         </div>
                         <!-- Multiplayer -->
                         <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
-                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Wegweisender Multiplayer</h3>
+                            <h3 class="text-2xl text-orange-400 mb-4 uppercase">Wegweisender Multiplayer</h3>
                             <p class="text-gray-400">
                                Erlebe die nächste Stufe der Bewegung und des Kampfes mit neuen futuristischen Gadgets. Meistere 16 brandneue Karten am ersten Tag und zeige deine Fähigkeiten im beliebten Prestigesystem.
                             </p>
                         </div>
                         <!-- Zombies -->
                         <div class="section-card p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300">
-                            <h3 class="text-2xl font-bold text-orange-400 mb-4 uppercase">Rundenbasierte Zombies</h3>
+                            <h3 class="text-2xl text-orange-400 mb-4 uppercase">Rundenbasierte Zombies</h3>
                             <p class="text-gray-400">
                                 Die Zombies sind zurück, tödlicher als je zuvor! Stelle dich Horden von kybernetisch verbesserten Untoten in einem brandneuen, rundenbasierten Erlebnis auf zwei neuen Karten.
                             </p>
@@ -152,7 +158,7 @@
             <!-- Release Date Section -->
             <section class="py-16 text-center">
                  <div class="container mx-auto px-6">
-                    <h3 class="text-4xl font-extrabold uppercase header-glow">Erhältlich am 24. Oktober 2025</h3>
+                    <h3 class="text-4xl uppercase header-glow">Erhältlich am 24. Oktober 2025</h3>
                     <p class="text-gray-400 mt-2">Auf Xbox, PlayStation und PC.</p>
                  </div>
             </section>
@@ -160,7 +166,7 @@
             <!-- Pre-order Section -->
             <section id="preorder" class="py-24 bg-black bg-opacity-50">
                 <div class="container mx-auto px-6 text-center">
-                    <h3 class="text-4xl font-bold mb-4">Wähle deine Plattform</h3>
+                    <h3 class="text-4xl mb-4">Wähle deine Plattform</h3>
                     <p class="text-gray-300 max-w-2xl mx-auto mb-8">
                         Bestelle jetzt vor und erhalte früheren Zugang zur offenen Beta sowie weitere exklusive Boni.
                     </p>
@@ -176,7 +182,7 @@
                              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor"><title>Battle.net</title><path d="M13.12 2.45h-2.24L2.45 13.12v2.24L10.88 24h2.24l8.43-8.64V13.1L13.12 2.45zM12 4.69l6.34 6.34h-4.08l-2.26-4.52zm0 14.62L5.66 12.97h4.08l2.26 4.52v.01zM4.69 12l2.25-2.25H10.5L8.24 12zm14.62 0l-2.25 2.25h-3.57L15.76 12l-2.25-2.25h3.57L19.31 12z"/></svg>
                         </button>
                     </div>
-                    <a id="platform-preorder-button" href="#" class="btn-primary text-black font-bold py-4 px-10 rounded-lg uppercase tracking-wider text-lg opacity-50 cursor-not-allowed">
+                    <a id="platform-preorder-button" href="#" class="btn-primary text-black py-4 px-10 rounded-lg uppercase tracking-wider text-lg opacity-50 cursor-not-allowed">
                         Plattform wählen
                     </a>
                 </div>
@@ -188,10 +194,10 @@
         <div id="details-view" class="page-view hidden opacity-0 container mx-auto px-6 py-16 md:py-24">
             <!-- Campaign Details -->
             <div id="detail-campaign" class="detail-section hidden">
-                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Kampagne: Operation Chimera</h2>
+                <h2 class="text-5xl uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Kampagne: Operation Chimera</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                     <div class="animate-fall" style="animation-delay: 0.3s;">
-                        <h3 class="text-2xl font-bold text-orange-400 mb-4">Die Welt am Abgrund</h3>
+                        <h3 class="text-2xl text-orange-400 mb-4">Die Welt am Abgrund</h3>
                         <p class="text-gray-300 mb-4">
                            Im Jahr 2035 ist die Welt zunehmend von privaten Militärunternehmen (PMCs) abhängig. Als eine abtrünnige KI namens "Chimera" die Kontrolle über die globalen Drohnen- und Robotik-Netzwerke übernimmt, bricht Chaos aus. Die Grenzen zwischen den Nationen lösen sich auf und die Welt versinkt im Misstrauen.
                         </p>
@@ -207,17 +213,17 @@
 
             <!-- Multiplayer Details -->
             <div id="detail-multiplayer" class="detail-section hidden">
-                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Multiplayer: Neu Definiert</h2>
+                <h2 class="text-5xl uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.1s;">Multiplayer: Neu Definiert</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                     <div class="animate-fall" style="animation-delay: 0.3s;">
                          <img src="https://futurefive.co.nz/uploads/story/2025/08/25/BO7_Reveal_CP_01_BRANDED_Medium.webp" alt="Ein Screenshot aus dem Multiplayer-Modus von Black Ops 7" class="rounded-lg shadow-lg border-2 border-orange-500">
                     </div>
                     <div class="animate-fall" style="animation-delay: 0.5s;">
-                        <h3 class="text-2xl font-bold text-orange-400 mb-4">Der Kampf der Zukunft</h3>
+                        <h3 class="text-2xl text-orange-400 mb-4">Der Kampf der Zukunft</h3>
                         <p class="text-gray-300 mb-4">
-                           Der Multiplayer von Black Ops 7 definiert die Regeln des Kampfes neu. Mit einem überarbeiteten Bewegungssystem, das schnelle Rutschmanöver, Kletter-Boosts und taktische Sprünge ermöglicht, wird das Gameplay vertikaler und dynamischer als je zuvor. Meistere deine Umgebung auf 16 brandneuen Karten, von dichten städtischen Kampfzonen bis hin zu weitläufigen, strategischen Außenposten.
+                           Der Multiplayer von Black Ops 7 definiert die Regeln des Kampfes neu. Mit einem überarbeiteten Bewegungssystem, das schnelle Rutschmanöver, Kletter-Boosts und taktische Sprünge ermöglicht, wird das Gameplay vertikaler und dynamischer als je zuvor. Meistere deine Umgebung auf 16 brandneue Karten, von dichten städtischen Kampfzonen bis hin zu weitläufigen, strategischen Außenposten.
                         </p>
-                        <h3 class="text-2xl font-bold text-orange-400 mt-6 mb-4">Dein Arsenal, deine Regeln</h3>
+                        <h3 class="text-2xl text-orange-400 mt-6 mb-4">Dein Arsenal, deine Regeln</h3>
                         <p class="text-gray-300">
                            Das "Pick 10"-System für die Klassenerstellung kehrt in erweiterter Form zurück und bietet beispiellose Freiheit bei der Gestaltung deines Operators. Experimentiere mit futuristischen Waffenaufsätzen, kybernetischen Verbesserungen und spielverändernden Gadgets. Beweise dein Können und steige im beliebten Prestige-System auf, um exklusive Belohnungen freizuschalten und deinen Status als Elite-Soldat zu festigen.
                         </p>
@@ -227,7 +233,7 @@
 
             <!-- Zombies Details -->
             <div id="detail-zombies" class="detail-section hidden">
-                <h2 class="text-5xl font-black uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.2s;">Zombies Details</h2>
+                <h2 class="text-5xl uppercase mb-6 header-glow animate-fall" style="animation-delay: 0.2s;">Zombies Details</h2>
                 <p class="text-gray-300 animate-fall" style="animation-delay: 0.4s;">Weitere Details zum Zombies-Modus werden in Kürze bekannt gegeben.</p>
             </div>
         </div>
@@ -237,7 +243,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const mainView = document.getElementById('main-view');
             const detailsView = document.getElementById('details-view');
-            const navLinks = document.querySelectorAll('.main-nav-link');
+            const navLinks = document.querySelectorAll('.nav-link');
             const detailSections = document.querySelectorAll('.detail-section');
 
             const setActiveLink = (targetId) => {
