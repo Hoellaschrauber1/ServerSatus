@@ -2,791 +2,196 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortnite Asset Explorer</title>
-    <!-- Tailwind CSS for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Font 'Inter' for a clean look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Simple pulse animation for the 'New' badge */
-        @keyframes pulse {
-            50% {
-                opacity: .5;
-            }
-        }
-        .animate-pulse {
-            animation: pulse 1.5s infinite;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Web Browser</title>
+    
+    <!-- PWA Metadaten für iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Web Browser">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/3498db/ffffff?text=WB">
 
-        /* Shine animation for loading skeletons, running diagonally from corner to corner */
-        @keyframes improvedShine {
-            0% {
-                background-position: -200% -200%;
-            }
-            100% {
-                background-position: 200% 200%;
-            }
-        }
-        /* Animation duration increased to 3 seconds to slow it down */
-        .animate-shine {
-            background: #2d3748;
-            background-image: linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.1) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            background-size: 400% 400%;
-            animation: improvedShine 3s infinite linear;
-        }
-        
-        /* Apply the Inter font to the entire body */
+    <!-- Web App Manifest (als Data-URI eingebettet) -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIldlYiBCcm93c2VyIiwKICAic2hvcnRfbmFtZSI6ICJXZWJCcm93c2VyIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9wbGFjZWhvZC5jby8xOTJ4MTkyLzM0OThkYi9mZmZmZmY/dGV4dD1XQiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3BsYWNlaG9kLmNvLzUxMng1MTIvMzQ5OGRiL2ZmZmZmZj90ZXh0PVdCIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiCiAgICB9CiAgXSwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJ0aGVtZV9jb2xvciI6ICIjMjIyNzI5IiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMjIyNzI5IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiCn0=">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* A slightly different dark background */
-            color: #e2e8f0;
+            /* Verhindert "pull-to-refresh" und Zoomen */
+            overscroll-behavior: none;
         }
-
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1.5s linear infinite;
         }
-        ::-webkit-scrollbar-track {
-            background: #2d3748;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        ::-webkit-scrollbar-thumb {
-            background: #4a5568;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6a728a;
-        }
-
-        /* Ensure the modal covers the entire screen */
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        /* Show the "Scroll to top" button */
-        .scroll-to-top-btn.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Hide the modal by default */
-        .modal.hidden {
-            display: none;
-        }
-        
-        /*
-         * CSS for the image loading transition
-         * The skeleton is initially visible, then its opacity transitions to 0
-         * The image is initially at 0 opacity and then transitions to 1
-         */
-        .loading-image {
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .loaded-image {
-            opacity: 1;
-        }
-        .loading-skeleton {
-            transition: opacity 0.5s ease-in-out;
-            opacity: 1;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-        }
-        .loaded-skeleton {
-            opacity: 0;
-            z-index: 1;
-        }
-
-        /* Adjusted skeleton size for consistency */
-        .loading-skeleton-image {
-            height: 8rem; /* Corresponds to w-full h-32 */
-        }
-        
-        /* Base card style */
-        .item-card {
-            background-color: #2d3748; /* Base background color */
-        }
+        /* Versteckt den Scrollbalken des iframes */
+        iframe::-webkit-scrollbar { display: none; }
+        iframe { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<body class="bg-[#222729] flex items-center justify-center h-screen">
 
-    <!-- Header with title and version as well as new settings icon -->
-    <header class="bg-gray-800 p-4 shadow-xl sticky top-0 z-50">
-        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fortnite Asset Explorer</h1>
-            <div class="flex items-center space-x-4 mt-2 sm:mt-0 relative">
-                <span class="text-sm text-gray-400">Version <span id="app-version">1.0.4</span></span>
-                <!-- Settings icon button -->
-                <button id="settings-icon-btn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.527.292 1.085.498 1.638.6z" />
-                    </svg>
+    <!-- Browser-UI -->
+    <div class="w-full h-full bg-gray-200 flex flex-col overflow-hidden">
+        <!-- Kopfzeile mit Steuerelementen -->
+        <header class="bg-gray-300 p-2 shadow-md z-10 flex-shrink-0">
+            <div class="flex items-center space-x-2">
+                <!-- Navigationsbuttons -->
+                <button id="backBtn" class="p-2 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <!-- Dropdown menu for settings -->
-                <div id="settings-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-gray-800 rounded-xl shadow-lg z-20 hidden transform transition-all scale-95 duration-200 origin-top-right">
-                    <div class="p-4">
-                        <span class="text-sm text-gray-400 block mb-2">Tile Size:</span>
-                        <button data-cols="2" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Large</button>
-                        <button data-cols="4" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Medium</button>
-                        <button data-cols="6" class="col-btn block w-full text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-700 hover:text-purple-400">Small</button>
-                    </div>
+                <button id="forwardBtn" class="p-2 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <button id="reloadBtn" class="p-2 rounded-full hover:bg-gray-400 transition-colors">
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4"></path></svg>
+                </button>
+
+                <!-- Adressleiste -->
+                <div class="relative flex-grow">
+                    <svg class="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="urlInput" placeholder="Suchen oder Adresse eingeben" class="w-full bg-white rounded-full py-2 pl-10 pr-4 border-2 border-transparent focus:outline-none focus:border-blue-500 transition-colors">
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main content and controls -->
-    <main class="container mx-auto p-4 md:p-8">
-
-        <!-- Filter and sort controls -->
-        <div class="bg-gray-800 p-4 rounded-xl shadow-inner mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <!-- Category tabs -->
-            <div class="flex flex-wrap justify-center gap-2">
-                <button data-category="outfit" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-purple-600 hover:bg-purple-700 hover:scale-105 active:scale-95 shadow-lg">Outfit</button>
-                <button data-category="backpack" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Backpack</button>
-                <button data-category="pickaxe" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Pickaxe</button>
-                <button data-category="emote" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Emote</button>
-                <button data-category="wrap" class="tab-btn px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 bg-gray-600 hover:bg-gray-700 hover:scale-105 active:scale-95 shadow-lg">Wrap</button>
+        <!-- Inhaltsbereich -->
+        <main id="contentArea" class="flex-grow relative bg-gray-100">
+            <!-- Willkommens-Ansicht -->
+            <div id="welcomeView" class="w-full h-full flex flex-col items-center justify-center p-8 text-center">
+                <h1 class="text-4xl font-bold text-gray-700">Web Browser</h1>
+                <p class="text-gray-500 mt-2">Gib oben eine Adresse ein, um loszulegen.</p>
             </div>
             
-            <!-- Sort and filter -->
-            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto mt-4 md:mt-0">
-                <div class="w-full sm:w-auto">
-                    <label for="sort-select" class="sr-only">Sort</label>
-                    <select id="sort-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
-                        <option value="name">Name</option>
-                        <option value="added">Recently Added</option>
-                    </select>
-                </div>
-                <div class="w-full sm:w-auto">
-                    <label for="rarity-filter-select" class="sr-only">Rarity</label>
-                    <select id="rarity-filter-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
-                        <option value="all">All Rarities</option>
-                        <option value="new">New</option>
-                        <option value="Common">Common</option>
-                        <option value="Uncommon">Uncommon</option>
-                        <option value="Rare">Rare</option>
-                        <option value="Epic">Epic</option>
-                        <option value="Legendary">Legendary</option>
-                        <option value="Mythic">Mythic</option>
-                        <option value="Crew">Crew</option>
-                        <option value="Marvel">Marvel</option>
-                        <option value="DC">DC</option>
-                        <option value="StarWars">Star Wars</option>
-                        <option value="GamingLegends">Gaming Legends</option>
-                        <option value="IconSeries">Icon Series</option>
-                        <option value="ShadowSeries">Shadow Series</option>
-                        <option value="Slurp">Slurp</option>
-                        <option value="LavaSeries">Lava Series</option>
-                        <option value="FrozenSeries">Frozen Series</option>
-                    </select>
-                </div>
-                <div class="w-full sm:w-auto">
-                    <label for="language-select" class="sr-only">Language</label>
-                    <select id="language-select" class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
-                        <option value="de">Deutsch</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
+            <!-- Lade-Spinner -->
+            <div id="loader" class="absolute inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center hidden">
+                <div class="loader"></div>
             </div>
-        </div>
-
-        <!-- Search bar and counter -->
-        <div class="mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <div class="relative w-full flex-grow">
-                <input type="text" id="search-input" placeholder="Search for items..." class="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </div>
-            <span id="result-count" class="text-sm text-gray-400 whitespace-nowrap">0 Results</span>
-        </div>
-
-        <!-- Cosmetics grid -->
-        <div id="item-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            <!-- Placeholder cards will be dynamically inserted here when data is loading. -->
-        </div>
-
-        <!-- Sentinel element for lazy loading -->
-        <div id="lazy-load-sentinel" class="w-full h-1 my-8"></div>
-    </main>
-
-    <!-- Modal for item details (hidden by default) -->
-    <div id="item-details-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
-        <div class="modal-backdrop absolute inset-0"></div>
-        <div class="bg-gray-800 rounded-xl shadow-2xl relative z-10 p-6 max-w-2xl w-full mx-auto transform transition-all scale-95 duration-200">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <div id="modal-content" class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                <!-- Image and details will be inserted here -->
-            </div>
-        </div>
+            
+            <!-- Iframe für Webseiten-Anzeige -->
+            <iframe id="browserFrame" class="w-full h-full border-none hidden" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"></iframe>
+        </main>
     </div>
 
-    <!-- "Scroll to top" button (hidden by default) -->
-    <button id="scroll-to-top-btn" class="scroll-to-top-btn fixed bottom-6 right-6 p-3 bg-purple-600 text-white rounded-full shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 z-50 hover:scale-110 active:scale-95">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-    </button>
-
     <script>
-        // General app variables
-        const appVersion = "1.0.4";
-        const apiUrl = "https://fortnite-api.com/v2/cosmetics/br";
-        
-        // DOM elements
-        const appVersionDisplay = document.getElementById('app-version');
-        const itemGrid = document.getElementById('item-grid');
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const sortSelect = document.getElementById('sort-select');
-        const rarityFilterSelect = document.getElementById('rarity-filter-select');
-        const languageSelect = document.getElementById('language-select');
-        const modalBackdrop = document.querySelector('.modal-backdrop');
-        const itemDetailsModal = document.getElementById('item-details-modal');
-        const modalContent = document.getElementById('modal-content');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
-        const lazyLoadSentinel = document.getElementById('lazy-load-sentinel');
-        const searchInput = document.getElementById('search-input');
-        const resultCountSpan = document.getElementById('result-count');
-        
-        // New DOM elements for the settings dropdown
-        const settingsIconBtn = document.getElementById('settings-icon-btn');
-        const settingsDropdown = document.getElementById('settings-dropdown');
-        const colButtons = document.querySelectorAll('.col-btn');
-
-        // Global state variables
-        let allCosmetics = {};
-        let currentCosmetics = [];
-        let newItemsIds = []; // Array to store the IDs of the 15 newest items
-        let currentLanguage = 'de';
-        let currentSortOrder = 'added';
-        let currentFilterRarity = 'all';
-        let currentSearchTerm = '';
-        let currentColumns = 4; // Default to 4 columns
-
-        // Variables for lazy loading
-        const itemsPerPage = 50; // Number of items per block
-        let allFilteredItems = []; // Stores all filtered & sorted items
-        let currentIndex = 0; // Current index of rendered items
-
-        // IntersectionObserver for lazy loading
-        const observer = new IntersectionObserver(entries => {
-            // Checks if the sentinel element is visible
-            if (entries[0].isIntersecting) {
-                renderNextChunk();
-            }
-        }, {
-            root: null, // Use the viewport as root
-            rootMargin: '0px',
-            threshold: 1.0 // Trigger when 100% of the element is visible
-        });
-
-        // Event listener for the category tabs
-        tabButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const category = button.dataset.category;
-                // Deactivate the observer before new data is loaded
-                observer.unobserve(lazyLoadSentinel); 
-                await loadCosmeticsCategory(category);
-                // Update the UI for the active tab
-                tabButtons.forEach(btn => btn.classList.remove('bg-purple-600', 'hover:bg-purple-700'));
-                tabButtons.forEach(btn => btn.classList.add('bg-gray-600', 'hover:bg-gray-700'));
-                button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                button.classList.add('bg-purple-600', 'hover:bg-purple-700');
-            });
-        });
-        
-        // Event listener for the settings icon to toggle the dropdown
-        settingsIconBtn.addEventListener('click', (event) => {
-            settingsDropdown.classList.toggle('hidden');
-            // Prevent the click from bubbling up to the document listener below
-            event.stopPropagation();
-        });
-
-        // Event listener to close the dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            const isClickInside = settingsDropdown.contains(event.target) || settingsIconBtn.contains(event.target);
-            if (!isClickInside && !settingsDropdown.classList.contains('hidden')) {
-                settingsDropdown.classList.add('hidden');
-            }
-        });
-
-        // Event listener for the column/tile size buttons in the dropdown
-        colButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const newCols = parseInt(button.dataset.cols, 10);
-                if (!isNaN(newCols) && newCols !== currentColumns) {
-                    currentColumns = newCols;
-                    updateGridColumns();
-                    updateColButtonStyles();
-                    settingsDropdown.classList.add('hidden'); // Close the dropdown after selection
-                }
-            });
-        });
-
-        // Event listener for sorting, filtering, language, and search
-        sortSelect.addEventListener('change', () => {
-            currentSortOrder = sortSelect.value;
-            applyFiltersAndSort();
-        });
-
-        rarityFilterSelect.addEventListener('change', () => {
-            currentFilterRarity = rarityFilterSelect.value;
-            applyFiltersAndSort();
-        });
-
-        languageSelect.addEventListener('change', () => {
-            currentLanguage = languageSelect.value;
-            updateUIForLanguage();
-        });
-        
-        searchInput.addEventListener('input', () => {
-            currentSearchTerm = searchInput.value.toLowerCase();
-            applyFiltersAndSort();
-        });
-
-        // Event listener for the modal
-        closeModalBtn.addEventListener('click', hideItemDetails);
-
-        // Add an event listener to show/hide the "Scroll to top" button
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 200) { // Show the button after scrolling 200px
-                scrollToTopBtn.classList.add('visible');
-            } else {
-                scrollToTopBtn.classList.remove('visible');
-            }
-        });
-
-        // Event listener to scroll to the top when the button is clicked
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-        
-        // Close the modal when clicking on the backdrop
-        modalBackdrop.addEventListener('click', (e) => {
-            if (e.target === modalBackdrop) {
-                hideItemDetails();
-            }
-        });
-
-        // --- Main functions ---
-
-        /**
-         * Displays placeholder skeletons in the grid.
-         */
-        function renderPlaceholderSkeletons() {
-            itemGrid.innerHTML = '';
-            // Create a series of placeholder cards
-            for (let i = 0; i < 50; i++) {
-                const skeleton = createSkeletonCard();
-                itemGrid.appendChild(skeleton);
-            }
-        }
-
-        /**
-         * Creates a single placeholder skeleton card.
-         * @returns {HTMLElement} - The DOM element of the placeholder card.
-         */
-        function createSkeletonCard() {
-            const card = document.createElement('div');
-            card.className = 'item-card bg-gray-800 rounded-xl p-1 md:p-2 overflow-hidden shadow-md relative group';
-            
-            card.innerHTML = `
-                <div class="relative w-full aspect-square rounded-lg mb-2 overflow-hidden">
-                    <div class="absolute inset-0 rounded-lg animate-shine"></div>
-                </div>
-                <div class="text-center truncate">
-                    <div class="h-4 w-3/4 mx-auto mb-2 rounded animate-shine"></div>
-                    <div class="h-3 w-1/2 mx-auto rounded animate-shine"></div>
-                </div>
-            `;
-            
-            return card;
-        }
-
-        /**
-         * Fetches cosmetic items of a specific category from the API or loads them from the cache.
-         * @param {string} category - The category to load (e.g., 'outfit').
-         */
-        async function loadCosmeticsCategory(category) {
-            // Display placeholders immediately to provide loading feedback
-            renderPlaceholderSkeletons();
-            
-            try {
-                // Fetch data from the API
-                const response = await fetch(`${apiUrl}?language=${currentLanguage}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok.');
-                }
-                const data = await response.json();
-                allCosmetics = data.data;
-
-                // Filter cosmetics by the selected category
-                currentCosmetics = allCosmetics.filter(item => item.type.value === category);
-                
-                // IMPORTANT FIX: Identify the IDs of the 15 newest items within the CURRENT category
-                const sortedByCategory = [...currentCosmetics].sort((a, b) => new Date(b.added) - new Date(a.added));
-                newItemsIds = sortedByCategory.slice(0, 15).map(item => item.id);
-                
-                applyFiltersAndSort(); // Apply filters and sort, then render the first chunk
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                itemGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Error loading data. Please try again later.</p>`;
-            }
-        }
-
-        /**
-         * Applies the current filters and sorting to the data and renders the first chunk.
-         */
-        function applyFiltersAndSort() {
-            // Copy the cosmetics data to be processed
-            allFilteredItems = [...currentCosmetics];
-            
-            // If the 'New' filter is active, we apply it here
-            if (currentFilterRarity === 'new') {
-                allFilteredItems.sort((a, b) => new Date(b.added) - new Date(a.added));
-                allFilteredItems = allFilteredItems.slice(0, 15);
-            } else if (currentFilterRarity !== 'all') {
-                // Convert both values to lowercase to be case-insensitive
-                allFilteredItems = allFilteredItems.filter(item => item.rarity.value.toLowerCase() === currentFilterRarity.toLowerCase());
-            }
-
-            // Apply search
-            if (currentSearchTerm) {
-                allFilteredItems = allFilteredItems.filter(item => 
-                    item.name.toLowerCase().includes(currentSearchTerm) ||
-                    (item.description && item.description.toLowerCase().includes(currentSearchTerm))
-                );
-            }
-
-            // Apply sorting
-            // Skip sorting if the 'New' filter is active, as they are already sorted
-            if (currentFilterRarity !== 'new') {
-                allFilteredItems.sort((a, b) => {
-                    if (currentSortOrder === 'name') {
-                        return a.name.localeCompare(b.name, currentLanguage);
-                    } else if (currentSortOrder === 'added') {
-                        return new Date(b.added) - new Date(a.added);
-                    }
+        // Service Worker für PWA-Funktionalität registrieren
+        if ('serviceWorker' in navigator) {
+            const swJS = `
+                self.addEventListener('install', event => {
+                    self.skipWaiting();
                 });
-            }
-
-            // Update counter
-            resultCountSpan.textContent = `${allFilteredItems.length} Results`;
-
-            // Reset the index and clear the grid before rendering the first chunk
-            currentIndex = 0;
-            itemGrid.innerHTML = '';
-
-            // Start lazy loading by rendering the first chunk
-            renderNextChunk();
+                self.addEventListener('activate', event => {
+                    event.waitUntil(clients.claim());
+                });
+                self.addEventListener('fetch', event => {
+                    // Simples Caching (kann erweitert werden)
+                    event.respondWith(fetch(event.request));
+                });
+            `;
+            const blob = new Blob([swJS], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob))
+                .then(registration => console.log('Service Worker registriert:', registration))
+                .catch(error => console.log('Service Worker Fehler:', error));
         }
+
+        // DOM-Elemente
+        const urlInput = document.getElementById('urlInput');
+        const backBtn = document.getElementById('backBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const reloadBtn = document.getElementById('reloadBtn');
+        const browserFrame = document.getElementById('browserFrame');
+        const welcomeView = document.getElementById('welcomeView');
+        const loader = document.getElementById('loader');
         
-        /**
-         * Renders the next chunk of items and appends it to the grid.
-         */
-        function renderNextChunk() {
-            // Check if there are still items to load
-            if (currentIndex >= allFilteredItems.length) {
-                observer.unobserve(lazyLoadSentinel);
-                return;
-            }
-
-            const chunk = allFilteredItems.slice(currentIndex, currentIndex + itemsPerPage);
-            
-            chunk.forEach(item => {
-                const card = createItemCard(item);
-                itemGrid.appendChild(card);
-            });
-            
-            currentIndex += itemsPerPage;
-
-            // Observe the sentinel element if the observer is not already observing it
-            if (currentIndex < allFilteredItems.length) {
-                observer.observe(lazyLoadSentinel);
-            }
-        }
-
-        /**
-         * Dynamically updates the grid's column classes based on the current column state.
-         */
-        function updateGridColumns() {
-            // Remove existing grid-cols- classes
-            itemGrid.className = itemGrid.className.replace(/grid-cols-\d+/g, '');
-
-            // Get the appropriate class based on the current columns and add it
-            if (currentColumns === 2) {
-                itemGrid.classList.add('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4');
-            } else if (currentColumns === 4) {
-                // For 'medium', we set different classes for different screen sizes
-                itemGrid.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'lg:grid-cols-5', 'xl:grid-cols-6');
-            } else if (currentColumns === 6) {
-                // For 'small', we set the highest possible column count
-                itemGrid.classList.add('grid-cols-4', 'sm:grid-cols-5', 'md:grid-cols-6', 'lg:grid-cols-7', 'xl:grid-cols-8');
-            }
-        }
+        // Browser-Verlauf
+        let history = [];
+        let currentIndex = -1;
         
-        /**
-         * Updates the visual state of the column buttons.
-         */
-        function updateColButtonStyles() {
-            colButtons.forEach(btn => {
-                const cols = parseInt(btn.dataset.cols, 10);
-                btn.classList.remove('bg-gray-700', 'text-purple-400'); // Remove active state
-                if (cols === currentColumns) {
-                    btn.classList.add('bg-gray-700', 'text-purple-400'); // Add active state
+        const updateNavButtons = () => {
+            backBtn.disabled = currentIndex <= 0;
+            forwardBtn.disabled = currentIndex >= history.length - 1;
+        };
+
+        const navigateTo = (url, isNavigatingHistory = false) => {
+            welcomeView.classList.add('hidden');
+            loader.classList.remove('hidden');
+            browserFrame.classList.add('hidden');
+
+            // URL validieren und ggf. http:// hinzufügen
+            let finalUrl = url;
+            if (!/^(https?:\/\/|file:|data:)/.test(finalUrl)) {
+                 // Einfache Prüfung auf Domain-ähnliche Struktur
+                if (finalUrl.includes('.') && !finalUrl.includes(' ')) {
+                    finalUrl = 'https://' + finalUrl;
+                } else {
+                    // Als Google-Suche behandeln
+                    finalUrl = `https://www.google.com/search?q=${encodeURIComponent(finalUrl)}`;
                 }
-            });
-        }
-
-        /**
-         * Creates a single item card with a loading skeleton.
-         * The skeleton is displayed by default and hides when the image is loaded.
-         * @param {object} item - The item object.
-         * @returns {HTMLElement} - The DOM element of the item card.
-         */
-        function createItemCard(item) {
-            const card = document.createElement('div');
-            card.className = 'item-card bg-gray-800 rounded-xl p-1 md:p-2 cursor-pointer transition-colors duration-200 overflow-hidden shadow-md relative group hover:scale-[1.03] active:scale-[0.97] transition-all duration-200';
-            card.dataset.id = item.id;
-            
-            const rarityColorClass = getRarityColor(item.rarity.value);
-            const rarityBorderClass = rarityColorClass.replace('text-', 'border-');
-            const imageUrl = item.images.smallIcon || item.images.icon || item.images.featured || 'https://placehold.co/128x128/374151/d1d5db?text=Image';
-
-            // Image container to hold both skeleton and image
-            const imageContainer = document.createElement('div');
-            // Use a square aspect ratio to ensure consistent image size on all devices
-            imageContainer.className = 'relative w-full aspect-square rounded-lg mb-2 overflow-hidden';
-
-            // Skeleton element
-            const skeleton = document.createElement('div');
-            // Apply the shine animation to the skeleton
-            skeleton.className = 'loading-skeleton absolute inset-0 rounded-lg animate-shine';
-            imageContainer.appendChild(skeleton);
-
-            // Image element
-            const img = document.createElement('img');
-            img.alt = item.name;
-            img.className = 'loading-image w-full h-auto rounded-lg transform transition-transform duration-300 group-hover:scale-105'; 
-            
-            // Load handler
-            img.onload = () => {
-                skeleton.classList.add('loaded-skeleton');
-                img.classList.add('loaded-image');
-            };
-            
-            // Error handler
-            img.onerror = () => {
-                img.src = 'https://placehold.co/128x128/374151/d1d5db?text=Image';
-                skeleton.classList.add('loaded-skeleton');
-                img.classList.add('loaded-image');
-            };
-
-            // Set the src attribute AFTER the listeners have been attached
-            img.src = imageUrl;
-            imageContainer.appendChild(img);
-
-            // Add the container to the card
-            card.appendChild(imageContainer);
-
-            // Text content
-            const textContainer = document.createElement('div');
-            textContainer.className = 'text-center truncate';
-            textContainer.innerHTML = `
-                <p class="font-semibold text-sm truncate">${item.name}</p>
-                <p class="text-xs font-medium ${rarityColorClass} truncate mt-1">${item.rarity.displayValue}</p>
-            `;
-            card.appendChild(textContainer);
-
-            // Border
-            const border = document.createElement('div');
-            border.className = `absolute inset-0 border-2 ${rarityBorderClass} rounded-xl transition-all duration-300 pointer-events-none`;
-            card.appendChild(border);
-            
-            // Check if the item ID is in the newItemsIds array to show the 'New' badge
-            if (newItemsIds.includes(item.id)) {
-                const newBadge = document.createElement('span');
-                newBadge.textContent = 'Neu';
-                newBadge.className = 'absolute top-2 right-2 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg transform rotate-6 animate-pulse';
-                card.appendChild(newBadge);
             }
-
-            card.addEventListener('click', () => showItemDetails(item));
-
-            return card;
-        }
-
-        /**
-         * Shows the details of an item in a modal.
-         * @param {object} item - The item object.
-         */
-        function showItemDetails(item) {
-            // First, show a loading animation
-            modalContent.innerHTML = `
-                <div class="w-full md:w-1/2">
-                    <div class="w-full h-64 rounded-lg shadow-lg animate-shine"></div>
-                </div>
-                <div class="w-full md:w-1/2 mt-4 md:mt-0">
-                    <div class="h-8 w-3/4 mb-4 rounded animate-shine"></div>
-                    <div class="h-4 w-1/2 mb-4 rounded animate-shine"></div>
-                    <div class="h-3 w-full mb-2 rounded animate-shine"></div>
-                    <div class="h-3 w-full mb-4 rounded animate-shine"></div>
-                    <div class="h-3 w-1/2 rounded animate-shine"></div>
-                </div>
-            `;
-            itemDetailsModal.classList.remove('hidden');
-
-            const rarityColor = getRarityColor(item.rarity.value);
-            const imageUrl = item.images.full_background || item.images.featured || item.images.icon;
-
-            // Create a new Image object to monitor loading
-            const img = new Image();
-            img.onload = () => {
-                // Once the image is loaded, update the modal content
-                modalContent.innerHTML = `
-                    <div class="w-full md:w-1/2">
-                        <img src="${imageUrl}" alt="${item.name}" class="w-full h-auto rounded-lg shadow-lg">
-                    </div>
-                    <div class="w-full md:w-1/2 mt-4 md:mt-0">
-                        <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
-                        <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
-                        <p class="text-gray-400 mb-2">Description:</p>
-                        <p class="text-gray-300 mb-4">${item.description || 'No description available.'}</p>
-                        <p class="text-gray-400">Released on:</p>
-                        <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    </div>
-                `;
-            };
-            img.onerror = () => {
-                // On error, show a fallback image
-                const fallbackImageUrl = 'https://placehold.co/512x512/374151/d1d5db?text=Image+Not+Found';
-                modalContent.innerHTML = `
-                    <div class="w-full md:w-1/2">
-                        <img src="${fallbackImageUrl}" alt="Image not found" class="w-full h-auto rounded-lg shadow-lg">
-                    </div>
-                    <div class="w-full md:w-1/2 mt-4 md:mt-0">
-                        <h2 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">${item.name}</h2>
-                        <p class="text-sm font-medium ${rarityColor} mb-4">${item.rarity.displayValue}</p>
-                        <p class="text-gray-400 mb-2">Description:</p>
-                        <p class="text-gray-300 mb-4">${item.description || 'No description available.'}</p>
-                        <p class="text-gray-400">Released on:</p>
-                        <p class="text-gray-300">${new Date(item.added).toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    </div>
-                `;
-            };
             
-            // Start the loading process
-            img.src = imageUrl;
-        }
+            urlInput.value = finalUrl;
+            browserFrame.src = finalUrl;
 
-        /**
-         * Hides the modal.
-         */
-        function hideItemDetails() {
-            itemDetailsModal.classList.add('hidden');
-        }
-
-        /**
-         * Helper function to get the correct Tailwind text color for the rarity.
-         * @param {string} rarity - The rarity of the item.
-         * @returns {string} - The corresponding Tailwind class.
-         */
-        function getRarityColor(rarity) {
-            const colors = {
-                'common': 'text-gray-400',
-                'uncommon': 'text-lime-400',
-                'rare': 'text-blue-400',
-                'epic': 'text-purple-400',
-                'legendary': 'text-orange-400',
-                'mythic': 'text-red-400',
-                'crew': 'text-zinc-500', // Added 'Crew' rarity
-                'marvel': 'text-red-600',
-                'dc': 'text-blue-600',
-                'starwars': 'text-cyan-400',
-                'gaminglegends': 'text-emerald-400',
-                'icon': 'text-teal-400',
-                'shadowseries': 'text-gray-800',
-                'slurp': 'text-blue-200',
-                'lavaseries': 'text-red-500',
-                'frozenseries': 'text-blue-300'
-            };
-            return colors[rarity.toLowerCase()] || 'text-white';
-        }
-
-        /**
-         * Updates UI texts based on the selected language.
-         */
-        function updateUIForLanguage() {
-            // This function's main purpose is to re-render with the new language.
-            // Since `applyFiltersAndSort` already re-renders everything, we can just call it.
-            if (currentCosmetics.length > 0) {
-                applyFiltersAndSort();
+            if (!isNavigatingHistory) {
+                // Alten Vorwärts-Verlauf abschneiden
+                history = history.slice(0, currentIndex + 1);
+                history.push(finalUrl);
+                currentIndex++;
             }
-            // Update static texts
-            document.querySelector('h1').textContent = currentLanguage === 'de' ? 'Fortnite Asset Explorer' : 'Fortnite Asset Explorer';
-            document.querySelector('#search-input').placeholder = currentLanguage === 'de' ? 'Nach Artikeln suchen...' : 'Search for items...';
-            document.querySelector('#sort-select option[value="name"]').textContent = currentLanguage === 'de' ? 'Name' : 'Name';
-            document.querySelector('#sort-select option[value="added"]').textContent = currentLanguage === 'de' ? 'Zuletzt Hinzugefügt' : 'Recently Added';
-            document.querySelector('#rarity-filter-select option[value="all"]').textContent = currentLanguage === 'de' ? 'Alle Seltenheiten' : 'All Rarities';
-            document.querySelector('#rarity-filter-select option[value="new"]').textContent = currentLanguage === 'de' ? 'Neu' : 'New';
-            document.querySelector('.tab-btn[data-category="outfit"]').textContent = currentLanguage === 'de' ? 'Outfit' : 'Outfit';
-            document.querySelector('.tab-btn[data-category="backpack"]').textContent = currentLanguage === 'de' ? 'Rucksack' : 'Backpack';
-            document.querySelector('.tab-btn[data-category="pickaxe"]').textContent = currentLanguage === 'de' ? 'Spitzhacke' : 'Pickaxe';
-            document.querySelector('.tab-btn[data-category="emote"]').textContent = currentLanguage === 'de' ? 'Emote' : 'Emote';
-            document.querySelector('.tab-btn[data-category="wrap"]').textContent = currentLanguage === 'de' ? 'Lackierung' : 'Wrap';
-            // Update dropdown texts
-            document.querySelector('#settings-dropdown span').textContent = currentLanguage === 'de' ? 'Kachelgröße:' : 'Tile Size:';
-            document.querySelector('.col-btn[data-cols="2"]').textContent = currentLanguage === 'de' ? 'Groß' : 'Large';
-            document.querySelector('.col-btn[data-cols="4"]').textContent = currentLanguage === 'de' ? 'Mittel' : 'Medium';
-            document.querySelector('.col-btn[data-cols="6"]').textContent = currentLanguage === 'de' ? 'Klein' : 'Small';
-        }
+            
+            updateNavButtons();
+        };
+        
+        browserFrame.onload = () => {
+            loader.classList.add('hidden');
+            browserFrame.classList.remove('hidden');
+        };
 
-        // --- Initial App Start ---
-        /**
-         * Initializes the app when the page loads.
-         */
-        async function initializeApp() {
-            // Set the initial state from the HTML select elements
-            currentLanguage = languageSelect.value;
-            currentSortOrder = sortSelect.value;
-            currentFilterRarity = rarityFilterSelect.value;
+        browserFrame.onerror = () => {
+             loader.classList.add('hidden');
+             alert('Die Seite konnte nicht geladen werden. Bitte überprüfe die Adresse.');
+             welcomeView.classList.remove('hidden');
+        };
 
-            appVersionDisplay.textContent = appVersion;
+        urlInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter' && urlInput.value.trim() !== '') {
+                navigateTo(urlInput.value.trim());
+            }
+        });
 
-            // Load the initial category ('outfit') and set the UI state
-            await loadCosmeticsCategory('outfit');
+        backBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                navigateTo(history[currentIndex], true);
+            }
+        });
 
-            // Set the initial column layout and button styles
-            updateGridColumns();
-            updateColButtonStyles();
+        forwardBtn.addEventListener('click', () => {
+            if (currentIndex < history.length - 1) {
+                currentIndex++;
+                navigateTo(history[currentIndex], true);
+            }
+        });
 
-            // Observe the sentinel element to begin lazy loading
-            observer.observe(lazyLoadSentinel);
-        }
+        reloadBtn.addEventListener('click', () => {
+            if (browserFrame.src && browserFrame.src !== 'about:blank') {
+                browserFrame.contentWindow.location.reload();
+            }
+        });
 
-        initializeApp();
+        // Initialer Zustand
+        updateNavButtons();
+
     </script>
 </body>
 </html>
