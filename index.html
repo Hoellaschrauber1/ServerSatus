@@ -15,6 +15,20 @@
             background-color: #0a0a0a; /* Dunklerer Hintergrund */
             letter-spacing: 1px;
         }
+        /* Fixed background image to prevent jumping */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://pbs.twimg.com/media/Gs8OvifWEAEK74u.jpg:large');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -1;
+        }
         /* Black Ops Font für Überschriften und wichtige Elemente */
         h1, h2, h3, .btn-primary, .nav-link {
             letter-spacing: 1.5px; /* Etwas mehr Abstand für bessere Lesbarkeit bei dieser Schriftart */
@@ -92,7 +106,7 @@
         }
     </style>
 </head>
-<body class="text-white bg-cover bg-center bg-fixed min-h-screen" style="background-image: url('https://pbs.twimg.com/media/Gs8OvifWEAEK74u.jpg:large');">
+<body class="text-white min-h-screen">
 
     <div class="bg-black bg-opacity-60 min-h-screen">
         <!-- Header & Navigation -->
