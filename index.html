@@ -660,7 +660,7 @@
             signOut,
             signInAnonymously
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getCountFromServer, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     document.addEventListener('DOMContentLoaded', () => {
             const itemGrid = document.getElementById('item-grid');
@@ -741,6 +741,7 @@
             let lastAppliedShowOnlyNew = false;
             let countdownInterval = null;
             let lastShopUpdate = null;
+            let visitsListener = null; // Listener für Echtzeit-Updates
             
             const translations = {
                 en: {
@@ -1504,40 +1505,62 @@
                  playCloseSound();
                  adminPanelModal.classList.add('opacity-0');
                  setTimeout(() => adminPanelModal.classList.add('hidden'), 300);
+                 // Den Echtzeit-Listener beenden, wenn das Panel geschlossen wird
+                 if (visitsListener) {
+                    visitsListener();
+                    visitsListener = null;
+                 }
             });
 
             async function loadAdminStats() {
                 totalVisitsCount.textContent = '...';
+                if (countryChart) countryChart.destroy();
+                
                 const visitsCol = collection(db, "visits");
-                const countSnapshot = await getCountFromServer(visitsCol);
-                totalVisitsCount.textContent = countSnapshot.data().count;
                 
-                // For country chart - In a real app, this data would be aggregated
-                // on the backend. For this demo, we'll simulate it.
-                // NOTE: This approach is inefficient for large datasets.
-                const countryData = { 'Germany': 4, 'USA': 7, 'Spain': 2, 'Unknown': 3 };
-                
-                if(countryChart) countryChart.destroy();
-                countryChart = new Chart(countryChartCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(countryData),
-                        datasets: [{
-                            label: 'Visitors by Country',
-                            data: Object.values(countryData),
-                            backgroundColor: ['#ff9500', '#34c759', '#af52de', '#5856d6'],
-                            borderColor: 'transparent',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { color: 'white' }
+                // onSnapshot erstellt einen Echtzeit-Listener
+                visitsListener = onSnapshot(query(visitsCol), (snapshot) => {
+                    const visits = [];
+                    snapshot.forEach(doc => visits.push(doc.data()));
+
+                    totalVisitsCount.textContent = visits.length;
+
+                    // Länderdaten aus allen Besuchen aggregieren
+                    const countryData = visits.reduce((acc, visit) => {
+                        const country = visit.country || 'Unknown';
+                        acc[country] = (acc[country] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    const sortedCountries = Object.entries(countryData)
+                        .sort(([, a], [, b]) => b - a)
+                        .slice(0, 5); // Top 5 Länder anzeigen
+
+                    const labels = sortedCountries.map(entry => entry[0]);
+                    const data = sortedCountries.map(entry => entry[1]);
+
+                    if(countryChart) countryChart.destroy();
+                    countryChart = new Chart(countryChartCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Visitors by Country',
+                                data: data,
+                                backgroundColor: ['#007aff', '#ff9500', '#34c759', '#af52de', '#5856d6'],
+                                borderColor: 'transparent',
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { color: 'white' }
+                                }
                             }
                         }
-                    }
+                    });
                 });
             }
             
@@ -1608,5 +1631,6 @@
     </script>
 </body>
 </html>
+
 
 
