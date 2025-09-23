@@ -32,6 +32,7 @@
             justify-content: center;
             align-items: center;
             transition: opacity 0.7s ease-in-out;
+            opacity: 1;
         }
         .loader-logo {
             position: absolute;
@@ -44,6 +45,12 @@
         main {
             opacity: 0;
             transition: opacity 0.7s ease-in-out;
+            visibility: hidden;
+        }
+
+        main.loaded {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Style for the Vice City vibe background */
@@ -135,14 +142,6 @@
             opacity: 1;
             animation-play-state: running;
         }
-
-        .gallery-img {
-            aspect-ratio: 16 / 9;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0.75rem;
-        }
         
         .faq-question { cursor: pointer; }
         .faq-answer {
@@ -157,7 +156,7 @@
 </head>
 <body class="gta-background">
     <div id="loader">
-        <img id="loader-rockstar" src="https://www.rockstargames.com/vi/dist/img/RS_logo_white.svg" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 1;">
+        <img id="loader-rockstar" src="https://www.rockstargames.com/vi/dist/img/RS_logo_white.svg" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 0;">
         <img id="loader-gta6" src="https://www.rockstargames.com/vi/dist/img/GTAVI_logo_white.svg" alt="GTA VI Logo" class="loader-logo" style="opacity: 0;">
     </div>
 
@@ -222,7 +221,7 @@
         <!-- Key Features Section -->
         <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24">
             <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider text-center">Key Features</h3>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
                 <div class="neon-box rounded-xl">
                     <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 text-center h-full">
@@ -305,27 +304,34 @@
 
     <script>
         // --- Loading Animation ---
-        const loader = document.getElementById('loader');
-        const rockstarLogo = document.getElementById('loader-rockstar');
-        const gta6Logo = document.getElementById('loader-gta6');
-        const mainContent = document.querySelector('main');
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            const rockstarLogo = document.getElementById('loader-rockstar');
+            const gta6Logo = document.getElementById('loader-gta6');
+            const mainContent = document.querySelector('main');
 
-        window.onload = () => {
-            // Sequence: R* Logo (2s) -> Fade to GTA VI Logo -> GTA VI Logo (2.5s) -> Fade out loader, fade in content
+            // Start with Rockstar logo
+            setTimeout(() => {
+                rockstarLogo.style.opacity = '1';
+            }, 100); // Small delay to ensure transition triggers
+
+            // Fade to GTA VI logo
             setTimeout(() => {
                 rockstarLogo.style.opacity = '0';
                 gta6Logo.style.opacity = '1';
-            }, 2000); // R* Logo display duration
+            }, 2100); // After 2 seconds of R* logo
 
+            // Fade out loader
             setTimeout(() => {
                 loader.style.opacity = '0';
-            }, 4500); // Start fading out loader (2000 + 2500)
+            }, 4600); // After 2.5 seconds of GTA VI logo
 
+            // Hide loader and show content
             setTimeout(() => {
                 loader.style.display = 'none';
-                mainContent.style.opacity = '1';
-            }, 5200); // Hide loader completely and show content (4500 + 700ms transition)
-        };
+                mainContent.classList.add('loaded');
+            }, 5300); // After loader fade-out transition
+        });
 
 
         // --- Countdown ---
