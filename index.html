@@ -34,12 +34,60 @@
             transition: opacity 0.7s ease-in-out;
             opacity: 1;
         }
-        .loader-logo {
-            position: absolute;
+
+        .loader-logo-wrapper {
+            position: relative;
             width: 40%;
             max-width: 300px;
-            transition: opacity 0.7s ease-in-out;
         }
+
+        .loader-logo {
+            display: block;
+            width: 100%;
+            transition: opacity 0.7s ease-in-out;
+            /* The white logo is the base, visible underneath */
+        }
+
+        /* This pseudo-element IS the colored shine, clipped to the logo's shape */
+        .loader-logo-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: linear-gradient(
+                100deg,
+                rgba(249, 115, 22, 0.9),
+                rgba(236, 72, 153, 1.0),
+                rgba(139, 92, 246, 0.9)
+            );
+            
+            /* We make the background much wider and move it */
+            background-size: 300% 100%;
+            animation: shine-wipe 3s linear infinite;
+
+            /* The magic: use the logo's transparency to mask this element */
+            -webkit-mask-image: url('https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png');
+            mask-image: url('https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png');
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-position: center;
+            mask-position: center;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+        }
+
+        @keyframes shine-wipe {
+            0% {
+                background-position: 150% 0;
+            }
+            100% {
+                background-position: -50% 0;
+            }
+        }
+
 
         /* --- Main Content Styling --- */
         main {
@@ -156,8 +204,9 @@
 </head>
 <body class="gta-background">
     <div id="loader">
-        <img id="loader-rockstar" src="https://www.rockstargames.com/vi/dist/img/RS_logo_white.svg" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 0;">
-        <img id="loader-gta6" src="https://www.rockstargames.com/vi/dist/img/GTAVI_logo_white.svg" alt="GTA VI Logo" class="loader-logo" style="opacity: 0;">
+        <div class="loader-logo-wrapper">
+            <img id="loader-rockstar" src="https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 0;">
+        </div>
     </div>
 
     <div class="overlay"></div>
@@ -307,30 +356,23 @@
         document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('loader');
             const rockstarLogo = document.getElementById('loader-rockstar');
-            const gta6Logo = document.getElementById('loader-gta6');
             const mainContent = document.querySelector('main');
 
-            // Start with Rockstar logo
+            // Phase 1: Fade in Rockstar logo
             setTimeout(() => {
                 rockstarLogo.style.opacity = '1';
-            }, 100); // Small delay to ensure transition triggers
+            }, 500); // Start after a brief moment
 
-            // Fade to GTA VI logo
-            setTimeout(() => {
-                rockstarLogo.style.opacity = '0';
-                gta6Logo.style.opacity = '1';
-            }, 2100); // After 2 seconds of R* logo
-
-            // Fade out loader
+            // Phase 2: Fade out loader
             setTimeout(() => {
                 loader.style.opacity = '0';
-            }, 4600); // After 2.5 seconds of GTA VI logo
+            }, 3500); // Start fading out loader after 3.5s total
 
             // Hide loader and show content
             setTimeout(() => {
                 loader.style.display = 'none';
                 mainContent.classList.add('loaded');
-            }, 5300); // After loader fade-out transition
+            }, 4200); // Fully hide and show content after fade-out
         });
 
 
@@ -379,5 +421,4 @@
 
 </body>
 </html>
-
 
