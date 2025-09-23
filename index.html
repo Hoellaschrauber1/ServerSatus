@@ -22,9 +22,33 @@
             background-color: #0c0c0c;
         }
 
+        /* --- Loading Screen --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.7s ease-in-out;
+        }
+        .loader-logo {
+            position: absolute;
+            width: 40%;
+            max-width: 300px;
+            transition: opacity 0.7s ease-in-out;
+        }
+
+        /* --- Main Content Styling --- */
+        main {
+            opacity: 0;
+            transition: opacity 0.7s ease-in-out;
+        }
+
         /* Style for the Vice City vibe background */
         .gta-background {
-            background-image: url('https://images.hdqwalls.com/wallpapers/gta-6-vice-city-2024-5k-w1.jpg');
+            background-image: url('https://media-rockstargames-com.akamaized.net/mfe6/prod/__common/img/7643b644a47489e2f1f53b51d2f7813a.jpg');
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
@@ -38,8 +62,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(2px);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
             z-index: -1;
         }
 
@@ -52,7 +76,6 @@
             text-fill-color: transparent;
         }
         
-        /* --- NEUER HOVER EFFEKT (Spiegelung am Rand) --- */
         @property --angle {
           syntax: '<angle>';
           initial-value: 0deg;
@@ -60,9 +83,7 @@
         }
 
         @keyframes glow-spin {
-          to {
-            --angle: 360deg;
-          }
+          to { --angle: 360deg; }
         }
 
         .neon-box {
@@ -71,18 +92,14 @@
             transition: all 0.3s ease-in-out;
         }
         
-        /* The glow effect */
         .neon-box::before {
             content: '';
             position: absolute;
             inset: -3px;
-            z-index: 0; /* Behind solid bg and content */
+            z-index: 0;
             background: conic-gradient(
                 from var(--angle),
-                transparent 20%,
-                #ec4899, /* Pink */
-                #f97316, /* Orange */
-                transparent 80%
+                transparent 20%, #ec4899, #f97316, transparent 80%
             );
             border-radius: inherit;
             animation: glow-spin 4s linear infinite paused;
@@ -91,23 +108,20 @@
             filter: blur(12px);
         }
         
-        /* Solid background layer FOR transparent cards */
         .neon-box::after {
             content: '';
             position: absolute;
             inset: 0;
             background: #0c0c0c;
             border-radius: inherit;
-            z-index: 1; /* Above glow */
+            z-index: 1;
         }
 
-        /* Ensure content is on top */
         .neon-box > * {
             position: relative;
             z-index: 2;
         }
 
-        /* Modifier for opaque cards (videos, images) that DON'T need the solid background */
         .neon-box-opaque::after {
             display: none;
         }
@@ -121,72 +135,32 @@
             opacity: 1;
             animation-play-state: running;
         }
-        /* --- ENDE NEUER HOVER EFFEKT --- */
 
-        /* Style for gallery images */
         .gallery-img {
             aspect-ratio: 16 / 9;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem;
         }
         
-        /* FAQ Accordion Styles */
-        .faq-question {
-            cursor: pointer;
-        }
+        .faq-question { cursor: pointer; }
         .faq-answer {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
         }
-        .faq-item.active .faq-answer {
-            max-height: 200px; /* Adjust as needed */
-        }
-        .faq-item.active .faq-icon {
-            transform: rotate(180deg);
-        }
-        .faq-icon {
-            transition: transform 0.3s ease;
-        }
-
-        /* Interactive Map */
-        .map-point {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #ec4899;
-            border-radius: 50%;
-            border: 2px solid white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .map-point:hover {
-            transform: scale(1.5);
-            background-color: #f97316;
-        }
-        .map-point .tooltip {
-            visibility: hidden;
-            width: 160px;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 150%;
-            left: 50%;
-            margin-left: -80px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .map-point:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
+        .faq-item.active .faq-answer { max-height: 200px; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-icon { transition: transform 0.3s ease; }
     </style>
 </head>
 <body class="gta-background">
+    <div id="loader">
+        <img id="loader-rockstar" src="https://www.rockstargames.com/vi/dist/img/RS_logo_white.svg" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 1;">
+        <img id="loader-gta6" src="https://www.rockstargames.com/vi/dist/img/GTAVI_logo_white.svg" alt="GTA VI Logo" class="loader-logo" style="opacity: 0;">
+    </div>
+
     <div class="overlay"></div>
 
     <main class="relative z-10 flex flex-col items-center p-4 sm:p-6 md:p-8 text-white">
@@ -240,6 +214,37 @@
                         <div class="w-full h-full rounded-xl overflow-hidden">
                             <iframe class="w-full h-full" src="https://www.youtube.com/embed/VQRLujxTm3c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24">
+            <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider text-center">Key Features</h3>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="neon-box rounded-xl">
+                    <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 text-center h-full">
+                        <i class="fas fa-map-marked-alt fa-3x mb-4 gta-text-gradient"></i>
+                        <h4 class="text-xl font-bold mb-2">A New Leonida</h4>
+                        <p class="text-gray-400">Explore the sun-soaked streets of Vice City and beyond, in the most immersive evolution of the Grand Theft Auto series yet.</p>
+                    </div>
+                </div>
+                 <!-- Feature 2 -->
+                <div class="neon-box rounded-xl">
+                     <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 text-center h-full">
+                        <i class="fas fa-users fa-3x mb-4 gta-text-gradient"></i>
+                        <h4 class="text-xl font-bold mb-2">Dual Protagonists</h4>
+                        <p class="text-gray-400">Experience a gripping, character-driven story through the eyes of Lucia and Jason, a criminal couple pushed to the edge.</p>
+                    </div>
+                </div>
+                 <!-- Feature 3 -->
+                <div class="neon-box rounded-xl">
+                     <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 text-center h-full">
+                        <i class="fas fa-gamepad fa-3x mb-4 gta-text-gradient"></i>
+                        <h4 class="text-xl font-bold mb-2">Next-Gen Immersion</h4>
+                        <p class="text-gray-400">Powered by the latest RAGE technology, expect groundbreaking graphics, physics, and an unprecedented level of detail.</p>
                     </div>
                 </div>
             </div>
@@ -299,7 +304,31 @@
     </main>
 
     <script>
-        // Countdown
+        // --- Loading Animation ---
+        const loader = document.getElementById('loader');
+        const rockstarLogo = document.getElementById('loader-rockstar');
+        const gta6Logo = document.getElementById('loader-gta6');
+        const mainContent = document.querySelector('main');
+
+        window.onload = () => {
+            // Sequence: R* Logo (2s) -> Fade to GTA VI Logo -> GTA VI Logo (2.5s) -> Fade out loader, fade in content
+            setTimeout(() => {
+                rockstarLogo.style.opacity = '0';
+                gta6Logo.style.opacity = '1';
+            }, 2000); // R* Logo display duration
+
+            setTimeout(() => {
+                loader.style.opacity = '0';
+            }, 4500); // Start fading out loader (2000 + 2500)
+
+            setTimeout(() => {
+                loader.style.display = 'none';
+                mainContent.style.opacity = '1';
+            }, 5200); // Hide loader completely and show content (4500 + 700ms transition)
+        };
+
+
+        // --- Countdown ---
         const countDownDate = new Date("May 26, 2026 01:00:00").getTime();
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
@@ -328,7 +357,7 @@
             }
         }, 1000);
 
-        // FAQ Accordion
+        // --- FAQ Accordion ---
         const faqItems = document.querySelectorAll('.faq-item');
         faqItems.forEach(item => {
             const question = item.querySelector('.faq-question');
@@ -344,5 +373,4 @@
 
 </body>
 </html>
-
 
