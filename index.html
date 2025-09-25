@@ -3,449 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA VI Fan Hub & Countdown</title>
-    <!-- Tailwind CSS -->
+    <title>Mein Spotify Explorer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Custom styles for the GTA 6 look */
-        html {
-            scroll-behavior: smooth;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #0c0c0c;
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
         }
-
-        /* --- Loading Screen --- */
-        #loader {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.7s ease-in-out;
-            opacity: 1;
+        .spotify-green {
+            background-color: #1DB954;
         }
-
-        .loader-logo-wrapper {
-            position: relative;
-            width: 40%;
-            max-width: 300px;
+        .spotify-green:hover {
+            background-color: #1ED760;
         }
-
-        .loader-logo {
-            display: block;
-            width: 100%;
-            transition: opacity 0.7s ease-in-out;
+        .card {
+            background-color: #181818;
+            transition: background-color 0.3s ease;
         }
-
-        .loader-logo-wrapper::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                100deg,
-                rgba(249, 115, 22, 0.9),
-                rgba(236, 72, 153, 1.0),
-                rgba(139, 92, 246, 0.9)
-            );
-            background-size: 300% 100%;
-            animation: shine-wipe 3s linear infinite;
-            -webkit-mask-image: url('https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png');
-            mask-image: url('https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png');
-            -webkit-mask-size: contain;
-            mask-size: contain;
-            -webkit-mask-position: center;
-            mask-position: center;
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
+        .card:hover {
+            background-color: #282828;
         }
-
-        @keyframes shine-wipe {
-            0% {
-                background-position: 150% 0;
-            }
-            100% {
-                background-position: -50% 0;
-            }
-        }
-
-
-        /* --- Main Content Styling --- */
-        main {
-            opacity: 0;
-            transition: opacity 0.7s ease-in-out;
-            visibility: hidden;
-        }
-
-        main.loaded {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .gta-background {
-            background-image: url('https://media-rockstargames-com.akamaized.net/mfe6/prod/__common/img/7643b644a47489e2f1f53b51d2f7813a.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: -1;
-        }
-
-        .gta-title, .gta-text-gradient {
-            background: linear-gradient(to right, #f97316, #ec4899, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-fill-color: transparent;
-        }
-        
-        @property --angle {
-          syntax: '<angle>';
-          initial-value: 0deg;
-          inherits: false;
-        }
-
-        @keyframes glow-spin {
-          to { --angle: 360deg; }
-        }
-
-        .neon-box {
-            position: relative;
-            box-shadow: 0 0 15px rgba(236, 72, 153, 0.4), 0 0 5px rgba(249, 115, 22, 0.3);
-            transition: all 0.3s ease-in-out;
-        }
-        
-        .neon-box::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            z-index: 0;
-            background: conic-gradient(
-                from var(--angle),
-                transparent 20%, #ec4899, #f97316, transparent 80%
-            );
-            border-radius: inherit;
-            animation: glow-spin 4s linear infinite paused;
-            opacity: 0;
-            transition: opacity 0.4s ease-out;
-            filter: blur(12px);
-        }
-        
-        .neon-box::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: #0c0c0c;
-            border-radius: inherit;
-            z-index: 1;
-        }
-
-        .neon-box > * {
-            position: relative;
-            z-index: 2;
-        }
-
-        .neon-box-opaque::after {
-            display: none;
-        }
-
-        .neon-box:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6), 0 0 10px rgba(249, 115, 22, 0.5);
-        }
-
-        .neon-box:hover::before {
-            opacity: 1;
-            animation-play-state: running;
-        }
-        
-        .faq-question { cursor: pointer; }
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-        .faq-item.active .faq-answer { max-height: 200px; }
-        .faq-item.active .faq-icon { transform: rotate(180deg); }
-        .faq-icon { transition: transform 0.3s ease; }
-
-        .preorder-button {
-            background: linear-gradient(to right, #f97316, #ec4899, #8b5cf6);
-            transition: all 0.3s ease-in-out;
-        }
-        .preorder-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
-        }
-
     </style>
 </head>
-<body class="gta-background">
-    <div id="loader">
-        <div class="loader-logo-wrapper">
-            <img id="loader-rockstar" src="https://cdn2.steamgriddb.com/logo/bcc1810bc35eeaa19be7a3339df2a563.png" alt="Rockstar Games Logo" class="loader-logo" style="opacity: 0;">
+<body class="antialiased">
+
+    <div id="app-container" class="min-h-screen p-4 sm:p-6 lg:p-8">
+        
+        <!-- Login Ansicht -->
+        <div id="login-view" class="flex flex-col items-center justify-center min-h-[80vh] text-center">
+            <i class="fa-brands fa-spotify text-8xl mb-6 text-[#1DB954]"></i>
+            <h1 class="text-4xl sm:text-5xl font-bold mb-4">Mein Spotify Explorer</h1>
+            <p class="text-neutral-400 mb-8 max-w-md">Melde dich mit deinem Spotify-Konto an, um deine Musik zu entdecken, Playlists anzuzeigen und neue Songs zu suchen.</p>
+            <button id="login-button" class="spotify-green text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-transform duration-200">
+                Mit Spotify einloggen
+            </button>
+        </div>
+
+        <!-- Hauptansicht nach dem Login -->
+        <div id="main-view" class="hidden">
+            <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                <div class="flex items-center gap-4">
+                    <i class="fa-brands fa-spotify text-5xl text-[#1DB954]"></i>
+                    <h1 class="text-3xl font-bold">Explorer</h1>
+                </div>
+                <div id="profile" class="flex items-center gap-3 bg-[#0a0a0a] p-2 rounded-full">
+                    <!-- Profilinformationen werden hier eingefügt -->
+                </div>
+            </header>
+            
+            <main>
+                <!-- Suchleiste -->
+                <form id="search-form" class="mb-8">
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Suche nach Songs oder Künstlern..." class="w-full bg-[#282828] text-white border-transparent focus:ring-2 focus:ring-[#1DB954] focus:border-transparent rounded-full py-3 pl-12 pr-4 text-lg">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-neutral-400"></i>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Linke Spalte: Suchergebnisse -->
+                    <div class="lg:col-span-2">
+                        <h2 class="text-2xl font-bold mb-4">Suchergebnisse</h2>
+                        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <!-- Suchergebnisse werden hier eingefügt -->
+                            <p id="results-placeholder" class="text-neutral-400 col-span-full">Suche nach etwas, um hier Ergebnisse zu sehen.</p>
+                        </div>
+                    </div>
+
+                    <!-- Rechte Spalte: Playlists -->
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">Meine Playlists</h2>
+                        <div id="playlists" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+                            <!-- Playlists werden hier eingefügt -->
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <div class="overlay"></div>
-
-    <main class="relative z-10 flex flex-col items-center p-4 sm:p-6 md:p-8 text-white">
+    <script type="module">
+        // ##################################################################
+        // WICHTIGER HINWEIS FÜR DICH!
+        // ##################################################################
+        // 1. Client ID: Ich habe deine Client ID bereits hier eingetragen.
+        // 2. Redirect URI: Du musst deine Spotify App konfigurieren!
+        //    - Gehe zu deinem Spotify Developer Dashboard: https://developer.spotify.com/dashboard
+        //    - Wähle deine App ("AssetExplorer") aus und klicke "Edit Settings".
+        //    - Füge unter "Redirect URIs" genau die URL hinzu, auf der diese App laufen wird.
+        //    - Wenn du diese HTML-Datei lokal öffnest, ist die URL oft http://127.0.0.1:5500/ oder ähnlich.
+        //    - Diese Seite berechnet die URI automatisch, kopiere einfach den Wert von `redirectUri` unten.
+        // ##################################################################
         
-        <section class="w-full text-center py-16 md:py-24">
-            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest uppercase">
-                <span class="gta-title">Grand Theft Auto VI</span>
-            </h1>
-            <h2 class="text-lg sm:text-xl md:text-2xl font-bold tracking-wider text-gray-200 mt-4">
-                COUNTDOWN TO RELEASE
-            </h2>
-        </section>
-
-        <section class="w-full max-w-5xl lg:max-w-6xl mx-auto text-center mb-16 md:mb-24">
-            <div id="countdown-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8">
-                <div class="neon-box rounded-xl min-w-[100px]">
-                    <div class="flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm border border-pink-500/30 rounded-xl p-4 md:p-6 w-full h-full"><span id="days" class="text-4xl md:text-6xl font-bold">00</span><span class="text-sm md:text-base font-semibold uppercase tracking-wider mt-1">Days</span></div>
-                </div>
-                <div class="neon-box rounded-xl min-w-[100px]">
-                    <div class="flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm border border-pink-500/30 rounded-xl p-4 md:p-6 w-full h-full"><span id="hours" class="text-4xl md:text-6xl font-bold">00</span><span class="text-sm md:text-base font-semibold uppercase tracking-wider mt-1">Hours</span></div>
-                </div>
-                <div class="neon-box rounded-xl min-w-[100px]">
-                    <div class="flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm border border-pink-500/30 rounded-xl p-4 md:p-6 w-full h-full"><span id="minutes" class="text-4xl md:text-6xl font-bold">00</span><span class="text-sm md:text-base font-semibold uppercase tracking-wider mt-1">Minutes</span></div>
-                </div>
-                <div class="neon-box rounded-xl min-w-[100px]">
-                    <div class="flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm border border-pink-500/30 rounded-xl p-4 md:p-6 w-full h-full"><span id="seconds" class="text-4xl md:text-6xl font-bold">00</span><span class="text-sm md:text-base font-semibold uppercase tracking-wider mt-1">Seconds</span></div>
-                </div>
-            </div>
-            <div id="end-message" class="hidden mt-12"><h3 class="text-4xl md:text-6xl font-black tracking-widest uppercase gta-title">WELCOME TO VICE CITY</h3></div>
-            <p class="mt-8 text-base md:text-lg font-semibold text-gray-300">May 26, 2026, 01:00 AM</p>
-        </section>
+        const clientId = "9a5edaf67562491892d375c81e843579"; // Deine Client ID aus dem Screenshot
+        const redirectUri = window.location.origin + window.location.pathname;
         
-        <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24">
-            <div class="lg:flex lg:justify-center lg:gap-8">
-                <div class="lg:w-1/2 mb-16 lg:mb-0 text-center">
-                    <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider">Official Trailer #1</h3>
-                    <div class="aspect-video neon-box neon-box-opaque rounded-xl">
-                        <div class="w-full h-full rounded-xl overflow-hidden">
-                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/QdBZY2fkU-0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-                <div class="lg:w-1/2 text-center">
-                    <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider">Official Trailer #2</h3>
-                    <div class="aspect-video neon-box neon-box-opaque rounded-xl">
-                        <div class="w-full h-full rounded-xl overflow-hidden">
-                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/VQRLujxTm3c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        console.log("Bitte füge diese Redirect URI in deinem Spotify Dashboard hinzu:", redirectUri);
 
-        <!-- Pre-Order Section -->
-        <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24 text-center">
-            <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider">Wishlist Now</h3>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
-                <a href="https://store.playstation.com/en-us/concept/10008224" target="_blank" class="preorder-button text-white font-bold py-4 px-8 rounded-lg flex items-center gap-3 text-xl">
-                    <i class="fab fa-playstation"></i>
-                    <span>PlayStation 5</span>
-                </a>
-                <a href="https://www.xbox.com/en-US/games/store/grand-theft-auto-vi/9PFFZ470W1N2" target="_blank" class="preorder-button text-white font-bold py-4 px-8 rounded-lg flex items-center gap-3 text-xl">
-                    <i class="fab fa-xbox"></i>
-                    <span>Xbox Series X|S</span>
-                </a>
-            </div>
-        </section>
+        let accessToken = null;
 
-        <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24">
-            <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider text-center">Key Features</h3>
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="neon-box rounded-xl">
-                    <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4 md:p-6 text-center h-full">
-                        <i class="fas fa-map-marked-alt fa-2x md:fa-3x mb-4 gta-text-gradient"></i>
-                        <h4 class="text-lg md:text-xl font-bold mb-2">A New Leonida</h4>
-                        <p class="text-sm sm:text-base text-gray-400">Explore the sun-soaked streets of Vice City and beyond, in the most immersive evolution of the Grand Theft Auto series yet.</p>
-                    </div>
-                </div>
-                <div class="neon-box rounded-xl">
-                     <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4 md:p-6 text-center h-full">
-                        <i class="fas fa-users fa-2x md:fa-3x mb-4 gta-text-gradient"></i>
-                        <h4 class="text-lg md:text-xl font-bold mb-2">Dual Protagonists</h4>
-                        <p class="text-sm sm:text-base text-gray-400">Experience a gripping, character-driven story through the eyes of Lucia and Jason, a criminal couple pushed to the edge.</p>
-                    </div>
-                </div>
-                <div class="neon-box rounded-xl">
-                     <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4 md:p-6 text-center h-full">
-                        <i class="fas fa-gamepad fa-2x md:fa-3x mb-4 gta-text-gradient"></i>
-                        <h4 class="text-lg md:text-xl font-bold mb-2">Next-Gen Immersion</h4>
-                        <p class="text-sm sm:text-base text-gray-400">Powered by the latest RAGE technology, expect groundbreaking graphics, physics, and an unprecedented level of detail.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PC Requirements Section -->
-        <section class="w-full max-w-5xl lg:max-w-7xl mx-auto mb-16 md:mb-24">
-            <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider text-center">PC Requirements (Speculation)</h3>
-            <div class="neon-box rounded-xl">
-                <div class="grid md:grid-cols-2 gap-px bg-purple-500/30 rounded-xl overflow-hidden">
-                    <div class="bg-black/80 backdrop-blur-sm p-6">
-                        <h4 class="text-2xl font-bold mb-4 text-center">Minimum</h4>
-                        <ul class="space-y-3 text-gray-300">
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>OS:</span> <span class="font-semibold">Windows 10/11</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Processor:</span> <span class="font-semibold">Intel Core i5-8600K</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Memory:</span> <span class="font-semibold">16 GB RAM</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Graphics:</span> <span class="font-semibold">NVIDIA GeForce GTX 1080</span></li>
-                            <li class="flex justify-between"><span>Storage:</span> <span class="font-semibold">150 GB SSD</span></li>
-                        </ul>
-                    </div>
-                    <div class="bg-black/80 backdrop-blur-sm p-6">
-                        <h4 class="text-2xl font-bold mb-4 text-center">Recommended</h4>
-                         <ul class="space-y-3 text-gray-300">
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>OS:</span> <span class="font-semibold">Windows 11</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Processor:</span> <span class="font-semibold">Intel Core i7-12700K</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Memory:</span> <span class="font-semibold">32 GB RAM</span></li>
-                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Graphics:</span> <span class="font-semibold">NVIDIA GeForce RTX 4070</span></li>
-                            <li class="flex justify-between"><span>Storage:</span> <span class="font-semibold">150 GB NVMe SSD</span></li>
-                        </ul>
-                    </div>
-                </div>
-                <p class="text-center text-xs text-gray-500 mt-4">*These are speculative requirements based on industry trends and are not official.</p>
-            </div>
-        </section>
-
-        <section class="w-full max-w-4xl lg:max-w-5xl mx-auto mb-16 md:mb-24">
-            <h3 class="text-3xl md:text-4xl font-black mb-8 gta-text-gradient uppercase tracking-wider text-center">Frequently Asked Questions</h3>
-            <div class="space-y-4">
-                <div class="faq-item neon-box rounded-xl">
-                    <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl px-6 py-4">
-                        <div class="faq-question flex justify-between items-center">
-                            <h4 class="text-lg font-semibold">When will GTA VI be released?</h4>
-                            <i class="fas fa-chevron-down faq-icon"></i>
-                        </div>
-                        <div class="faq-answer pt-4 text-gray-300">
-                            <p>The official release date is May 26, 2026.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item neon-box rounded-xl">
-                    <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl px-6 py-4">
-                        <div class="faq-question flex justify-between items-center">
-                            <h4 class="text-lg font-semibold">What platforms will it be on?</h4>
-                            <i class="fas fa-chevron-down faq-icon"></i>
-                        </div>
-                        <div class="faq-answer pt-4 text-gray-300">
-                            <p>GTA VI has been announced for PlayStation 5 and Xbox Series X|S. A PC version has not yet been confirmed, but is expected to follow at a later date, similar to previous titles.</p>
-                        </div>
-                    </div>
-                </div>
-                 <div class="faq-item neon-box rounded-xl">
-                    <div class="bg-black/60 backdrop-blur-sm border border-purple-500/30 rounded-xl px-6 py-4">
-                        <div class="faq-question flex justify-between items-center">
-                            <h4 class="text-lg font-semibold">Where is GTA VI set?</h4>
-                            <i class="fas fa-chevron-down faq-icon"></i>
-                        </div>
-                        <div class="faq-answer pt-4 text-gray-300">
-                            <p>The game returns to Vice City, located in the fictional US state of Leonida, inspired by Florida. The game world will include Vice City and expansive surrounding areas.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="w-full max-w-5xl mx-auto text-center py-8 border-t border-white/10">
-            <p class="text-gray-400 mb-4">Follow Rockstar Games for official updates:</p>
-            <div class="flex justify-center space-x-6">
-                <a href="https://twitter.com/RockstarGames" target="_blank" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-twitter fa-2x"></i></a>
-                <a href="https://www.instagram.com/rockstargames" target="_blank" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-instagram fa-2x"></i></a>
-                <a href="https://www.youtube.com/rockstargames" target="_blank" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-youtube fa-2x"></i></a>
-            </div>
-            <p class="text-xs text-gray-500 mt-6">&copy; This is a fan-made website. Grand Theft Auto and all related marks and logos are trademarks of Take-Two Interactive.</p>
-        </footer>
-
-    </main>
-
-    <script>
+        // Beim Laden der Seite prüfen, ob ein Access Token in der URL vorhanden ist
         document.addEventListener('DOMContentLoaded', () => {
-            const loader = document.getElementById('loader');
-            const rockstarLogo = document.getElementById('loader-rockstar');
-            const mainContent = document.querySelector('main');
+            const args = new URLSearchParams(window.location.hash.substring(1));
+            const token = args.get('access_token');
 
-            setTimeout(() => {
-                rockstarLogo.style.opacity = '1';
-            }, 500);
-
-            setTimeout(() => {
-                loader.style.opacity = '0';
-            }, 3500);
-
-            setTimeout(() => {
-                loader.style.display = 'none';
-                mainContent.classList.add('loaded');
-            }, 4200);
-        });
-
-        const countDownDate = new Date("May 26, 2026 01:00:00").getTime();
-        const daysEl = document.getElementById('days');
-        const hoursEl = document.getElementById('hours');
-        const minutesEl = document.getElementById('minutes');
-        const secondsEl = document.getElementById('seconds');
-        const countdownContainer = document.getElementById('countdown-container');
-        const endMessage = document.getElementById('end-message');
-        const interval = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = countDownDate - now;
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            const formatTime = (time) => time < 10 ? `0${time}` : time;
-            if(daysEl) {
-                daysEl.innerHTML = formatTime(days);
-                hoursEl.innerHTML = formatTime(hours);
-                minutesEl.innerHTML = formatTime(minutes);
-                secondsEl.innerHTML = formatTime(seconds);
+            if (token) {
+                accessToken = token;
+                showMainView();
+                fetchProfile();
+                fetchPlaylists();
+                 // Bereinige die URL, damit der Token nicht sichtbar bleibt
+                window.history.pushState("", document.title, window.location.pathname + window.location.search);
+            } else {
+                showLoginView();
             }
-            if (distance < 0) {
-                clearInterval(interval);
-                countdownContainer.classList.add('hidden');
-                endMessage.classList.remove('hidden');
-            }
-        }, 1000);
 
-        const faqItems = document.querySelectorAll('.faq-item');
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question');
-            question.addEventListener('click', () => {
-                const currentlyActive = document.querySelector('.faq-item.active');
-                if (currentlyActive && currentlyActive !== item) {
-                    currentlyActive.classList.remove('active');
+            document.getElementById('login-button').addEventListener('click', redirectToSpotifyLogin);
+            document.getElementById('search-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const query = document.getElementById('search-input').value;
+                if(query) {
+                    await searchSpotify(query);
                 }
-                item.classList.toggle('active');
             });
         });
-    </script>
+        
+        function redirectToSpotifyLogin() {
+            const scope = 'user-read-private user-read-email playlist-read-private';
+            let url = 'https://accounts.spotify.com/authorize';
+            url += '?response_type=token';
+            url += '&client_id=' + encodeURIComponent(clientId);
+            url += '&scope=' + encodeURIComponent(scope);
+            url += '&redirect_uri=' + encodeURIComponent(redirectUri);
+            
+            window.location.href = url;
+        }
 
+        // Hilfsfunktion für API-Aufrufe
+        async function fetchWebApi(endpoint, method = 'GET', body) {
+            const res = await fetch(`https://api.spotify.com/v1/${endpoint}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                method,
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) {
+                 // Wenn der Token abgelaufen ist, leite zur Login-Seite weiter
+                if(res.status === 401) {
+                    console.error("Access Token ist ungültig oder abgelaufen. Bitte neu einloggen.");
+                    accessToken = null;
+                    showLoginView();
+                }
+                throw new Error(`Konnte Daten nicht abrufen: ${res.statusText}`);
+            }
+            return await res.json();
+        }
+
+        async function fetchProfile() {
+            try {
+                const profileData = await fetchWebApi('me');
+                displayProfile(profileData);
+            } catch(e) {
+                console.error("Fehler beim Abrufen des Profils:", e);
+            }
+        }
+
+        async function fetchPlaylists() {
+            try {
+                const playlistsData = await fetchWebApi('me/playlists?limit=50');
+                displayPlaylists(playlistsData.items);
+            } catch(e) {
+                console.error("Fehler beim Abrufen der Playlists:", e);
+            }
+        }
+        
+        async function searchSpotify(query) {
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            resultsPlaceholder.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Suche wird durchgeführt...';
+            try {
+                const searchData = await fetchWebApi(`search?q=${encodeURIComponent(query)}&type=track&limit=20`);
+                displayResults(searchData.tracks.items);
+            } catch(e) {
+                console.error("Fehler bei der Suche:", e);
+                resultsPlaceholder.textContent = 'Bei der Suche ist ein Fehler aufgetreten.';
+            }
+        }
+
+        function showLoginView() {
+            document.getElementById('login-view').classList.remove('hidden');
+            document.getElementById('main-view').classList.add('hidden');
+        }
+
+        function showMainView() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('main-view').classList.remove('hidden');
+        }
+
+        function displayProfile(profile) {
+            const profileContainer = document.getElementById('profile');
+            profileContainer.innerHTML = `
+                <img src="${profile.images[0]?.url || 'https://placehold.co/40x40/181818/FFF?text=P'}" alt="Profilbild" class="w-10 h-10 rounded-full">
+                <span class="font-semibold hidden sm:block">${profile.display_name}</span>
+                <button id="logout-button" title="Abmelden" class="w-8 h-8 rounded-full hover:bg-neutral-700 flex items-center justify-center">
+                    <i class="fas fa-sign-out-alt text-neutral-400"></i>
+                </button>
+            `;
+            document.getElementById('logout-button').addEventListener('click', () => {
+                accessToken = null;
+                showLoginView();
+            });
+        }
+
+        function displayPlaylists(playlists) {
+            const playlistsContainer = document.getElementById('playlists');
+            if (playlists.length === 0) {
+                playlistsContainer.innerHTML = '<p class="text-neutral-400">Keine Playlists gefunden.</p>';
+                return;
+            }
+            playlistsContainer.innerHTML = playlists.map(playlist => `
+                <a href="${playlist.external_urls.spotify}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-2 rounded-lg card">
+                    <img src="${playlist.images[0]?.url || 'https://placehold.co/64x64/181818/FFF?text=🎵'}" alt="${playlist.name}" class="w-16 h-16 object-cover rounded">
+                    <div>
+                        <p class="font-bold truncate">${playlist.name}</p>
+                        <p class="text-sm text-neutral-400">${playlist.tracks.total} Songs</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+        
+        function displayResults(tracks) {
+            const resultsContainer = document.getElementById('results');
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            resultsPlaceholder.classList.add('hidden');
+            resultsContainer.innerHTML = ''; // Vorherige Ergebnisse löschen
+
+            if (tracks.length === 0) {
+                resultsPlaceholder.textContent = 'Keine Ergebnisse für deine Suche gefunden.';
+                resultsPlaceholder.classList.remove('hidden');
+                return;
+            }
+
+            tracks.forEach(track => {
+                const artistNames = track.artists.map(artist => artist.name).join(', ');
+                const card = document.createElement('a');
+                card.href = track.external_urls.spotify;
+                card.target = "_blank";
+                card.rel = "noopener noreferrer";
+                card.className = "p-4 rounded-lg card flex flex-col gap-4 group";
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${track.album.images[0]?.url || 'https://placehold.co/200x200/181818/FFF?text=🎵'}" alt="${track.album.name}" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                        <div class="absolute bottom-2 right-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform group-hover:scale-110">
+                            <i class="fas fa-play text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-bold truncate">${track.name}</p>
+                        <p class="text-sm text-neutral-400 truncate">${artistNames}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+    </script>
 </body>
 </html>
 
