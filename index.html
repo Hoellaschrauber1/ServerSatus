@@ -3,262 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brückenbau-Anleitung für Klasse 9</title>
+    <title>Brückenbau-Analyse-Terminal v2.0</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js for 3D graphics -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Google Fonts for better typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- Liquid Glass Effect & Background Animation --- */
+        /* --- Cyberpunk Terminal Theme --- */
+        html {
+             scroll-behavior: smooth;
+        }
+        
         body { 
-            font-family: 'Inter', sans-serif; 
-            scroll-behavior: smooth;
-            background-color: #0f172a; /* Dark blue background */
-            color: #e2e8f0; /* Light text color for contrast */
-            overflow-x: hidden; /* Prevent horizontal scroll from blobs */
+            font-family: 'Roboto Mono', monospace; 
+            background-color: #0c0c0c;
+            color: #00ffc3; /* Main text color: Neon green/cyan */
+            overflow-x: hidden;
+            background-image: radial-gradient(rgba(0, 255, 195, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
-        /* Animated blobs in the background */
-        .background-blob {
+        /* Scanline Overlay Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
+            background-size: 100% 4px;
+            animation: scanlines 0.2s linear infinite;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        @keyframes scanlines {
+            from { background-position-y: 0; }
+            to { background-position-y: 4px; }
+        }
+
+        h1, h2, h3, .cyber-btn {
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+        }
+
+        /* Text Flicker / Glitch Effect */
+        .flicker {
+            animation: flicker-text 3s infinite;
+        }
+        @keyframes flicker-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .title-glitch {
+            position: relative;
+        }
+        .title-glitch::before, .title-glitch::after {
+            content: attr(data-text);
             position: absolute;
-            border-radius: 9999px; /* Make it a circle */
-            filter: blur(100px); /* Heavy blur for a soft effect */
-            z-index: -10; /* Place it behind all content */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0c0c0c;
+            overflow: hidden;
+        }
+        .title-glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .title-glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff, 2px 2px #ff00ff;
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
         }
 
-        .blob-1 {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.6));
-            top: -150px;
-            left: -150px;
-            animation: move 25s infinite alternate;
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(5% 0 90% 0); } 20% { clip-path: inset(70% 0 25% 0); } 40% { clip-path: inset(45% 0 40% 0); } 60% { clip-path: inset(90% 0 5% 0); } 80% { clip-path: inset(30% 0 60% 0); } 100% { clip-path: inset(55% 0 20% 0); }
         }
-
-        .blob-2 {
-            width: 500px;
-            height: 500px;
-            background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(124, 58, 237, 0.6));
-            bottom: -200px;
-            right: -200px;
-            animation: move 30s infinite alternate;
-        }
-
-        @keyframes move {
-            from {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            to {
-                transform: translate(100px, 50px) rotate(180deg);
-            }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(75% 0 5% 0); } 20% { clip-path: inset(10% 0 88% 0); } 40% { clip-path: inset(60% 0 30% 0); } 60% { clip-path: inset(20% 0 75% 0); } 80% { clip-path: inset(80% 0 10% 0); } 100% { clip-path: inset(40% 0 45% 0); }
         }
         
-        /* The main class for the glass effect panels */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05); /* Very transparent white */
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px); /* For Safari */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* Soft shadow */
+            background: rgba(0, 20, 15, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 195, 0.3);
+            border-radius: 0; /* Sharp corners */
+            box-shadow: 0 0 15px 0 rgba(0, 255, 195, 0.1), inset 0 0 10px rgba(0, 255, 195, 0.1);
+            position: relative;
+        }
+
+        /* Blinking corner decorators */
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid #00ffc3;
+            border-left: 2px solid #00ffc3;
+            animation: blinker 2s infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.3; }
         }
         
-        /* Style for the 3D canvas container */
         #bridgeCanvasContainer {
             min-height: 400px;
             cursor: grab;
-            border-radius: 0.5rem;
-            background: transparent; /* Make canvas container transparent */
+            background: transparent;
+        }
+        
+        .cyber-btn {
+            background: transparent;
+            border: 1px solid;
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem;
+            color: #00ffc3;
+            border-color: #00ffc3;
         }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+        .cyber-btn.active, .cyber-btn:hover {
+            background: rgba(0, 255, 195, 1);
+            color: #0c0c0c;
+            box-shadow: 0 0 20px rgba(0, 255, 195, 0.7);
         }
+
     </style>
 </head>
-<body class="bg-slate-900 text-slate-200">
-    <!-- Background Blobs for the liquid effect -->
-    <div class="background-blob blob-1"></div>
-    <div class="background-blob blob-2"></div>
+<body>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
         
-        <!-- Header Section -->
         <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-5xl font-bold text-white mb-2">
-                Faszination Brückenbau
+            <h1 class="title-glitch text-3xl md:text-5xl font-black uppercase" data-text="[Brücken-Analyse v2.0]">
+                [Brücken-Analyse v2.0]
             </h1>
-            <p class="text-lg md:text-xl text-slate-400">Eine Anleitung für Schüler der 9. Klasse</p>
+            <p class="text-lg text-fuchsia-400 flicker">// System bereit. Datenstrom für Sektor 9 geladen.</p>
         </header>
 
-        <!-- Main Content Grid -->
-        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             
             <!-- Left Column: 3D Model -->
-            <div class="glass-panel p-6 flex flex-col">
-                <h2 class="text-2xl font-bold text-blue-400 mb-3">Interaktives 3D-Modell</h2>
-                <p class="mb-4 text-slate-300">
-                    Wähle eine Ansicht, um die Struktur der Brücke zu erkunden. Halte die Maustaste gedrückt und bewege die Maus, um das Modell zu drehen.
-                </p>
-                <!-- Model Switcher -->
-                <div class="flex justify-center space-x-4 mb-4">
-                    <button id="wireframeBtn" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold transition-transform transform hover:scale-105">Drahtmodell</button>
-                    <button id="solidBtn" class="px-4 py-2 rounded-lg bg-slate-600 text-white font-semibold transition-transform transform hover:scale-105">Festkörpermodell</button>
+            <div class="glass-panel p-6 lg:col-span-3 flex flex-col">
+                <h2 class="text-2xl font-bold mb-3">Holografie-Projektor</h2>
+                
+                <!-- Bridge Type Switcher -->
+                <div class="mb-4">
+                    <p class="mb-2 text-sm">// Protokoll wählen:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="trussBtn" class="cyber-btn active text-xs">Fachwerk</button>
+                        <button id="archBtn" class="cyber-btn text-xs">Bogen</button>
+                        <button id="suspensionBtn" class="cyber-btn text-xs">Hängebrücke</button>
+                    </div>
                 </div>
-                <!-- Container for the 3D Canvas -->
-                <div id="bridgeCanvasContainer" class="w-full h-96 flex-grow">
-                    <!-- The 3D canvas will be inserted here -->
+
+                <!-- Model View Switcher -->
+                <div class="mb-4">
+                     <p class="mb-2 text-sm">// Visualisierungsebene:</p>
+                     <div class="flex flex-wrap gap-2">
+                        <button id="wireframeBtn" class="cyber-btn active text-xs">Vektor-Scan</button>
+                        <button id="solidBtn" class="cyber-btn text-xs">Festkörper-Render</button>
+                     </div>
                 </div>
+               
+                <div id="bridgeCanvasContainer" class="w-full h-96 flex-grow"></div>
             </div>
 
-            <!-- Right Column: Explanations -->
-            <div class="glass-panel p-6 space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-400 mb-3">Das Geheimnis der Stabilität</h2>
-                    <p class="text-slate-300">
-                        Brücken sind Meisterwerke der Ingenieurskunst. Ihr Ziel ist es, Lasten sicher über ein Hindernis zu tragen. Die größte Herausforderung sind zwei Kräfte: <span class="font-semibold text-red-400">Druck</span> und <span class="font-semibold text-green-400">Zug</span>.
+            <!-- Right Column: Info -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-panel p-6">
+                    <h2 class="text-2xl font-bold mb-3">Stabilitäts-Matrix</h2>
+                    <p class="font-light text-sm">
+                        Fachwerk-Architekturen nutzen die überlegene Stabilität trigonaler (dreieckiger) Formen, um Vektorkräfte effizient auf die Stützpfeiler abzuleiten.
                     </p>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold text-white mb-2">Das Dreieck: Die stabilste Form</h3>
-                    <p class="text-slate-300">
-                        Eine Fachwerkbrücke nutzt die unglaubliche Stabilität von Dreiecken. Ein Viereck verformt sich leicht. Ein Dreieck hingegen ist starr. Diese Eigenschaft macht es extrem stabil, da die Kräfte durch die Stäbe auf die Pfeiler abgeleitet werden.
-                    </p>
+                 <div class="glass-panel p-6">
+                    <h3 class="text-xl font-bold mb-2">Kräfte-Analyse</h3>
+                    <ul class="space-y-2 text-sm font-light">
+                        <li><span class="text-red-500 font-semibold">> Druck:</span> Stauchung eines Bauteils.</li>
+                        <li><span class="text-green-400 font-semibold">> Zug:</span> Dehnung/Streckung eines Bauteils.</li>
+                        <li><span class="text-yellow-400 font-semibold">> Biegung:</span> Kombination aus Druck und Zug.</li>
+                        <li><span class="text-blue-400 font-semibold">> Scherung:</span> Verschiebung von Teilchen gegeneinander.</li>
+                    </ul>
                 </div>
-                 <div>
-                    <h3 class="text-xl font-bold text-white mb-2">Andere Brückentypen</h3>
-                    <ul class="list-disc list-inside space-y-2 text-slate-300">
-                        <li><strong>Balkenbrücke:</strong> Die einfachste Form. Ein Balken auf zwei Pfeilern.</li>
-                        <li><strong>Bogenbrücke:</strong> Der Bogen leitet die Druckkräfte perfekt in die Fundamente ab.</li>
-                        <li><strong>Hängebrücke:</strong> Für sehr weite Strecken. Dicke Stahlseile tragen die Fahrbahn.</li>
+                <div class="glass-panel p-6">
+                    <h3 class="text-xl font-bold mb-2">Material-Protokolle</h3>
+                     <ul class="space-y-2 text-sm font-light">
+                        <li><span class="font-semibold">> Stahl:</span> Extrem hohe Zugfestigkeit.</li>
+                        <li><span class="font-semibold">> Beton:</span> Hohe Druckfestigkeit, oft mit Stahl armiert.</li>
+                        <li><span class="font-semibold">> Verbundstoffe:</span> Moderne, leichte Materialien mit spezifischen Eigenschaften.</li>
                     </ul>
                 </div>
             </div>
         </main>
+
+        <footer class="text-center mt-12 py-8 text-slate-500 text-xs">
+            <p>// Übertragung beendet</p>
+            <p class="flicker">SYSTEM-ID: 7-NINER-DELTA // STATUS: NOMINAL</p>
+        </footer>
     </div>
 
     <script type="module">
         const container = document.getElementById('bridgeCanvasContainer');
-        const wireframeBtn = document.getElementById('wireframeBtn');
-        const solidBtn = document.getElementById('solidBtn');
-
-        if (!container || !wireframeBtn || !solidBtn) {
-            console.error("Ein benötigtes HTML-Element wurde nicht gefunden!");
-        }
+        const buttons = {
+            truss: document.getElementById('trussBtn'),
+            arch: document.getElementById('archBtn'),
+            suspension: document.getElementById('suspensionBtn'),
+            wireframe: document.getElementById('wireframeBtn'),
+            solid: document.getElementById('solidBtn')
+        };
 
         // --- Basic Three.js Setup ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(0, 4, 12);
-
+        camera.position.set(0, 5, 18);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setClearColor(0x000000, 0); // Transparent background
         renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         
         // --- Lighting ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        directionalLight.position.set(8, 10, 5);
-        scene.add(directionalLight);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        dirLight.position.set(8, 10, 5);
+        scene.add(dirLight);
 
-        // --- Parent Group for Rotation ---
-        const masterGroup = new THREE.Group();
+        // --- Parent Groups ---
+        const masterGroup = new THREE.Group(); // Rotates everything
         scene.add(masterGroup);
-        
-        // --- Bridge Geometry Data ---
-        const vertices = [
-            new THREE.Vector3(-8, 0, -1), new THREE.Vector3(-4, 0, -1), new THREE.Vector3(0, 0, -1), new THREE.Vector3(4, 0, -1), new THREE.Vector3(8, 0, -1),
-            new THREE.Vector3(-8, 0, 1), new THREE.Vector3(-4, 0, 1), new THREE.Vector3(0, 0, 1), new THREE.Vector3(4, 0, 1), new THREE.Vector3(8, 0, 1),
-            new THREE.Vector3(-6, 3, -1), new THREE.Vector3(-2, 3, -1), new THREE.Vector3(2, 3, -1), new THREE.Vector3(6, 3, -1),
-            new THREE.Vector3(-6, 3, 1), new THREE.Vector3(-2, 3, 1), new THREE.Vector3(2, 3, 1), new THREE.Vector3(6, 3, 1),
-        ];
+        let currentBridge; // To hold the currently active bridge group
 
-        const lineIndices = [
-            0,1, 1,2, 2,3, 3,4, 5,6, 6,7, 7,8, 8,9, 0,5, 1,6, 2,7, 3,8, 4,9, 10,11, 11,12, 12,13, 14,15, 15,16, 16,17,
-            10,14, 11,15, 12,16, 13,17, 1,10, 6,14, 2,11, 7,15, 3,12, 8,16, 4,13, 9,17, 0,10, 1,11, 2,12, 3,13, 5,14, 
-            6,15, 7,16, 8,17, 10,2, 11,3, 12,4, 14,7, 15,8, 16,9
-        ];
+        const nodeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffc3, roughness: 0.2, metalness: 0.8, emissive: 0x00ffc3, emissiveIntensity: 0.1 });
+        const beamMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.1, metalness: 0.9 });
+        const pointsMaterial = new THREE.PointsMaterial({ color: 0x00ffc3, size: 0.3 });
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff00ff });
+        const nodeGeo = new THREE.SphereGeometry(0.25, 12, 12);
+        const beamRadius = 0.1;
 
-        // --- Model 1: Wireframe ---
-        const wireframeGroup = new THREE.Group();
-        const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
-        const pointsMaterial = new THREE.PointsMaterial({ color: 0x60a5fa, size: 0.3 });
-        wireframeGroup.add(new THREE.Points(pointsGeometry, pointsMaterial));
-        const lineGeometry = new THREE.BufferGeometry();
-        const linePositions = [];
-        lineIndices.forEach(index => linePositions.push(vertices[index].x, vertices[index].y, vertices[index].z));
-        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x94a3b8 });
-        wireframeGroup.add(new THREE.LineSegments(lineGeometry, lineMaterial));
-        masterGroup.add(wireframeGroup);
+        function createSolidBeam(start, end, group) {
+            const dir = new THREE.Vector3().subVectors(end, start);
+            const len = dir.length();
+            const beamGeo = new THREE.CylinderGeometry(beamRadius, beamRadius, len, 8);
+            const beamMesh = new THREE.Mesh(beamGeo, beamMaterial);
+            beamMesh.position.copy(start).add(dir.multiplyScalar(0.5));
+            beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+            group.add(beamMesh);
+        }
 
-        // --- Model 2: Solid Body ---
-        const solidGroup = new THREE.Group();
-        const nodeMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.4, metalness: 0.1 });
-        const beamMaterial = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.8, metalness: 0.2 });
-        const nodeGeometry = new THREE.SphereGeometry(0.25, 16, 16);
-        
-        vertices.forEach(vertex => {
-            const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
-            nodeMesh.position.copy(vertex);
-            solidGroup.add(nodeMesh);
+        // --- Bridge Model Factory ---
+        function createTrussBridge() {
+            const group = new THREE.Group();
+            const wireframe = new THREE.Group();
+            const solid = new THREE.Group();
+            group.add(wireframe, solid);
+            group.userData = { wireframe, solid };
+
+            const v = [ new THREE.Vector3(-8,0,-1),new THREE.Vector3(-4,0,-1),new THREE.Vector3(0,0,-1),new THREE.Vector3(4,0,-1),new THREE.Vector3(8,0,-1),new THREE.Vector3(-8,0,1),new THREE.Vector3(-4,0,1),new THREE.Vector3(0,0,1),new THREE.Vector3(4,0,1),new THREE.Vector3(8,0,1),new THREE.Vector3(-6,3,-1),new THREE.Vector3(-2,3,-1),new THREE.Vector3(2,3,-1),new THREE.Vector3(6,3,-1),new THREE.Vector3(-6,3,1),new THREE.Vector3(-2,3,1),new THREE.Vector3(2,3,1),new THREE.Vector3(6,3,1) ];
+            const i = [ 0,1,1,2,2,3,3,4,5,6,6,7,7,8,8,9,0,5,1,6,2,7,3,8,4,9,10,11,11,12,12,13,14,15,15,16,16,17,10,14,11,15,12,16,13,17,1,10,6,14,2,11,7,15,3,12,8,16,4,13,9,17,0,10,1,11,2,12,3,13,5,14,6,15,7,16,8,17,10,2,11,3,12,4,14,7,15,8,16,9 ];
+            
+            wireframe.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(v), pointsMaterial));
+            const linePos = []; i.forEach(idx => linePos.push(v[idx].x, v[idx].y, v[idx].z));
+            const lineGeo = new THREE.BufferGeometry(); lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+            wireframe.add(new THREE.LineSegments(lineGeo, lineMaterial));
+
+            v.forEach(p => {
+                const nodeMesh = new THREE.Mesh(nodeGeo, nodeMaterial);
+                nodeMesh.position.copy(p);
+                solid.add(nodeMesh);
+            });
+            for (let j = 0; j < i.length; j += 2) createSolidBeam(v[i[j]], v[i[j+1]], solid);
+
+            return group;
+        }
+
+        function createArchBridge() {
+            const group = new THREE.Group();
+            const wireframe = new THREE.Group();
+            const solid = new THREE.Group();
+            group.add(wireframe, solid);
+            group.userData = { wireframe, solid };
+            
+            const v = []; const i = [];
+            const segments = 10;
+            const width = 2;
+            const span = 16;
+            const height = 5;
+
+            for (let side = -1; side <= 1; side += 2) {
+                for (let j = 0; j <= segments; j++) {
+                    const angle = (j / segments) * Math.PI;
+                    const x = -span/2 + (j / segments) * span;
+                    const y = Math.sin(angle) * height;
+                    const z = side * width / 2;
+                    v.push(new THREE.Vector3(x, y, z)); // Arch nodes
+                    v.push(new THREE.Vector3(x, 0, z)); // Deck nodes
+                }
+            }
+
+            for(let j=0; j < v.length; j++) {
+                if ((j+2) < v.length && j % 2 === 0) i.push(j, j + 2); // Arch segments
+                if ((j+2) < v.length && j % 2 !== 0) i.push(j, j + 2); // Deck segments
+                if (j % 2 === 0) i.push(j, j + 1); // Vertical supports
+                if (j < v.length / 2) i.push(j, j + (segments + 1) * 2); // Cross beams
+            }
+
+            wireframe.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(v), pointsMaterial));
+            const linePos = []; i.forEach(idx => linePos.push(v[idx].x, v[idx].y, v[idx].z));
+            const lineGeo = new THREE.BufferGeometry(); lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+            wireframe.add(new THREE.LineSegments(lineGeo, lineMaterial));
+            
+            v.forEach(p => {
+                const nodeMesh = new THREE.Mesh(nodeGeo, nodeMaterial);
+                nodeMesh.position.copy(p);
+                solid.add(nodeMesh);
+            });
+            for (let j = 0; j < i.length; j += 2) createSolidBeam(v[i[j]], v[i[j+1]], solid);
+            
+            return group;
+        }
+
+        function createSuspensionBridge() {
+            const group = new THREE.Group();
+            const wireframe = new THREE.Group();
+            const solid = new THREE.Group();
+            group.add(wireframe, solid);
+            group.userData = { wireframe, solid };
+
+            const v = []; const i = [];
+            const towerHeight = 10;
+            const deckWidth = 4;
+            const deckLength = 24;
+
+            // Towers
+            [-deckLength/3, deckLength/3].forEach(x => {
+                [-deckWidth/2, deckWidth/2].forEach(z => {
+                    v.push(new THREE.Vector3(x, 0, z), new THREE.Vector3(x, towerHeight, z));
+                });
+            });
+            i.push(0,1, 2,3, 4,5, 6,7, 1,3, 5,7);
+
+            // Deck
+            const deckSegments = 12;
+            for(let j=0; j <= deckSegments; j++){
+                const x = -deckLength/2 + (j/deckSegments) * deckLength;
+                v.push(new THREE.Vector3(x, 0, -deckWidth/2), new THREE.Vector3(x, 0, deckWidth/2));
+                if(j < deckSegments) {
+                    const base = v.length - 4;
+                    i.push(base, base+2, base+1, base+3, base, base+1);
+                }
+            }
+
+            // Suspension cables
+            const cablePoints = [];
+            const catenary = x => towerHeight/2 * (Math.cosh(x / (towerHeight*0.8))) - 3;
+            for(let j=0; j <= 20; j++) {
+                const x = -deckLength/2 + (j/20)*deckLength;
+                cablePoints.push(new THREE.Vector3(x, catenary(x-deckLength/3), -deckWidth/2), new THREE.Vector3(x, catenary(x-deckLength/3), deckWidth/2));
+            }
+            v.push(...cablePoints);
+            const start = v.length - cablePoints.length;
+            for(let j = start; j < v.length - 2; j+=2) {
+                i.push(j, j+2, j+1, j+3);
+            }
+            
+            wireframe.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(v), pointsMaterial));
+            const linePos = []; i.forEach(idx => linePos.push(v[idx].x, v[idx].y, v[idx].z));
+            const lineGeo = new THREE.BufferGeometry(); lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+            wireframe.add(new THREE.LineSegments(lineGeo, lineMaterial));
+
+            v.forEach(p => {
+                const nodeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), nodeMaterial);
+                nodeMesh.position.copy(p);
+                solid.add(nodeMesh);
+            });
+            for (let j = 0; j < i.length; j += 2) createSolidBeam(v[i[j]], v[i[j+1]], solid);
+
+            return group;
+        }
+
+        // --- Create and manage bridges ---
+        const bridges = {
+            truss: createTrussBridge(),
+            arch: createArchBridge(),
+            suspension: createSuspensionBridge()
+        };
+        Object.values(bridges).forEach(b => {
+            b.visible = false;
+            masterGroup.add(b);
         });
 
-        const beamRadius = 0.1;
-        for (let i = 0; i < lineIndices.length; i += 2) {
-            const startPoint = vertices[lineIndices[i]];
-            const endPoint = vertices[lineIndices[i+1]];
+        function setActiveBridge(name) {
+            if (currentBridge) currentBridge.visible = false;
+            currentBridge = bridges[name];
+            currentBridge.visible = true;
             
-            const direction = new THREE.Vector3().subVectors(endPoint, startPoint);
-            const beamLength = direction.length();
-            const beamGeometry = new THREE.CylinderGeometry(beamRadius, beamRadius, beamLength, 12);
-            
-            const beamMesh = new THREE.Mesh(beamGeometry, beamMaterial);
-            beamMesh.position.copy(startPoint).add(direction.multiplyScalar(0.5));
-            beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
-            solidGroup.add(beamMesh);
+            Object.values(buttons).forEach(b => b.classList.remove('active'));
+            buttons[name].classList.add('active');
+            buttons.wireframe.classList.add('active'); // Default to wireframe
         }
-        solidGroup.visible = false;
-        masterGroup.add(solidGroup);
+        
+        setActiveBridge('truss');
 
         // --- Controls & Interaction ---
-        wireframeBtn.addEventListener('click', () => {
-            wireframeGroup.visible = true;
-            solidGroup.visible = false;
-            wireframeBtn.classList.replace('bg-slate-600', 'bg-blue-500');
-            solidBtn.classList.replace('bg-blue-500', 'bg-slate-600');
+        buttons.truss.addEventListener('click', () => setActiveBridge('truss'));
+        buttons.arch.addEventListener('click', () => setActiveBridge('arch'));
+        buttons.suspension.addEventListener('click', () => setActiveBridge('suspension'));
+
+        buttons.wireframe.addEventListener('click', () => {
+            currentBridge.userData.wireframe.visible = true;
+            currentBridge.userData.solid.visible = false;
+            buttons.wireframe.classList.add('active');
+            buttons.solid.classList.remove('active');
+        });
+        buttons.solid.addEventListener('click', () => {
+            currentBridge.userData.wireframe.visible = false;
+            currentBridge.userData.solid.visible = true;
+            buttons.solid.classList.add('active');
+            buttons.wireframe.classList.remove('active');
         });
 
-        solidBtn.addEventListener('click', () => {
-            wireframeGroup.visible = false;
-            solidGroup.visible = true;
-            solidBtn.classList.replace('bg-slate-600', 'bg-blue-500');
-            wireframeBtn.classList.replace('bg-blue-500', 'bg-slate-600');
-        });
-
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        container.addEventListener('mousedown', (e) => { isDragging = true; container.style.cursor = 'grabbing'; });
-        container.addEventListener('mouseup', () => { isDragging = false; container.style.cursor = 'grab'; });
-        container.addEventListener('mouseleave', () => { isDragging = false; container.style.cursor = 'grab'; });
+        let isDragging = false, pmp = { x: 0, y: 0 };
+        container.addEventListener('mousedown', (e) => { isDragging = true; container.style.cursor = 'grabbing'; pmp = {x: e.offsetX, y: e.offsetY}; });
+        ['mouseup', 'mouseleave'].forEach(evt => container.addEventListener(evt, () => { isDragging = false; container.style.cursor = 'grab'; }));
         container.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            const deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
-            masterGroup.rotation.y += deltaMove.x * 0.005;
-            masterGroup.rotation.x += deltaMove.y * 0.005;
-            previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            const delta = { x: e.offsetX - pmp.x, y: e.offsetY - pmp.y };
+            masterGroup.rotation.y += delta.x * 0.005;
+            masterGroup.rotation.x += delta.y * 0.005;
+            pmp = { x: e.offsetX, y: e.offsetY };
         });
 
         // --- Animation & Resizing ---
         function animate() {
             requestAnimationFrame(animate);
-            if (!isDragging) { masterGroup.rotation.y += 0.002; }
+            if (!isDragging) { masterGroup.rotation.y += 0.001; }
             renderer.render(scene, camera);
         }
         animate();
@@ -271,3 +462,4 @@
     </script>
 </body>
 </html>
+
