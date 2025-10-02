@@ -3,275 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Spotify Explorer</title>
+    <title>Brückenbau-Anleitung für Klasse 9</title>
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Three.js for 3D graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+        /* --- Liquid Glass Effect & Background Animation --- */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #0f172a; /* Dark blue background */
+            color: #e2e8f0; /* Light text color for contrast */
+            overflow-x: hidden; /* Prevent horizontal scroll from blobs */
         }
-        .spotify-green {
-            background-color: #1DB954;
+
+        /* Animated blobs in the background */
+        .background-blob {
+            position: absolute;
+            border-radius: 9999px; /* Make it a circle */
+            filter: blur(100px); /* Heavy blur for a soft effect */
+            z-index: -10; /* Place it behind all content */
         }
-        .spotify-green:hover {
-            background-color: #1ED760;
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.6));
+            top: -150px;
+            left: -150px;
+            animation: move 25s infinite alternate;
         }
-        .card {
-            background-color: #181818;
-            transition: background-color 0.3s ease;
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(124, 58, 237, 0.6));
+            bottom: -200px;
+            right: -200px;
+            animation: move 30s infinite alternate;
         }
-        .card:hover {
-            background-color: #282828;
+
+        @keyframes move {
+            from {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            to {
+                transform: translate(100px, 50px) rotate(180deg);
+            }
+        }
+        
+        /* The main class for the glass effect panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05); /* Very transparent white */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* Soft shadow */
+        }
+        
+        /* Style for the 3D canvas container */
+        #bridgeCanvasContainer {
+            min-height: 400px;
+            cursor: grab;
+            border-radius: 0.5rem;
+            background: transparent; /* Make canvas container transparent */
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="bg-slate-900 text-slate-200">
+    <!-- Background Blobs for the liquid effect -->
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
 
-    <div id="app-container" class="min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
         
-        <!-- Login Ansicht -->
-        <div id="login-view" class="flex flex-col items-center justify-center min-h-[80vh] text-center">
-            <i class="fa-brands fa-spotify text-8xl mb-6 text-[#1DB954]"></i>
-            <h1 class="text-4xl sm:text-5xl font-bold mb-4">Mein Spotify Explorer</h1>
-            <p class="text-neutral-400 mb-8 max-w-md">Melde dich mit deinem Spotify-Konto an, um deine Musik zu entdecken, Playlists anzuzeigen und neue Songs zu suchen.</p>
-            <button id="login-button" class="spotify-green text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-transform duration-200">
-                Mit Spotify einloggen
-            </button>
-        </div>
+        <!-- Header Section -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-5xl font-bold text-white mb-2">
+                Faszination Brückenbau
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400">Eine Anleitung für Schüler der 9. Klasse</p>
+        </header>
 
-        <!-- Hauptansicht nach dem Login -->
-        <div id="main-view" class="hidden">
-            <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                <div class="flex items-center gap-4">
-                    <i class="fa-brands fa-spotify text-5xl text-[#1DB954]"></i>
-                    <h1 class="text-3xl font-bold">Explorer</h1>
-                </div>
-                <div id="profile" class="flex items-center gap-3 bg-[#0a0a0a] p-2 rounded-full">
-                    <!-- Profilinformationen werden hier eingefügt -->
-                </div>
-            </header>
+        <!-- Main Content Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <main>
-                <!-- Suchleiste -->
-                <form id="search-form" class="mb-8">
-                    <div class="relative">
-                        <input type="text" id="search-input" placeholder="Suche nach Songs oder Künstlern..." class="w-full bg-[#282828] text-white border-transparent focus:ring-2 focus:ring-[#1DB954] focus:border-transparent rounded-full py-3 pl-12 pr-4 text-lg">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-neutral-400"></i>
-                        </div>
-                    </div>
-                </form>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Linke Spalte: Suchergebnisse -->
-                    <div class="lg:col-span-2">
-                        <h2 class="text-2xl font-bold mb-4">Suchergebnisse</h2>
-                        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                            <!-- Suchergebnisse werden hier eingefügt -->
-                            <p id="results-placeholder" class="text-neutral-400 col-span-full">Suche nach etwas, um hier Ergebnisse zu sehen.</p>
-                        </div>
-                    </div>
-
-                    <!-- Rechte Spalte: Playlists -->
-                    <div>
-                        <h2 class="text-2xl font-bold mb-4">Meine Playlists</h2>
-                        <div id="playlists" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
-                            <!-- Playlists werden hier eingefügt -->
-                        </div>
-                    </div>
+            <!-- Left Column: 3D Model -->
+            <div class="glass-panel p-6 flex flex-col">
+                <h2 class="text-2xl font-bold text-blue-400 mb-3">Interaktives 3D-Modell</h2>
+                <p class="mb-4 text-slate-300">
+                    Wähle eine Ansicht, um die Struktur der Brücke zu erkunden. Halte die Maustaste gedrückt und bewege die Maus, um das Modell zu drehen.
+                </p>
+                <!-- Model Switcher -->
+                <div class="flex justify-center space-x-4 mb-4">
+                    <button id="wireframeBtn" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold transition-transform transform hover:scale-105">Drahtmodell</button>
+                    <button id="solidBtn" class="px-4 py-2 rounded-lg bg-slate-600 text-white font-semibold transition-transform transform hover:scale-105">Festkörpermodell</button>
                 </div>
-            </main>
-        </div>
+                <!-- Container for the 3D Canvas -->
+                <div id="bridgeCanvasContainer" class="w-full h-96 flex-grow">
+                    <!-- The 3D canvas will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Right Column: Explanations -->
+            <div class="glass-panel p-6 space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-blue-400 mb-3">Das Geheimnis der Stabilität</h2>
+                    <p class="text-slate-300">
+                        Brücken sind Meisterwerke der Ingenieurskunst. Ihr Ziel ist es, Lasten sicher über ein Hindernis zu tragen. Die größte Herausforderung sind zwei Kräfte: <span class="font-semibold text-red-400">Druck</span> und <span class="font-semibold text-green-400">Zug</span>.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">Das Dreieck: Die stabilste Form</h3>
+                    <p class="text-slate-300">
+                        Eine Fachwerkbrücke nutzt die unglaubliche Stabilität von Dreiecken. Ein Viereck verformt sich leicht. Ein Dreieck hingegen ist starr. Diese Eigenschaft macht es extrem stabil, da die Kräfte durch die Stäbe auf die Pfeiler abgeleitet werden.
+                    </p>
+                </div>
+                 <div>
+                    <h3 class="text-xl font-bold text-white mb-2">Andere Brückentypen</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-300">
+                        <li><strong>Balkenbrücke:</strong> Die einfachste Form. Ein Balken auf zwei Pfeilern.</li>
+                        <li><strong>Bogenbrücke:</strong> Der Bogen leitet die Druckkräfte perfekt in die Fundamente ab.</li>
+                        <li><strong>Hängebrücke:</strong> Für sehr weite Strecken. Dicke Stahlseile tragen die Fahrbahn.</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script type="module">
-        // ##################################################################
-        // WICHTIGER HINWEIS FÜR DICH!
-        // ##################################################################
-        // 1. Client ID: Ich habe deine Client ID bereits hier eingetragen.
-        // 2. Redirect URI: Du musst deine Spotify App konfigurieren!
-        //    - Gehe zu deinem Spotify Developer Dashboard: https://developer.spotify.com/dashboard
-        //    - Wähle deine App ("AssetExplorer") aus und klicke "Edit Settings".
-        //    - Füge unter "Redirect URIs" genau die URL hinzu, auf der diese App laufen wird.
-        //    - Wenn du diese HTML-Datei lokal öffnest, ist die URL oft http://127.0.0.1:5500/ oder ähnlich.
-        //    - Diese Seite berechnet die URI automatisch, kopiere einfach den Wert von `redirectUri` unten.
-        // ##################################################################
+        const container = document.getElementById('bridgeCanvasContainer');
+        const wireframeBtn = document.getElementById('wireframeBtn');
+        const solidBtn = document.getElementById('solidBtn');
+
+        if (!container || !wireframeBtn || !solidBtn) {
+            console.error("Ein benötigtes HTML-Element wurde nicht gefunden!");
+        }
+
+        // --- Basic Three.js Setup ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 4, 12);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setClearColor(0x000000, 0); // Transparent background
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
         
-        const clientId = "9a5edaf67562491892d375c81e843579"; // Deine Client ID aus dem Screenshot
-        const redirectUri = window.location.origin + window.location.pathname;
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        directionalLight.position.set(8, 10, 5);
+        scene.add(directionalLight);
+
+        // --- Parent Group for Rotation ---
+        const masterGroup = new THREE.Group();
+        scene.add(masterGroup);
         
-        console.log("Bitte füge diese Redirect URI in deinem Spotify Dashboard hinzu:", redirectUri);
+        // --- Bridge Geometry Data ---
+        const vertices = [
+            new THREE.Vector3(-8, 0, -1), new THREE.Vector3(-4, 0, -1), new THREE.Vector3(0, 0, -1), new THREE.Vector3(4, 0, -1), new THREE.Vector3(8, 0, -1),
+            new THREE.Vector3(-8, 0, 1), new THREE.Vector3(-4, 0, 1), new THREE.Vector3(0, 0, 1), new THREE.Vector3(4, 0, 1), new THREE.Vector3(8, 0, 1),
+            new THREE.Vector3(-6, 3, -1), new THREE.Vector3(-2, 3, -1), new THREE.Vector3(2, 3, -1), new THREE.Vector3(6, 3, -1),
+            new THREE.Vector3(-6, 3, 1), new THREE.Vector3(-2, 3, 1), new THREE.Vector3(2, 3, 1), new THREE.Vector3(6, 3, 1),
+        ];
 
-        let accessToken = null;
+        const lineIndices = [
+            0,1, 1,2, 2,3, 3,4, 5,6, 6,7, 7,8, 8,9, 0,5, 1,6, 2,7, 3,8, 4,9, 10,11, 11,12, 12,13, 14,15, 15,16, 16,17,
+            10,14, 11,15, 12,16, 13,17, 1,10, 6,14, 2,11, 7,15, 3,12, 8,16, 4,13, 9,17, 0,10, 1,11, 2,12, 3,13, 5,14, 
+            6,15, 7,16, 8,17, 10,2, 11,3, 12,4, 14,7, 15,8, 16,9
+        ];
 
-        // Beim Laden der Seite prüfen, ob ein Access Token in der URL vorhanden ist
-        document.addEventListener('DOMContentLoaded', () => {
-            const args = new URLSearchParams(window.location.hash.substring(1));
-            const token = args.get('access_token');
+        // --- Model 1: Wireframe ---
+        const wireframeGroup = new THREE.Group();
+        const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
+        const pointsMaterial = new THREE.PointsMaterial({ color: 0x60a5fa, size: 0.3 });
+        wireframeGroup.add(new THREE.Points(pointsGeometry, pointsMaterial));
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = [];
+        lineIndices.forEach(index => linePositions.push(vertices[index].x, vertices[index].y, vertices[index].z));
+        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x94a3b8 });
+        wireframeGroup.add(new THREE.LineSegments(lineGeometry, lineMaterial));
+        masterGroup.add(wireframeGroup);
 
-            if (token) {
-                accessToken = token;
-                showMainView();
-                fetchProfile();
-                fetchPlaylists();
-                 // Bereinige die URL, damit der Token nicht sichtbar bleibt
-                window.history.pushState("", document.title, window.location.pathname + window.location.search);
-            } else {
-                showLoginView();
-            }
-
-            document.getElementById('login-button').addEventListener('click', redirectToSpotifyLogin);
-            document.getElementById('search-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const query = document.getElementById('search-input').value;
-                if(query) {
-                    await searchSpotify(query);
-                }
-            });
+        // --- Model 2: Solid Body ---
+        const solidGroup = new THREE.Group();
+        const nodeMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.4, metalness: 0.1 });
+        const beamMaterial = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.8, metalness: 0.2 });
+        const nodeGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+        
+        vertices.forEach(vertex => {
+            const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+            nodeMesh.position.copy(vertex);
+            solidGroup.add(nodeMesh);
         });
-        
-        function redirectToSpotifyLogin() {
-            const scope = 'user-read-private user-read-email playlist-read-private';
-            let url = 'https://accounts.spotify.com/authorize';
-            url += '?response_type=token';
-            url += '&client_id=' + encodeURIComponent(clientId);
-            url += '&scope=' + encodeURIComponent(scope);
-            url += '&redirect_uri=' + encodeURIComponent(redirectUri);
+
+        const beamRadius = 0.1;
+        for (let i = 0; i < lineIndices.length; i += 2) {
+            const startPoint = vertices[lineIndices[i]];
+            const endPoint = vertices[lineIndices[i+1]];
             
-            window.location.href = url;
+            const direction = new THREE.Vector3().subVectors(endPoint, startPoint);
+            const beamLength = direction.length();
+            const beamGeometry = new THREE.CylinderGeometry(beamRadius, beamRadius, beamLength, 12);
+            
+            const beamMesh = new THREE.Mesh(beamGeometry, beamMaterial);
+            beamMesh.position.copy(startPoint).add(direction.multiplyScalar(0.5));
+            beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+            solidGroup.add(beamMesh);
         }
+        solidGroup.visible = false;
+        masterGroup.add(solidGroup);
 
-        // Hilfsfunktion für API-Aufrufe
-        async function fetchWebApi(endpoint, method = 'GET', body) {
-            const res = await fetch(`https://api.spotify.com/v1/${endpoint}`, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                method,
-                body: JSON.stringify(body)
-            });
-            if (!res.ok) {
-                 // Wenn der Token abgelaufen ist, leite zur Login-Seite weiter
-                if(res.status === 401) {
-                    console.error("Access Token ist ungültig oder abgelaufen. Bitte neu einloggen.");
-                    accessToken = null;
-                    showLoginView();
-                }
-                throw new Error(`Konnte Daten nicht abrufen: ${res.statusText}`);
-            }
-            return await res.json();
-        }
+        // --- Controls & Interaction ---
+        wireframeBtn.addEventListener('click', () => {
+            wireframeGroup.visible = true;
+            solidGroup.visible = false;
+            wireframeBtn.classList.replace('bg-slate-600', 'bg-blue-500');
+            solidBtn.classList.replace('bg-blue-500', 'bg-slate-600');
+        });
 
-        async function fetchProfile() {
-            try {
-                const profileData = await fetchWebApi('me');
-                displayProfile(profileData);
-            } catch(e) {
-                console.error("Fehler beim Abrufen des Profils:", e);
-            }
-        }
+        solidBtn.addEventListener('click', () => {
+            wireframeGroup.visible = false;
+            solidGroup.visible = true;
+            solidBtn.classList.replace('bg-slate-600', 'bg-blue-500');
+            wireframeBtn.classList.replace('bg-blue-500', 'bg-slate-600');
+        });
 
-        async function fetchPlaylists() {
-            try {
-                const playlistsData = await fetchWebApi('me/playlists?limit=50');
-                displayPlaylists(playlistsData.items);
-            } catch(e) {
-                console.error("Fehler beim Abrufen der Playlists:", e);
-            }
-        }
-        
-        async function searchSpotify(query) {
-            const resultsPlaceholder = document.getElementById('results-placeholder');
-            resultsPlaceholder.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Suche wird durchgeführt...';
-            try {
-                const searchData = await fetchWebApi(`search?q=${encodeURIComponent(query)}&type=track&limit=20`);
-                displayResults(searchData.tracks.items);
-            } catch(e) {
-                console.error("Fehler bei der Suche:", e);
-                resultsPlaceholder.textContent = 'Bei der Suche ist ein Fehler aufgetreten.';
-            }
-        }
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        container.addEventListener('mousedown', (e) => { isDragging = true; container.style.cursor = 'grabbing'; });
+        container.addEventListener('mouseup', () => { isDragging = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mouseleave', () => { isDragging = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
+            masterGroup.rotation.y += deltaMove.x * 0.005;
+            masterGroup.rotation.x += deltaMove.y * 0.005;
+            previousMousePosition = { x: e.offsetX, y: e.offsetY };
+        });
 
-        function showLoginView() {
-            document.getElementById('login-view').classList.remove('hidden');
-            document.getElementById('main-view').classList.add('hidden');
+        // --- Animation & Resizing ---
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!isDragging) { masterGroup.rotation.y += 0.002; }
+            renderer.render(scene, camera);
         }
+        animate();
 
-        function showMainView() {
-            document.getElementById('login-view').classList.add('hidden');
-            document.getElementById('main-view').classList.remove('hidden');
-        }
-
-        function displayProfile(profile) {
-            const profileContainer = document.getElementById('profile');
-            profileContainer.innerHTML = `
-                <img src="${profile.images[0]?.url || 'https://placehold.co/40x40/181818/FFF?text=P'}" alt="Profilbild" class="w-10 h-10 rounded-full">
-                <span class="font-semibold hidden sm:block">${profile.display_name}</span>
-                <button id="logout-button" title="Abmelden" class="w-8 h-8 rounded-full hover:bg-neutral-700 flex items-center justify-center">
-                    <i class="fas fa-sign-out-alt text-neutral-400"></i>
-                </button>
-            `;
-            document.getElementById('logout-button').addEventListener('click', () => {
-                accessToken = null;
-                showLoginView();
-            });
-        }
-
-        function displayPlaylists(playlists) {
-            const playlistsContainer = document.getElementById('playlists');
-            if (playlists.length === 0) {
-                playlistsContainer.innerHTML = '<p class="text-neutral-400">Keine Playlists gefunden.</p>';
-                return;
-            }
-            playlistsContainer.innerHTML = playlists.map(playlist => `
-                <a href="${playlist.external_urls.spotify}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-2 rounded-lg card">
-                    <img src="${playlist.images[0]?.url || 'https://placehold.co/64x64/181818/FFF?text=🎵'}" alt="${playlist.name}" class="w-16 h-16 object-cover rounded">
-                    <div>
-                        <p class="font-bold truncate">${playlist.name}</p>
-                        <p class="text-sm text-neutral-400">${playlist.tracks.total} Songs</p>
-                    </div>
-                </a>
-            `).join('');
-        }
-        
-        function displayResults(tracks) {
-            const resultsContainer = document.getElementById('results');
-            const resultsPlaceholder = document.getElementById('results-placeholder');
-            resultsPlaceholder.classList.add('hidden');
-            resultsContainer.innerHTML = ''; // Vorherige Ergebnisse löschen
-
-            if (tracks.length === 0) {
-                resultsPlaceholder.textContent = 'Keine Ergebnisse für deine Suche gefunden.';
-                resultsPlaceholder.classList.remove('hidden');
-                return;
-            }
-
-            tracks.forEach(track => {
-                const artistNames = track.artists.map(artist => artist.name).join(', ');
-                const card = document.createElement('a');
-                card.href = track.external_urls.spotify;
-                card.target = "_blank";
-                card.rel = "noopener noreferrer";
-                card.className = "p-4 rounded-lg card flex flex-col gap-4 group";
-                card.innerHTML = `
-                    <div class="relative">
-                        <img src="${track.album.images[0]?.url || 'https://placehold.co/200x200/181818/FFF?text=🎵'}" alt="${track.album.name}" class="w-full aspect-square object-cover rounded-md shadow-lg">
-                        <div class="absolute bottom-2 right-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform group-hover:scale-110">
-                            <i class="fas fa-play text-white text-xl"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="font-bold truncate">${track.name}</p>
-                        <p class="text-sm text-neutral-400 truncate">${artistNames}</p>
-                    </div>
-                `;
-                resultsContainer.appendChild(card);
-            });
-        }
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }, false);
     </script>
 </body>
 </html>
-
