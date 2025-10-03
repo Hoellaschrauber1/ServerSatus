@@ -357,12 +357,26 @@
                 selectFolderButton.disabled = true;
                 downloadZipButton.disabled = true;
 
-                const allowedExtensions = ['.jar', '.dll', '.pak', '.esp', '.esm', '.esl', '.ba2', '.archive', '.mod', '.zip', '.rar', '.7z', '.scs', '.asi'];
+                // **FIX:** Die Liste wurde erweitert, um mehr Mod-relevante Dateien zu erkennen
+                const allowedExtensions = [
+                    // Archive & Pakete
+                    '.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar',
+                    // Plugins & Code (C++, C# etc.)
+                    '.dll', '.asi', '.so', '.cs',
+                    // Skripte & Daten (Bethesda, Lua, etc.)
+                    '.esp', '.esm', '.esl', '.lua',
+                    // Konfigurationen
+                    '.xml', '.json', '.ini', '.cfg', '.toml',
+                    // Assets (Texturen, Modelle, Audio)
+                    '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav'
+                ];
+                
                 cleanedZip = new JSZip();
                 let keptFilesCount = 0;
                 let removedFilesCount = 0;
 
                 for (const file of files) {
+                    // Prüfe, ob die Dateiendung in der Liste der erlaubten Endungen ist
                     const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
                     if (allowedExtensions.includes(fileExtension)) {
                         cleanedZip.file(file.webkitRelativePath, file);
@@ -374,7 +388,7 @@
                 
                 setTimeout(() => {
                     if (keptFilesCount > 0) {
-                        updateStatus(`Fertig! ${keptFilesCount} Mods behalten, ${removedFilesCount} Dateien entfernt.`, 'success');
+                        updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success');
                         downloadZipButton.disabled = false;
                     } else {
                         updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning');
