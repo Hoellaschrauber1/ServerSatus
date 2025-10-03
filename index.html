@@ -248,55 +248,73 @@
             <input type="file" id="folderInput" webkitdirectory directory multiple>
             <button id="selectFolderButton" class="btn">1. Mod-Ordner auswählen</button>
             <button id="downloadZipButton" class="btn" disabled>2. Bereinigte Mods als ZIP laden</button>
-            <div class="version-display">Version 2.1</div>
+            <div id="versionDisplay" class="version-display"></div>
         </div>
     </div>
 
     <!-- Modal-Fenster für Software-Update -->
     <div id="updateModal" class="modal">
         <div class="glass-card modal-content">
-            <h2>Seite wurde aktualisiert!</h2>
-            <p>Die Anwendung wurde im Hintergrund aktualisiert. Möchtest du sie neu starten, um die Änderungen zu übernehmen?</p>
+            <h2>Update verfügbar!</h2>
+            <p>Eine neue Version der Anwendung ist verfügbar. Möchtest du sie jetzt installieren und die Seite neu starten?</p>
             <div class="modal-buttons">
-                <button id="confirmUpdateButton" class="btn btn-confirm">Ja, neu starten</button>
-                <button id="cancelUpdateButton" class="btn btn-cancel">Später</button>
+                <button id="confirmUpdateButton" class="btn btn-confirm">Ja, installieren</button>
+                <button id="cancelUpdateButton" class="btn btn-cancel">Nicht jetzt</button>
             </div>
         </div>
     </div>
 
     <!-- Fortschrittsbalken-Overlay -->
     <div id="progressOverlay" class="progress-overlay">
-        <p class="progress-text">Update wird installiert...</p>
+        <p class="progress-text">Update wird aktiviert...</p>
         <div class="progress-bar-container">
             <div id="progressBar" class="progress-bar"></div>
         </div>
     </div>
 
-    <script id="main-script">
+    <!-- Der Quellcode der eigentlichen App. Wird nicht direkt ausgeführt. -->
+    <script type="application/json" id="main-script-source">
+        {
+            "version": "2.1",
+            "code": "(() => { const APP_VERSION = '2.1'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); let cleanedZip = null; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; const allowedExtensions = ['.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar', '.dll', '.asi', '.so', '.cs', '.esp', '.esm', '.esl', '.lua', '.xml', '.json', '.ini', '.cfg', '.toml', '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase(); if (allowedExtensions.includes(fileExtension)) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; } else { removedFilesCount++; } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); downloadZipButton.disabled = true; try { const content = await cleanedZip.generateAsync({ type: 'blob' }); const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = 'cleaned_mods.zip'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); updateStatus('Download gestartet!', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { selectFolderButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
+        }
+    </script>
+    
+    <!-- Der neue Loader-Skript, der die Update-Logik steuert -->
+    <script id="loader-script">
         document.addEventListener('DOMContentLoaded', () => {
-            // Version 2.1
-            // --- DOM-Elemente ---
-            const statusDisplay = document.getElementById('statusDisplay');
-            const folderInput = document.getElementById('folderInput');
-            const selectFolderButton = document.getElementById('selectFolderButton');
-            const downloadZipButton = document.getElementById('downloadZipButton');
+            const SCRIPT_STORAGE_KEY = 'app_script_content';
+            const mainScriptSourceEl = document.getElementById('main-script-source');
+            
             const updateModal = document.getElementById('updateModal');
             const confirmUpdateButton = document.getElementById('confirmUpdateButton');
             const cancelUpdateButton = document.getElementById('cancelUpdateButton');
             const progressOverlay = document.getElementById('progressOverlay');
             const progressBar = document.getElementById('progressBar');
+            const statusDisplay = document.getElementById('statusDisplay');
 
-            // --- Globale Variablen ---
-            let cleanedZip = null;
-            let currentScriptHash = null;
-            
-            // --- Lokaler Update-Mechanismus ---
-            const SCRIPT_STORAGE_KEY = 'scriptVersionHash';
+            if (!mainScriptSourceEl || !mainScriptSourceEl.textContent) {
+                statusDisplay.textContent = "Fataler Fehler: App-Quelle nicht gefunden.";
+                statusDisplay.className = 'status-display status-warning';
+                return;
+            }
 
-            /**
-             * Prüft, ob der Browser-Speicher (localStorage) verfügbar und beschreibbar ist.
-             * @returns {boolean} True, wenn localStorage funktioniert.
-             */
+            const newScriptPayload = mainScriptSourceEl.textContent;
+
+            function executeScript(scriptContent) {
+                try {
+                    const scriptData = JSON.parse(scriptContent);
+                    const script = document.createElement('script');
+                    script.textContent = scriptData.code;
+                    document.body.appendChild(script);
+                } catch(e) {
+                    console.error("Fehler beim Ausführen des Skripts:", e);
+                    statusDisplay.textContent = "Fehler beim Laden der App.";
+                    statusDisplay.className = 'status-display status-warning';
+                    localStorage.removeItem(SCRIPT_STORAGE_KEY); // Clear broken script
+                }
+            }
+
             function isLocalStorageAvailable() {
                 try {
                     const testKey = '__test__';
@@ -307,153 +325,51 @@
                     return false;
                 }
             }
-
-            /**
-             * Erstellt einen einfachen numerischen Hash aus einem String.
-             * @param {string} str Der zu hashende String.
-             * @returns {string} Der resultierende Hash als String.
-             */
-            function hashString(str) {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                    const char = str.charCodeAt(i);
-                    hash = (hash << 5) - hash + char;
-                    hash |= 0; // Zu 32bit Integer konvertieren
-                }
-                return hash.toString();
-            }
-
-            /**
-             * Vergleicht den Hash des aktuellen Skripts mit dem gespeicherten Hash.
-             */
-            function checkForUpdates() {
-                const mainScript = document.getElementById('main-script');
-                if (!mainScript || !mainScript.textContent) {
-                    updateStatus("Update-Check Fehler: Skript nicht gefunden.", "warning");
-                    return;
-                }
-
-                currentScriptHash = hashString(mainScript.textContent);
-                const storedHash = localStorage.getItem(SCRIPT_STORAGE_KEY);
-
-                if (!storedHash) {
-                    localStorage.setItem(SCRIPT_STORAGE_KEY, currentScriptHash);
-                    updateStatus('System initialisiert.', 'success');
-                    setTimeout(() => updateStatus('Bereit zum Start.', 'default'), 3000);
-                } else if (storedHash !== currentScriptHash) {
-                    updateModal.style.display = 'flex';
-                } else {
-                    updateStatus('Software ist auf dem neuesten Stand.', 'success');
-                    setTimeout(() => updateStatus('Bereit zum Start.', 'default'), 3000);
-                }
-            }
             
-            /**
-             * Führt das "Update" durch (speichert neuen Hash und lädt die Seite neu).
-             */
-            function applyUpdate() {
-                updateModal.style.display = 'none';
-                progressOverlay.style.display = 'flex';
-                
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    progressBar.style.width = progress + '%';
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        localStorage.setItem(SCRIPT_STORAGE_KEY, currentScriptHash);
-                        setTimeout(() => location.reload(true), 300);
-                    }
-                }, 50);
+            if (!isLocalStorageAvailable()) {
+                statusDisplay.textContent = "Speicher blockiert. App kann nicht gestartet werden.";
+                statusDisplay.className = 'status-display status-warning';
+                return;
             }
 
-            confirmUpdateButton.addEventListener('click', applyUpdate);
+            const storedScriptContent = localStorage.getItem(SCRIPT_STORAGE_KEY);
 
-            cancelUpdateButton.addEventListener('click', () => {
-                updateModal.style.display = 'none';
-                updateStatus('Update auf später verschoben.', 'info');
-            });
-            
-            // --- KERNFUNKTIONALITÄT ---
-            function updateStatus(message, type = 'default') {
-                statusDisplay.textContent = message;
-                statusDisplay.className = 'status-display';
-                statusDisplay.classList.add(`status-${type}`);
-            }
-
-            selectFolderButton.addEventListener('click', () => folderInput.click());
-            folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files));
-
-            async function handleFolderSelection(files) {
-                if (files.length === 0) {
-                    updateStatus('Kein Ordner ausgewählt.', 'warning');
-                    return;
-                }
-                updateStatus(`Verarbeite ${files.length} Dateien...`, 'info');
-                selectFolderButton.disabled = true;
-                downloadZipButton.disabled = true;
-
-                const allowedExtensions = [
-                    '.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar',
-                    '.dll', '.asi', '.so', '.cs',
-                    '.esp', '.esm', '.esl', '.lua',
-                    '.xml', '.json', '.ini', '.cfg', '.toml',
-                    '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav'
-                ];
-                
-                cleanedZip = new JSZip();
-                let keptFilesCount = 0;
-                let removedFilesCount = 0;
-
-                for (const file of files) {
-                    const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-                    if (allowedExtensions.includes(fileExtension)) {
-                        cleanedZip.file(file.webkitRelativePath, file);
-                        keptFilesCount++;
-                    } else {
-                        removedFilesCount++;
-                    }
-                }
-                
-                setTimeout(() => {
-                    if (keptFilesCount > 0) {
-                        updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success');
-                        downloadZipButton.disabled = false;
-                    } else {
-                        updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning');
-                    }
-                    selectFolderButton.disabled = false;
-                    folderInput.value = '';
-                }, 500);
-            }
-
-            downloadZipButton.addEventListener('click', async () => {
-                if (!cleanedZip) return;
-                updateStatus('Erstelle ZIP-Datei...', 'info');
-                downloadZipButton.disabled = true;
-                try {
-                    const content = await cleanedZip.generateAsync({ type: "blob" });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(content);
-                    link.download = 'cleaned_mods.zip';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                    updateStatus('Download gestartet!', 'success');
-                } catch (error) {
-                    console.error("Fehler beim Erstellen der ZIP-Datei:", error);
-                    updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning');
-                } finally {
-                    selectFolderButton.disabled = false;
-                }
-            });
-
-            // --- Initialisierung ---
-            if (isLocalStorageAvailable()) {
-                checkForUpdates();
+            if (!storedScriptContent) {
+                // Erster Besuch: Speichere das neue Skript und führe es aus.
+                localStorage.setItem(SCRIPT_STORAGE_KEY, newScriptPayload);
+                executeScript(newScriptPayload);
             } else {
-                updateStatus('Update-Check deaktiviert: Browser-Speicher blockiert.', 'warning');
+                const storedVersion = JSON.parse(storedScriptContent).version;
+                const newVersion = JSON.parse(newScriptPayload).version;
+
+                if (storedVersion !== newVersion) {
+                    // Update verfügbar: Zeige Modal an.
+                    updateModal.style.display = 'flex';
+                    
+                    confirmUpdateButton.onclick = () => {
+                        updateModal.style.display = 'none';
+                        progressOverlay.style.display = 'flex';
+                        let progress = 0;
+                        const interval = setInterval(() => {
+                            progress += 5;
+                            progressBar.style.width = progress + '%';
+                            if (progress >= 100) {
+                                clearInterval(interval);
+                                localStorage.setItem(SCRIPT_STORAGE_KEY, newScriptPayload);
+                                setTimeout(() => location.reload(true), 300);
+                            }
+                        }, 50);
+                    };
+
+                    cancelUpdateButton.onclick = () => {
+                        updateModal.style.display = 'none';
+                        // Benutzer lehnt ab: Führe die alte, gespeicherte Version aus.
+                        executeScript(storedScriptContent);
+                    };
+                } else {
+                    // Kein Update: Führe die gespeicherte Version aus.
+                    executeScript(storedScriptContent);
+                }
             }
         });
     </script>
