@@ -29,9 +29,6 @@
             --info-color: #2196F3;
             --progress-bar-bg: rgba(255, 255, 255, 0.2);
             --progress-bar-fill: #ffffff;
-            --log-success: rgba(76, 175, 80, 0.7);
-            --log-warning: rgba(255, 152, 0, 0.7);
-            --log-info: rgba(33, 150, 243, 0.7);
         }
 
         * {
@@ -131,7 +128,7 @@
 
         .status-display {
             min-height: 50px;
-            margin-bottom: 0rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -146,36 +143,6 @@
         .status-info { background: rgba(33, 150, 243, 0.3); }
         .status-warning { background: rgba(255, 152, 0, 0.3); }
         .status-success { background: rgba(76, 175, 80, 0.3); }
-
-        .log-container {
-            width: 100%;
-            height: 150px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-            overflow-y: auto;
-            text-align: left;
-            padding: 0.75rem;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            display: none;
-        }
-        .log-container p {
-            margin: 0 0 0.25rem 0;
-            padding: 0;
-            font-weight: normal;
-            opacity: 0.9;
-        }
-        .log-entry.log-success { color: var(--log-success); }
-        .log-entry.log-warning { color: var(--log-warning); }
-        .log-entry.log-info { color: var(--log-info); }
-        
-        .log-container::-webkit-scrollbar { width: 8px; }
-        .log-container::-webkit-scrollbar-track { background: transparent; }
-        .log-container::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
-        .log-container::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
-
 
         .btn {
             background: var(--button-bg);
@@ -241,6 +208,25 @@
         .btn-cancel:hover { background: rgba(244, 67, 54, 0.6); }
         
         /* Stile für die Dateiliste im Modal */
+        .removed-files-list {
+            width: 100%;
+            height: 250px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            overflow-y: auto;
+            text-align: left;
+            padding: 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        .removed-files-list::-webkit-scrollbar { width: 8px; }
+        .removed-files-list::-webkit-scrollbar-track { background: transparent; }
+        .removed-files-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+        .removed-files-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
         .removed-file-entry {
             display: flex;
             justify-content: space-between;
@@ -367,7 +353,6 @@
             <h1>Mod Cleaner & Zipper</h1>
             <p>Wähle deinen Mod-Ordner aus. Unnötige Dateien werden entfernt und die bereinigten Mods als ZIP-Datei zum Download bereitgestellt.</p>
             <div id="statusDisplay" class="status-display status-default">Initialisiere...</div>
-            <div id="logContainer" class="log-container"></div>
             
             <div class="button-group">
                 <input type="file" id="folderInput" webkitdirectory directory multiple>
@@ -402,7 +387,7 @@
     <div id="removedFilesModal" class="modal">
         <div class="glass-card modal-content">
             <h2>Entfernte Dateien</h2>
-            <div id="removedFilesList" class="log-container" style="display:block; height: 250px; margin-bottom: 1rem;">
+            <div id="removedFilesList" class="removed-files-list">
                 <!-- Dynamischer Inhalt -->
             </div>
             <button id="closeRemovedFilesModal" class="btn btn-cancel">Schließen</button>
@@ -419,8 +404,8 @@
     <!-- App Source -->
     <script type="application/json" id="main-script-source">
         {
-            "version": "2.30",
-            "code": "(() => { const APP_VERSION = '2.30'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const logContainer = document.getElementById('logContainer'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); const showRemovedButton = document.getElementById('showRemovedButton'); const removedFilesModal = document.getElementById('removedFilesModal'); const removedFilesList = document.getElementById('removedFilesList'); const closeRemovedFilesModal = document.getElementById('closeRemovedFilesModal'); const progressOverlay = document.getElementById('progressOverlay'); const progressBar = document.getElementById('progressBar'); const progressText = progressOverlay.querySelector('.progress-text'); let cleanedZip = null; let removedFiles = []; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } function logMessage(message, type = 'info') { const logEntry = document.createElement('p'); logEntry.textContent = message; logEntry.className = `log-entry log-${type}`; logContainer.appendChild(logEntry); logContainer.scrollTop = logContainer.scrollHeight; } function clearLogs() { logContainer.innerHTML = ''; } function copyToClipboard(text, button) { const textarea = document.createElement('textarea'); textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); if (button) { const originalText = button.textContent; button.textContent = 'Kopiert!'; setTimeout(() => { button.textContent = originalText; }, 1500); } } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); showRemovedButton.addEventListener('click', () => { removedFilesList.innerHTML = ''; if (removedFiles.length > 0) { removedFiles.forEach(file => { const entryDiv = document.createElement('div'); entryDiv.className = 'removed-file-entry'; const pathSpan = document.createElement('span'); pathSpan.className = 'file-path'; pathSpan.textContent = file; const buttonsDiv = document.createElement('div'); buttonsDiv.className = 'copy-buttons'; const copyPathBtn = document.createElement('button'); copyPathBtn.className = 'copy-btn'; copyPathBtn.textContent = 'Pfad'; copyPathBtn.onclick = (e) => { e.stopPropagation(); copyToClipboard(file, copyPathBtn); }; const copyNameBtn = document.createElement('button'); copyNameBtn.className = 'copy-btn'; copyNameBtn.textContent = 'Name'; const filename = file.split('/').pop(); copyNameBtn.onclick = (e) => { e.stopPropagation(); copyToClipboard(filename, copyNameBtn); }; buttonsDiv.appendChild(copyPathBtn); buttonsDiv.appendChild(copyNameBtn); entryDiv.appendChild(pathSpan); entryDiv.appendChild(buttonsDiv); removedFilesList.appendChild(entryDiv); }); } else { const p = document.createElement('p'); p.textContent = 'Keine Dateien wurden entfernt.'; removedFilesList.appendChild(p); } removedFilesModal.style.display = 'flex'; }); closeRemovedFilesModal.addEventListener('click', () => { removedFilesModal.style.display = 'none'; }); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } logContainer.style.display = 'block'; showRemovedButton.style.display = 'none'; clearLogs(); updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); logMessage('Prüfung gestartet...'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; removedFiles = []; const disallowedExtensions = ['.txt', '.md', '.pdf', '.doc', '.docx', '.url', '.exe', '.log', '.info', '.nfo', '.jpg', '.jpeg', '.png', '.gif']; const disallowedFilenames = ['thumbs.db', '.ds_store']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileName = file.name.toLowerCase(); const fileExtension = fileName.slice(fileName.lastIndexOf('.')); const isDisallowed = disallowedExtensions.includes(fileExtension) || disallowedFilenames.includes(fileName); if (!isDisallowed) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; logMessage(`[+] BEHALTEN: ${file.webkitRelativePath}`, 'success'); } else { removedFiles.push(file.webkitRelativePath); removedFilesCount++; logMessage(`[-] ENTFERNT: ${file.webkitRelativePath}`, 'warning'); } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; if (removedFilesCount > 0) { showRemovedButton.style.display = 'block'; } logMessage(`--------------------`); logMessage(`Zusammenfassung: ${keptFilesCount} behalten, ${removedFilesCount} entfernt. ZIP ist bereit.`, 'info'); } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); logMessage(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); logMessage('Starte ZIP-Erstellung. Die Datei wird alle grün markierten Dateien enthalten.', 'info'); downloadZipButton.disabled = true; selectFolderButton.disabled = true; progressText.textContent = 'Komprimiere ZIP-Datei...'; progressBar.style.width = '0%'; progressBar.classList.add('indeterminate'); progressOverlay.style.display = 'flex'; try { if (!window.streamSaver) { throw new Error('StreamSaver library is not loaded.'); } const readableStream = new ReadableStream({ start(controller) { cleanedZip.generateInternalStream({ type: 'uint8array' }).on('data', (chunk) => { controller.enqueue(chunk); }).on('end', () => { controller.close(); }).on('error', (err) => { controller.error(err); }).resume(); } }); const fileStream = streamSaver.createWriteStream('cleaned_mods.zip'); await readableStream.pipeTo(fileStream); updateStatus('Download abgeschlossen!', 'success'); logMessage('ZIP-Datei erfolgreich erstellt und gespeichert.', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); logMessage('Fehler beim Erstellen der ZIP-Datei: ' + error.message, 'warning'); } finally { progressBar.classList.remove('indeterminate'); progressOverlay.style.display = 'none'; progressText.textContent = 'Update wird aktiviert...'; selectFolderButton.disabled = false; downloadZipButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
+            "version": "2.31",
+            "code": "(() => { const APP_VERSION = '2.31'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); const showRemovedButton = document.getElementById('showRemovedButton'); const removedFilesModal = document.getElementById('removedFilesModal'); const removedFilesList = document.getElementById('removedFilesList'); const closeRemovedFilesModal = document.getElementById('closeRemovedFilesModal'); const progressOverlay = document.getElementById('progressOverlay'); const progressBar = document.getElementById('progressBar'); const progressText = progressOverlay.querySelector('.progress-text'); let cleanedZip = null; let removedFiles = []; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } function copyToClipboard(text, button) { const textarea = document.createElement('textarea'); textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); if (button) { const originalText = button.textContent; button.textContent = 'Kopiert!'; setTimeout(() => { button.textContent = originalText; }, 1500); } } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); showRemovedButton.addEventListener('click', () => { removedFilesList.innerHTML = ''; if (removedFiles.length > 0) { removedFiles.forEach(file => { const entryDiv = document.createElement('div'); entryDiv.className = 'removed-file-entry'; const pathSpan = document.createElement('span'); pathSpan.className = 'file-path'; pathSpan.textContent = file; const buttonsDiv = document.createElement('div'); buttonsDiv.className = 'copy-buttons'; const copyPathBtn = document.createElement('button'); copyPathBtn.className = 'copy-btn'; copyPathBtn.textContent = 'Pfad'; copyPathBtn.onclick = (e) => { e.stopPropagation(); copyToClipboard(file, copyPathBtn); }; const copyNameBtn = document.createElement('button'); copyNameBtn.className = 'copy-btn'; copyNameBtn.textContent = 'Name'; const filename = file.split('/').pop(); copyNameBtn.onclick = (e) => { e.stopPropagation(); copyToClipboard(filename, copyNameBtn); }; buttonsDiv.appendChild(copyPathBtn); buttonsDiv.appendChild(copyNameBtn); entryDiv.appendChild(pathSpan); entryDiv.appendChild(buttonsDiv); removedFilesList.appendChild(entryDiv); }); } else { const p = document.createElement('p'); p.textContent = 'Keine Dateien wurden entfernt.'; removedFilesList.appendChild(p); } removedFilesModal.style.display = 'flex'; }); closeRemovedFilesModal.addEventListener('click', () => { removedFilesModal.style.display = 'none'; }); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } showRemovedButton.style.display = 'none'; updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; removedFiles = []; const disallowedExtensions = ['.txt', '.md', '.pdf', '.doc', '.docx', '.url', '.exe', '.log', '.info', '.nfo', '.jpg', '.jpeg', '.png', '.gif']; const disallowedFilenames = ['thumbs.db', '.ds_store']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileName = file.name.toLowerCase(); const fileExtension = fileName.slice(fileName.lastIndexOf('.')); const isDisallowed = disallowedExtensions.includes(fileExtension) || disallowedFilenames.includes(fileName); if (!isDisallowed) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; } else { removedFiles.push(file.webkitRelativePath); removedFilesCount++; } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; if (removedFilesCount > 0) { showRemovedButton.style.display = 'block'; } } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); downloadZipButton.disabled = true; selectFolderButton.disabled = true; progressText.textContent = 'Komprimiere ZIP-Datei...'; progressBar.style.width = '0%'; progressBar.classList.add('indeterminate'); progressOverlay.style.display = 'flex'; try { if (!window.streamSaver) { throw new Error('StreamSaver library is not loaded.'); } const readableStream = new ReadableStream({ start(controller) { cleanedZip.generateInternalStream({ type: 'uint8array' }).on('data', (chunk) => { controller.enqueue(chunk); }).on('end', () => { controller.close(); }).on('error', (err) => { controller.error(err); }).resume(); } }); const fileStream = streamSaver.createWriteStream('cleaned_mods.zip'); await readableStream.pipeTo(fileStream); updateStatus('Download abgeschlossen!', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { progressBar.classList.remove('indeterminate'); progressOverlay.style.display = 'none'; progressText.textContent = 'Update wird aktiviert...'; selectFolderButton.disabled = false; downloadZipButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
         }
     </script>
     
