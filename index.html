@@ -24,7 +24,8 @@
             --success-color: #4CAF50;
             --warning-color: #ff9800;
             --info-color: #2196F3;
-            --update-dot-color: #ffeb3b;
+            --progress-bar-bg: rgba(255, 255, 255, 0.2);
+            --progress-bar-fill: #ffffff;
         }
 
         * {
@@ -189,57 +190,52 @@
         .btn-confirm:hover { background: rgba(76, 175, 80, 0.6); }
         .btn-cancel { background: rgba(244, 67, 54, 0.4); }
         .btn-cancel:hover { background: rgba(244, 67, 54, 0.6); }
-
-        /* Dropdown/Update-Menü Stile */
-        .update-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-        }
-
-        .update-button {
-            background: var(--button-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--primary-color);
-            padding: 0.6rem 1.2rem;
-            cursor: pointer;
-            position: relative;
-            display: none; /* Standardmäßig versteckt */
-        }
         
-        .update-button.available::after {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background-color: var(--update-dot-color);
-            border-radius: 50%;
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            animation: pulse 2s infinite;
+        /* Fortschrittsbalken-Overlay */
+        .progress-overlay {
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
         }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); }
+        .progress-bar-container {
+            width: 80%;
+            max-width: 400px;
+            background-color: var(--progress-bar-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: var(--progress-bar-fill);
+            border-radius: 10px;
+            transition: width 0.2s ease-out;
+        }
+        .progress-text {
+            margin-top: 1rem;
+            font-size: 1.1rem;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="update-container">
-        <button id="manualUpdateButton" class="update-button">Update</button>
-    </div>
-
     <div class="container">
         <div class="glass-card main-card">
             <h1>Mod Cleaner & Zipper</h1>
             <p>Wähle deinen Mod-Ordner aus. Unnötige Dateien werden entfernt und die bereinigten Mods als ZIP-Datei zum Download bereitgestellt.</p>
-            <div id="statusDisplay" class="status-display status-default">Bereit zum Start.</div>
+            <div id="statusDisplay" class="status-display status-default">Initialisiere...</div>
             
             <input type="file" id="folderInput" webkitdirectory directory multiple>
             <button id="selectFolderButton" class="btn">1. Mod-Ordner auswählen</button>
@@ -250,161 +246,170 @@
     <!-- Modal-Fenster für Software-Update -->
     <div id="updateModal" class="modal">
         <div class="glass-card modal-content">
-            <h2 id="updateModalTitle">Update verfügbar!</h2>
-            <p id="updateModalText">Eine neue Version ist verfügbar. Möchtest du die Seite neu laden, um das Update zu erhalten?</p>
+            <h2>Seite wurde aktualisiert!</h2>
+            <p>Die Anwendung wurde im Hintergrund aktualisiert. Möchtest du sie neu starten, um die Änderungen zu übernehmen?</p>
             <div class="modal-buttons">
-                <button id="confirmUpdateButton" class="btn btn-confirm">Ja, neu laden</button>
+                <button id="confirmUpdateButton" class="btn btn-confirm">Ja, neu starten</button>
                 <button id="cancelUpdateButton" class="btn btn-cancel">Später</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- DOM-Elemente ---
-        const statusDisplay = document.getElementById('statusDisplay');
-        const folderInput = document.getElementById('folderInput');
-        const selectFolderButton = document.getElementById('selectFolderButton');
-        const downloadZipButton = document.getElementById('downloadZipButton');
-        const updateModal = document.getElementById('updateModal');
-        const confirmUpdateButton = document.getElementById('confirmUpdateButton');
-        const cancelUpdateButton = document.getElementById('cancelUpdateButton');
-        const manualUpdateButton = document.getElementById('manualUpdateButton');
-        const updateModalTitle = document.getElementById('updateModalTitle');
-        const updateModalText = document.getElementById('updateModalText');
+    <!-- Fortschrittsbalken-Overlay -->
+    <div id="progressOverlay" class="progress-overlay">
+        <p class="progress-text">Update wird installiert...</p>
+        <div class="progress-bar-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+    </div>
 
-        // --- Globale Variablen ---
-        let cleanedZip = null;
-        let latestVersion = null; // Wird von der API gefüllt
-        
-        // --- ECHTES UPDATE-SYSTEM ---
-        const SCRIPT_VERSION = "1.0"; // Die Version dieses Skripts
-        // In einer echten App würde diese URL auf deine eigene Versionsdatei verweisen.
-        const VERSION_CHECK_URL = 'https://api.npoint.io/4e7d8c6b7d3f2b1a8c9f'; // Beispiel-API, die {"version": "1.1"} zurückgibt
+    <script id="main-script">
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM-Elemente ---
+            const statusDisplay = document.getElementById('statusDisplay');
+            const folderInput = document.getElementById('folderInput');
+            const selectFolderButton = document.getElementById('selectFolderButton');
+            const downloadZipButton = document.getElementById('downloadZipButton');
+            const updateModal = document.getElementById('updateModal');
+            const confirmUpdateButton = document.getElementById('confirmUpdateButton');
+            const cancelUpdateButton = document.getElementById('cancelUpdateButton');
+            const progressOverlay = document.getElementById('progressOverlay');
+            const progressBar = document.getElementById('progressBar');
 
-        async function checkForUpdates() {
-            try {
-                const response = await fetch(VERSION_CHECK_URL);
-                if (!response.ok) return; // Fehler beim Abrufen ignorieren
-                const data = await response.json();
-                latestVersion = data.version;
+            // --- Globale Variablen ---
+            let cleanedZip = null;
+            let currentScriptHash = null;
+            
+            // --- Lokaler Update-Mechanismus ohne externen Server ---
+            const SCRIPT_STORAGE_KEY = 'scriptVersionHash';
 
-                // Versionen vergleichen (einfacher String-Vergleich funktioniert für "1.1" > "1.0")
-                if (latestVersion && latestVersion > SCRIPT_VERSION) {
-                    const skippedVersion = localStorage.getItem('skippedVersion');
-                    if (skippedVersion === latestVersion) {
-                        // User hat dieses Update schon mal übersprungen
-                        showManualUpdateButton();
-                    } else {
-                        // Neues, unbekanntes Update gefunden
-                        showUpdateModal();
-                    }
+            // Einfache Hash-Funktion, um einen "Fingerabdruck" des Skripts zu erstellen
+            function hashString(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = (hash << 5) - hash + char;
+                    hash |= 0; // Zu 32bit Integer konvertieren
                 }
-            } catch (error) {
-                console.error("Update-Check fehlgeschlagen:", error);
+                return hash.toString();
             }
-        }
-        
-        function showUpdateModal() {
-            updateModalTitle.textContent = `Update auf v${latestVersion} verfügbar!`;
-            updateModalText.textContent = `Eine neue Version der Seite ist verfügbar. Möchtest du jetzt aktualisieren?`;
-            updateModal.style.display = 'flex';
-        }
-        
-        function showManualUpdateButton() {
-            manualUpdateButton.style.display = 'block';
-            manualUpdateButton.classList.add('available');
-            manualUpdateButton.textContent = `Update auf v${latestVersion}`;
-        }
 
-        // Event Listeners für Update-Flow
-        confirmUpdateButton.addEventListener('click', () => {
-            localStorage.removeItem('skippedVersion'); // Gespeicherte Entscheidung löschen
-            location.reload(true); // true erzwingt Neuladen vom Server, nicht aus dem Cache
-        });
+            function checkForUpdates() {
+                const scriptContent = document.getElementById('main-script').textContent;
+                currentScriptHash = hashString(scriptContent);
+                const storedHash = localStorage.getItem(SCRIPT_STORAGE_KEY);
 
-        cancelUpdateButton.addEventListener('click', () => {
-            updateModal.style.display = 'none';
-            localStorage.setItem('skippedVersion', latestVersion);
-            showManualUpdateButton();
-        });
-        
-        manualUpdateButton.addEventListener('click', () => {
-             localStorage.removeItem('skippedVersion');
-             location.reload(true);
-        });
-
-        // Beim Laden der Seite nach Updates suchen
-        window.onload = checkForUpdates;
-        
-        // --- KERNFUNKTIONALITÄT (unverändert) ---
-        function updateStatus(message, type = 'default') {
-            statusDisplay.textContent = message;
-            statusDisplay.className = 'status-display';
-            statusDisplay.classList.add(`status-${type}`);
-        }
-
-        selectFolderButton.addEventListener('click', () => folderInput.click());
-        folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files));
-
-        async function handleFolderSelection(files) {
-            if (files.length === 0) {
-                updateStatus('Kein Ordner ausgewählt.', 'warning');
-                return;
-            }
-            updateStatus(`Verarbeite ${files.length} Dateien...`, 'info');
-            selectFolderButton.disabled = true;
-            downloadZipButton.disabled = true;
-
-            const allowedExtensions = ['.jar', '.dll', '.pak', '.esp', '.esm', '.esl', '.ba2', '.archive', '.mod', '.zip', '.rar', '.7z', '.scs', '.asi'];
-            cleanedZip = new JSZip();
-            let keptFilesCount = 0;
-            let removedFilesCount = 0;
-
-            for (const file of files) {
-                const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-                if (allowedExtensions.includes(fileExtension)) {
-                    cleanedZip.file(file.webkitRelativePath, file);
-                    keptFilesCount++;
+                if (!storedHash) {
+                    // Erster Besuch, speichere den aktuellen Hash
+                    localStorage.setItem(SCRIPT_STORAGE_KEY, currentScriptHash);
+                    updateStatus('System initialisiert.', 'success');
+                    setTimeout(() => updateStatus('Bereit zum Start.', 'default'), 3000);
+                } else if (storedHash !== currentScriptHash) {
+                    // Der Hash hat sich geändert -> Update wurde geladen
+                    updateModal.style.display = 'flex';
                 } else {
-                    removedFilesCount++;
+                    // Alles ist auf dem neuesten Stand
+                    updateStatus('Software ist auf dem neuesten Stand.', 'success');
+                    setTimeout(() => updateStatus('Bereit zum Start.', 'default'), 3000);
                 }
             }
             
-            setTimeout(() => {
-                if (keptFilesCount > 0) {
-                    updateStatus(`Fertig! ${keptFilesCount} Mods behalten, ${removedFilesCount} Dateien entfernt.`, 'success');
-                    downloadZipButton.disabled = false;
-                } else {
-                    updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning');
-                }
-                selectFolderButton.disabled = false;
-                folderInput.value = '';
-            }, 500);
-        }
-
-        downloadZipButton.addEventListener('click', async () => {
-            if (!cleanedZip) return;
-            updateStatus('Erstelle ZIP-Datei...', 'info');
-            downloadZipButton.disabled = true;
-            try {
-                const content = await cleanedZip.generateAsync({ type: "blob" });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(content);
-                link.download = 'cleaned_mods.zip';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-                updateStatus('Download gestartet!', 'success');
-            } catch (error) {
-                console.error("Fehler beim Erstellen der ZIP-Datei:", error);
-                updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning');
-            } finally {
-                selectFolderButton.disabled = false;
+            function applyUpdate() {
+                updateModal.style.display = 'none';
+                progressOverlay.style.display = 'flex';
+                
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        // Neuen Hash speichern und Seite neu laden
+                        localStorage.setItem(SCRIPT_STORAGE_KEY, currentScriptHash);
+                        setTimeout(() => location.reload(true), 300);
+                    }
+                }, 50); // Simuliert einen 2-sekündigen Update-Prozess
             }
+
+            confirmUpdateButton.addEventListener('click', applyUpdate);
+
+            cancelUpdateButton.addEventListener('click', () => {
+                updateModal.style.display = 'none';
+                updateStatus('Update auf später verschoben.', 'info');
+            });
+            
+            // --- KERNFUNKTIONALITÄT ---
+            function updateStatus(message, type = 'default') {
+                statusDisplay.textContent = message;
+                statusDisplay.className = 'status-display';
+                statusDisplay.classList.add(`status-${type}`);
+            }
+
+            selectFolderButton.addEventListener('click', () => folderInput.click());
+            folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files));
+
+            async function handleFolderSelection(files) {
+                if (files.length === 0) {
+                    updateStatus('Kein Ordner ausgewählt.', 'warning');
+                    return;
+                }
+                updateStatus(`Verarbeite ${files.length} Dateien...`, 'info');
+                selectFolderButton.disabled = true;
+                downloadZipButton.disabled = true;
+
+                const allowedExtensions = ['.jar', '.dll', '.pak', '.esp', '.esm', '.esl', '.ba2', '.archive', '.mod', '.zip', '.rar', '.7z', '.scs', '.asi'];
+                cleanedZip = new JSZip();
+                let keptFilesCount = 0;
+                let removedFilesCount = 0;
+
+                for (const file of files) {
+                    const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+                    if (allowedExtensions.includes(fileExtension)) {
+                        cleanedZip.file(file.webkitRelativePath, file);
+                        keptFilesCount++;
+                    } else {
+                        removedFilesCount++;
+                    }
+                }
+                
+                setTimeout(() => {
+                    if (keptFilesCount > 0) {
+                        updateStatus(`Fertig! ${keptFilesCount} Mods behalten, ${removedFilesCount} Dateien entfernt.`, 'success');
+                        downloadZipButton.disabled = false;
+                    } else {
+                        updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning');
+                    }
+                    selectFolderButton.disabled = false;
+                    folderInput.value = '';
+                }, 500);
+            }
+
+            downloadZipButton.addEventListener('click', async () => {
+                if (!cleanedZip) return;
+                updateStatus('Erstelle ZIP-Datei...', 'info');
+                downloadZipButton.disabled = true;
+                try {
+                    const content = await cleanedZip.generateAsync({ type: "blob" });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = 'cleaned_mods.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    updateStatus('Download gestartet!', 'success');
+                } catch (error) {
+                    console.error("Fehler beim Erstellen der ZIP-Datei:", error);
+                    updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning');
+                } finally {
+                    selectFolderButton.disabled = false;
+                }
+            });
+
+            // Initialen Update-Check starten
+            checkForUpdates();
         });
     </script>
 </body>
 </html>
-
 
