@@ -227,13 +227,70 @@
             font-size: 1.1rem;
         }
         
+        .footer-info {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
         .version-display {
             font-size: 0.8rem;
             color: var(--primary-color);
             opacity: 0.6;
-            align-self: flex-end;
-            margin-top: 1rem;
         }
+
+        .update-later-container {
+            position: relative;
+        }
+        
+        #updateLaterButton {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        #updateLaterButton:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        #updateLaterButton svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: 120%;
+            right: 0;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.5rem;
+            min-width: 150px;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-content button {
+            width: 100%;
+            text-align: left;
+        }
+
+        .update-later-container:hover .dropdown-content {
+            display: block;
+        }
+
 
     </style>
 </head>
@@ -248,7 +305,18 @@
             <input type="file" id="folderInput" webkitdirectory directory multiple>
             <button id="selectFolderButton" class="btn">1. Mod-Ordner auswählen</button>
             <button id="downloadZipButton" class="btn" disabled>2. Bereinigte Mods als ZIP laden</button>
-            <div id="versionDisplay" class="version-display"></div>
+            
+            <div class="footer-info">
+                 <div class="update-later-container" id="updateLaterContainer" style="display: none;">
+                    <button id="updateLaterButton" title="Update verfügbar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v5h-2zm0 6h2v2h-2z" opacity=".3"/><path d="M11 7h2v5h-2zm0 6h2v2h-2zm1-11C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    </button>
+                    <div class="dropdown-content">
+                        <button id="startDelayedUpdateButton" class="btn">Update installieren</button>
+                    </div>
+                </div>
+                <div id="versionDisplay" class="version-display"></div>
+            </div>
         </div>
     </div>
 
@@ -292,6 +360,8 @@
             const progressOverlay = document.getElementById('progressOverlay');
             const progressBar = document.getElementById('progressBar');
             const statusDisplay = document.getElementById('statusDisplay');
+            const updateLaterContainer = document.getElementById('updateLaterContainer');
+            const startDelayedUpdateButton = document.getElementById('startDelayedUpdateButton');
 
             if (!mainScriptSourceEl || !mainScriptSourceEl.textContent) {
                 statusDisplay.textContent = "Fataler Fehler: App-Quelle nicht gefunden.";
@@ -325,6 +395,20 @@
                     return false;
                 }
             }
+
+            function triggerUpdate() {
+                progressOverlay.style.display = 'flex';
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        localStorage.setItem(SCRIPT_STORAGE_KEY, newScriptPayload);
+                        setTimeout(() => location.reload(true), 300);
+                    }
+                }, 50);
+            }
             
             if (!isLocalStorageAvailable()) {
                 statusDisplay.textContent = "Speicher blockiert. App kann nicht gestartet werden.";
@@ -346,34 +430,28 @@
                     // Update verfügbar: Zeige Modal an.
                     updateModal.style.display = 'flex';
                     
-                    confirmUpdateButton.onclick = () => {
-                        updateModal.style.display = 'none';
-                        progressOverlay.style.display = 'flex';
-                        let progress = 0;
-                        const interval = setInterval(() => {
-                            progress += 5;
-                            progressBar.style.width = progress + '%';
-                            if (progress >= 100) {
-                                clearInterval(interval);
-                                localStorage.setItem(SCRIPT_STORAGE_KEY, newScriptPayload);
-                                setTimeout(() => location.reload(true), 300);
-                            }
-                        }, 50);
-                    };
+                    confirmUpdateButton.onclick = triggerUpdate;
+                    startDelayedUpdateButton.onclick = triggerUpdate;
 
                     cancelUpdateButton.onclick = () => {
                         updateModal.style.display = 'none';
+                        updateLaterContainer.style.display = 'block';
                         // Benutzer lehnt ab: Führe die alte, gespeicherte Version aus.
                         executeScript(storedScriptContent);
                     };
                 } else {
                     // Kein Update: Führe die gespeicherte Version aus.
                     executeScript(storedScriptContent);
+                    setTimeout(() => {
+                         if (statusDisplay.textContent === 'Bereit zum Start.') {
+                            statusDisplay.textContent = 'Software ist auf dem neuesten Stand.';
+                            statusDisplay.className = 'status-display status-success';
+                         }
+                    }, 1000);
                 }
             }
         });
     </script>
 </body>
 </html>
-
 
