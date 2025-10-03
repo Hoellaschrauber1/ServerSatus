@@ -355,7 +355,7 @@
             selectFolderButton.disabled = true;
             downloadZipButton.disabled = true;
 
-            const allowedExtensions = ['.jar', '.dll', '.pak', '.esp', '.esm', '.esl', '.ba2', '.archive', '.mod'];
+            const allowedExtensions = ['.jar', '.dll', '.pak', '.esp', '.esm', '.esl', '.ba2', '.archive', '.mod', '.zip', '.rar', '.7z', '.scs', '.asi'];
             cleanedZip = new JSZip();
             let keptFilesCount = 0;
             let removedFilesCount = 0;
@@ -406,4 +406,5 @@
     </script>
 </body>
 </html>
+
 
