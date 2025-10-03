@@ -241,10 +241,6 @@
             color: var(--primary-color);
             opacity: 0.6;
         }
-
-        .update-later-container {
-            position: relative;
-        }
         
         #updateLaterButton {
             background: none;
@@ -267,37 +263,6 @@
             width: 20px;
             height: 20px;
         }
-        
-        .dropdown-content {
-            display: block; /* Use opacity and pointer-events for visibility */
-            position: absolute;
-            top: 100%; /* Position below the icon */
-            right: 0;
-            margin-top: 8px; /* Add space */
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            padding: 0.5rem;
-            min-width: 150px;
-            z-index: 1;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            pointer-events: none; /* Not interactive when hidden */
-        }
-
-        .dropdown-content button {
-            width: 100%;
-            text-align: left;
-        }
-
-        .update-later-container:hover .dropdown-content {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto; /* Interactive when visible */
-        }
-
 
     </style>
 </head>
@@ -318,9 +283,6 @@
                     <button id="updateLaterButton" title="Update verfügbar">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     </button>
-                    <div class="dropdown-content">
-                        <button id="startDelayedUpdateButton" class="btn">Update installieren</button>
-                    </div>
                 </div>
                 <div id="versionDisplay" class="version-display"></div>
             </div>
@@ -350,8 +312,8 @@
     <!-- Der Quellcode der eigentlichen App. Wird nicht direkt ausgeführt. -->
     <script type="application/json" id="main-script-source">
         {
-            "version": "2.22",
-            "code": "(() => { const APP_VERSION = '2.22'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); let cleanedZip = null; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; const allowedExtensions = ['.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar', '.dll', '.asi', '.so', '.cs', '.esp', '.esm', '.esl', '.lua', '.xml', '.json', '.ini', '.cfg', '.toml', '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase(); if (allowedExtensions.includes(fileExtension)) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; } else { removedFilesCount++; } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); downloadZipButton.disabled = true; try { const content = await cleanedZip.generateAsync({ type: 'blob' }); const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = 'cleaned_mods.zip'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); updateStatus('Download gestartet!', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { selectFolderButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
+            "version": "2.23",
+            "code": "(() => { const APP_VERSION = '2.23'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); let cleanedZip = null; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; const allowedExtensions = ['.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar', '.dll', '.asi', '.so', '.cs', '.esp', '.esm', '.esl', '.lua', '.xml', '.json', '.ini', '.cfg', '.toml', '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase(); if (allowedExtensions.includes(fileExtension)) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; } else { removedFilesCount++; } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); downloadZipButton.disabled = true; try { const content = await cleanedZip.generateAsync({ type: 'blob' }); const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = 'cleaned_mods.zip'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); updateStatus('Download gestartet!', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { selectFolderButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
         }
     </script>
     
@@ -368,7 +330,7 @@
             const progressBar = document.getElementById('progressBar');
             const statusDisplay = document.getElementById('statusDisplay');
             const updateLaterContainer = document.getElementById('updateLaterContainer');
-            const startDelayedUpdateButton = document.getElementById('startDelayedUpdateButton');
+            const updateLaterButton = document.getElementById('updateLaterButton');
 
             if (!mainScriptSourceEl || !mainScriptSourceEl.textContent) {
                 statusDisplay.textContent = "Fataler Fehler: App-Quelle nicht gefunden.";
@@ -438,14 +400,18 @@
                     updateModal.style.display = 'flex';
                     
                     confirmUpdateButton.onclick = triggerUpdate;
-                    startDelayedUpdateButton.onclick = triggerUpdate;
 
                     cancelUpdateButton.onclick = () => {
                         updateModal.style.display = 'none';
-                        updateLaterContainer.style.display = 'block';
+                        updateLaterContainer.style.display = 'flex';
                         // Benutzer lehnt ab: Führe die alte, gespeicherte Version aus.
                         executeScript(storedScriptContent);
                     };
+
+                    updateLaterButton.onclick = () => {
+                        updateModal.style.display = 'flex';
+                    };
+
                 } else {
                     // Kein Update: Führe die gespeicherte Version aus.
                     executeScript(storedScriptContent);
@@ -461,5 +427,4 @@
     </script>
 </body>
 </html>
-
 
