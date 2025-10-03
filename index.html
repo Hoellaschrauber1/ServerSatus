@@ -26,6 +26,9 @@
             --info-color: #2196F3;
             --progress-bar-bg: rgba(255, 255, 255, 0.2);
             --progress-bar-fill: #ffffff;
+            --log-success: rgba(76, 175, 80, 0.7);
+            --log-warning: rgba(255, 152, 0, 0.7);
+            --log-info: rgba(33, 150, 243, 0.7);
         }
 
         * {
@@ -119,7 +122,7 @@
 
         .status-display {
             min-height: 50px;
-            margin-bottom: 1rem;
+            margin-bottom: 0rem; /* Reduzierter Abstand */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -134,6 +137,38 @@
         .status-info { background: rgba(33, 150, 243, 0.3); }
         .status-warning { background: rgba(255, 152, 0, 0.3); }
         .status-success { background: rgba(76, 175, 80, 0.3); }
+
+        /* Log-Container */
+        .log-container {
+            width: 100%;
+            height: 150px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            overflow-y: auto;
+            text-align: left;
+            padding: 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: none; /* Standardmäßig ausgeblendet */
+        }
+        .log-container p {
+            margin: 0 0 0.25rem 0;
+            padding: 0;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .log-entry.log-success { color: var(--log-success); }
+        .log-entry.log-warning { color: var(--log-warning); }
+        .log-entry.log-info { color: var(--log-info); }
+        
+        /* Custom Scrollbar für Log-Container */
+        .log-container::-webkit-scrollbar { width: 8px; }
+        .log-container::-webkit-scrollbar-track { background: transparent; }
+        .log-container::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+        .log-container::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
 
         .btn {
             background: var(--button-bg);
@@ -273,6 +308,7 @@
             <h1>Mod Cleaner & Zipper</h1>
             <p>Wähle deinen Mod-Ordner aus. Unnötige Dateien werden entfernt und die bereinigten Mods als ZIP-Datei zum Download bereitgestellt.</p>
             <div id="statusDisplay" class="status-display status-default">Initialisiere...</div>
+            <div id="logContainer" class="log-container"></div>
             
             <input type="file" id="folderInput" webkitdirectory directory multiple>
             <button id="selectFolderButton" class="btn">1. Mod-Ordner auswählen</button>
@@ -312,8 +348,8 @@
     <!-- Der Quellcode der eigentlichen App. Wird nicht direkt ausgeführt. -->
     <script type="application/json" id="main-script-source">
         {
-            "version": "2.23",
-            "code": "(() => { const APP_VERSION = '2.23'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); let cleanedZip = null; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; const allowedExtensions = ['.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar', '.dll', '.asi', '.so', '.cs', '.esp', '.esm', '.esl', '.lua', '.xml', '.json', '.ini', '.cfg', '.toml', '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase(); if (allowedExtensions.includes(fileExtension)) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; } else { removedFilesCount++; } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); downloadZipButton.disabled = true; try { const content = await cleanedZip.generateAsync({ type: 'blob' }); const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = 'cleaned_mods.zip'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); updateStatus('Download gestartet!', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { selectFolderButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
+            "version": "2.24",
+            "code": "(() => { const APP_VERSION = '2.24'; document.getElementById('versionDisplay').textContent = 'Version ' + APP_VERSION; const statusDisplay = document.getElementById('statusDisplay'); const logContainer = document.getElementById('logContainer'); const folderInput = document.getElementById('folderInput'); const selectFolderButton = document.getElementById('selectFolderButton'); const downloadZipButton = document.getElementById('downloadZipButton'); let cleanedZip = null; function updateStatus(message, type = 'default') { statusDisplay.textContent = message; statusDisplay.className = 'status-display'; statusDisplay.classList.add(`status-${type}`); } function logMessage(message, type = 'info') { const logEntry = document.createElement('p'); logEntry.textContent = message; logEntry.className = `log-entry log-${type}`; logContainer.appendChild(logEntry); logContainer.scrollTop = logContainer.scrollHeight; } function clearLogs() { logContainer.innerHTML = ''; } selectFolderButton.addEventListener('click', () => folderInput.click()); folderInput.addEventListener('change', (event) => handleFolderSelection(event.target.files)); async function handleFolderSelection(files) { if (files.length === 0) { updateStatus('Kein Ordner ausgewählt.', 'warning'); return; } logContainer.style.display = 'block'; clearLogs(); updateStatus(`Verarbeite ${files.length} Dateien...`, 'info'); logMessage('Prüfung gestartet...'); selectFolderButton.disabled = true; downloadZipButton.disabled = true; const allowedExtensions = ['.zip', '.rar', '.7z', '.pak', '.scs', '.ba2', '.archive', '.mod', '.jar', '.dll', '.asi', '.so', '.cs', '.esp', '.esm', '.esl', '.lua', '.xml', '.json', '.ini', '.cfg', '.toml', '.dds', '.nif', '.mesh', '.tga', '.ogg', '.wav']; cleanedZip = new JSZip(); let keptFilesCount = 0; let removedFilesCount = 0; for (const file of files) { const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase(); if (allowedExtensions.includes(fileExtension)) { cleanedZip.file(file.webkitRelativePath, file); keptFilesCount++; logMessage(`[+] BEHALTEN: ${file.webkitRelativePath}`, 'success'); } else { removedFilesCount++; logMessage(`[-] ENTFERNT: ${file.webkitRelativePath}`, 'warning'); } } setTimeout(() => { if (keptFilesCount > 0) { updateStatus(`Fertig! ${keptFilesCount} Mod-Dateien behalten, ${removedFilesCount} Dateien entfernt.`, 'success'); downloadZipButton.disabled = false; logMessage(`--------------------`); logMessage(`Zusammenfassung: ${keptFilesCount} behalten, ${removedFilesCount} entfernt. ZIP ist bereit.`, 'info'); } else { updateStatus(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); logMessage(`Keine gültigen Mod-Dateien im Ordner gefunden.`, 'warning'); } selectFolderButton.disabled = false; folderInput.value = ''; }, 500); } downloadZipButton.addEventListener('click', async () => { if (!cleanedZip) return; updateStatus('Erstelle ZIP-Datei...', 'info'); logMessage('Erstelle ZIP-Datei, bitte warten...'); downloadZipButton.disabled = true; try { const content = await cleanedZip.generateAsync({ type: 'blob' }); const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = 'cleaned_mods.zip'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); updateStatus('Download gestartet!', 'success'); logMessage('ZIP-Datei erfolgreich erstellt und Download gestartet.', 'success'); } catch (error) { console.error('Fehler beim Erstellen der ZIP-Datei:', error); updateStatus('Fehler beim Erstellen der ZIP-Datei.', 'warning'); logMessage('Fehler beim Erstellen der ZIP-Datei.', 'warning'); } finally { selectFolderButton.disabled = false; } }); updateStatus('Bereit zum Start.', 'default'); })()"
         }
     </script>
     
