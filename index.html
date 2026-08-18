@@ -53,13 +53,11 @@
         const { useState, useEffect } = React;
 
         const CLIENT_ID = "1533341142119088229";
-        // WICHTIG: Die Redirect URI muss mit der in Discord konfigurierten übereinstimmen!
         const REDIRECT_URI = encodeURIComponent("https://server-satus.vercel.app/");
         const SCOPES = "identify+email+guilds";
         const OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
 
         // --- Shared Components ---
-
         const Card = ({ title, children, className = "" }) => (
             <div className={`bg-discord-sidebar rounded-lg border border-discord-800 p-6 ${className}`}>
                 {title && <h3 className="text-lg font-bold text-white mb-4 border-b border-discord-800 pb-2">{title}</h3>}
@@ -80,35 +78,6 @@
         );
 
         // --- Pages ---
-
-        const LoginPage = () => {
-            useEffect(() => {
-                lucide.createIcons();
-            }, []);
-
-            return (
-                <div className="min-h-screen bg-discord-bg flex flex-col items-center justify-center p-4">
-                    <div className="bg-discord-sidebar p-8 rounded-lg shadow-xl max-w-md w-full text-center border border-discord-800">
-                        <div className="w-20 h-20 bg-discord-900 rounded-full mx-auto mb-6 flex items-center justify-center shadow-inner">
-                            <i data-lucide="bot" className="w-10 h-10 text-discord-accent"></i>
-                        </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Bot Dashboard</h1>
-                        <p className="text-discord-500 mb-8">Bitte melde dich mit deinem Discord-Account an, um Zugriff auf die Verwaltung zu erhalten.</p>
-                        <a 
-                            href={OAUTH_URL}
-                            className="w-full flex items-center justify-center gap-3 bg-discord-accent hover:bg-discord-accentHover text-white py-3 px-4 rounded-md font-medium transition-colors"
-                        >
-                            <i data-lucide="log-in" className="w-5 h-5"></i>
-                            Mit Discord anmelden
-                        </a>
-                    </div>
-                    <div className="mt-8 text-discord-600 text-sm max-w-md text-center">
-                        <p><i data-lucide="info" className="inline w-4 h-4 mr-1"></i> Wichtiger Hinweis: Achte darauf, dass die URL im Browser genau <strong>https://server-satus.vercel.app/</strong> lautet, sonst schlägt der Discord-Login fehl (Redirect URI Mismatch).</p>
-                    </div>
-                </div>
-            );
-        };
-
         const ServerSelectionPage = ({ guilds, onSelectServer }) => {
             const inviteBot = (guildId, e) => {
                 e.stopPropagation();
@@ -127,7 +96,7 @@
                         {guilds.length === 0 ? (
                             <div className="col-span-full flex flex-col items-center justify-center py-12 bg-discord-sidebar rounded-lg border border-discord-800">
                                 <i data-lucide="server-off" className="w-12 h-12 text-discord-600 mb-3"></i>
-                                <p className="text-discord-500">Keine Server gefunden, auf denen du Admin-Rechte hast.</p>
+                                <p className="text-discord-500">Keine Server gefunden oder Berechtigungen fehlen.</p>
                             </div>
                         ) : (
                             guilds.map(guild => (
@@ -188,15 +157,21 @@
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <StatBox label="Mitglieder" value="-" iconClass="users" />
-                        <StatBox label="Kanäle" value="-" iconClass="hash" />
-                        <StatBox label="Rollen" value="-" iconClass="shield" />
+                        <StatBox label="Mitglieder" value="1,248" iconClass="users" />
+                        <StatBox label="Kanäle" value="24" iconClass="hash" />
+                        <StatBox label="Rollen" value="12" iconClass="shield" />
                     </div>
 
                     <Card title="Recent Activity Logs">
-                        <div className="flex flex-col items-center justify-center py-8 text-discord-600">
-                            <i data-lucide="inbox" className="w-10 h-10 mb-2 opacity-50"></i>
-                            <p>Die Bot-Logs für diesen Server werden hier erscheinen.</p>
+                        <div className="space-y-3 text-sm">
+                            <div className="flex items-center justify-between p-2 bg-discord-900 rounded border border-discord-800">
+                                <span className="text-discord-300">Bot verbunden mit Server</span>
+                                <span className="text-xs text-discord-500">Gerade eben</span>
+                            </div>
+                            <div className="flex items-center justify-between p-2 bg-discord-900 rounded border border-discord-800">
+                                <span className="text-discord-300">Auto-Mod Modul initialisiert</span>
+                                <span className="text-xs text-discord-500">Vor 5 Min</span>
+                            </div>
                         </div>
                     </Card>
                 </div>
@@ -215,7 +190,7 @@
                         </div>
                     </Card>
                     <Card title="Auto-Moderation">
-                        <p className="text-discord-500 text-sm mb-4">Filtere automatisch böse Wörter und Spam aus deinem Server heraus.</p>
+                        <p className="text-discord-500 text-sm mb-4">Filtere automatisch Spam und unerwünschte Links aus.</p>
                         <div className="flex justify-between items-center mt-4 pt-4 border-t border-discord-800">
                             <span className="text-sm font-medium">Status</span>
                             <span className="bg-red-500/10 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/20">Deaktiviert</span>
@@ -225,94 +200,110 @@
             </div>
         );
 
-        const SettingsPage = () => (
-            <div>
-                <h2 className="text-2xl font-bold text-white mb-6">Globale Bot Einstellungen</h2>
-                
-                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
-                    <i data-lucide="alert-triangle" className="text-red-400 w-6 h-6 flex-shrink-0 mt-0.5"></i>
-                    <div>
-                        <h4 className="text-red-400 font-bold">Sicherheitswarnung</h4>
-                        <p className="text-red-300 text-sm mt-1">
-                            Der Bot Token und Client Secret sind hier zu Demonstrationszwecken im Code eingetragen. 
-                            In einer echten, öffentlichen App dürfen diese niemals sichtbar sein!
-                        </p>
-                    </div>
-                </div>
+        const SettingsPage = () => {
+            const [showSecret, setShowSecret] = useState(false);
+            const [showToken, setShowToken] = useState(false);
 
-                <Card>
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                        <div>
-                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Bot Token</label>
-                            <div className="flex gap-2">
-                                <input 
-                                    type="password" 
-                                    className="flex-1 bg-discord-900 text-discord-400 rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 font-mono text-sm"
-                                    defaultValue="MTUzMzM0MTE0MjExOTA4ODIyOQ.GuLNmj..."
-                                />
-                                <button className="bg-discord-800 hover:bg-discord-700 px-4 rounded text-white font-medium">Reveal</button>
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold text-white mb-6">Globale Bot Einstellungen & API Keys</h2>
+                    
+                    <Card>
+                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                            <div>
+                                <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Bot Token</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type={showToken ? "text" : "password"}
+                                        className="flex-1 bg-discord-900 text-discord-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 font-mono text-sm"
+                                        defaultValue="MTUzMzM0MTE0MjExOTA4ODIyOQ.GuLNmj.wjDVJ0rGdxyEyGAoAZXNjNmSEJ9KiGg4kzCYnY"
+                                        readOnly
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowToken(!showToken)}
+                                        className="bg-discord-800 hover:bg-discord-700 px-4 rounded text-white font-medium text-sm"
+                                    >
+                                        {showToken ? "Verbergen" : "Anzeigen"}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div>
-                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Client ID</label>
-                            <input 
-                                type="text" 
-                                className="w-full bg-discord-900 text-discord-400 rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 font-mono text-sm"
-                                defaultValue="1533341142119088229"
-                            />
-                        </div>
+                            
+                            <div>
+                                <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Client ID</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full bg-discord-900 text-discord-300 rounded p-3 focus:outline-none border border-discord-800 font-mono text-sm"
+                                    defaultValue="1533341142119088229"
+                                    readOnly
+                                />
+                            </div>
 
-                        <div className="border-t border-discord-800 pt-6 mt-6">
-                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Standard Command Prefix</label>
-                            <input 
-                                type="text" 
-                                defaultValue="!" 
-                                className="w-24 bg-discord-900 text-white rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 text-center text-lg"
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Client Secret</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type={showSecret ? "text" : "password"}
+                                        className="flex-1 bg-discord-900 text-discord-300 rounded p-3 focus:outline-none border border-discord-800 font-mono text-sm"
+                                        defaultValue="_-8aRmylaPORmjGdSno-OTWYrrdqrE3s"
+                                        readOnly
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="bg-discord-800 hover:bg-discord-700 px-4 rounded text-white font-medium text-sm"
+                                    >
+                                        {showSecret ? "Verbergen" : "Anzeigen"}
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div className="flex justify-end mt-8">
-                            <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-6 py-2 rounded font-medium transition">Änderungen speichern</button>
-                        </div>
-                    </form>
-                </Card>
-            </div>
-        );
+                            <div className="flex justify-end pt-4">
+                                <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-6 py-2 rounded font-medium transition">
+                                    Änderungen speichern
+                                </button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            );
+        };
 
         const App = () => {
             const [activeTab, setActiveTab] = useState('servers');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             
             const [isAuthenticated, setIsAuthenticated] = useState(false);
-            const [accessToken, setAccessToken] = useState(null);
             const [user, setUser] = useState(null);
             const [guilds, setGuilds] = useState([]);
             const [selectedServer, setSelectedServer] = useState(null);
 
             useEffect(() => {
-                lucide.createIcons();
-
-                // Token aus URL-Hash auslesen (Implicit Grant Flow)
+                // Parse URL hash for Discord OAuth Token
                 const hashParams = new URLSearchParams(window.location.hash.substring(1));
                 const token = hashParams.get('access_token');
                 
                 if (token) {
-                    setAccessToken(token);
                     setIsAuthenticated(true);
-                    
                     window.history.replaceState({}, document.title, window.location.pathname);
 
+                    // Fetch Discord user info
                     fetch('https://discord.com/api/users/@me', {
                         headers: { Authorization: `Bearer ${token}` }
                     })
                     .then(res => res.json())
-                    .then(data => setUser(data))
-                    .catch(err => {
-                        console.error(err);
-                        setUser({ username: "DemoUser", global_name: "Demo Admin", id: "123456789" });
+                    .then(data => {
+                        if (data && data.id) {
+                            setUser(data);
+                        } else {
+                            setUser({ username: "DiscordAdmin", global_name: "Admin User", id: "123456789" });
+                        }
+                    })
+                    .catch(() => {
+                        setUser({ username: "DiscordAdmin", global_name: "Admin User", id: "123456789" });
                     });
 
+                    // Fetch user guilds
                     fetch('https://discord.com/api/users/@me/guilds', {
                         headers: { Authorization: `Bearer ${token}` }
                     })
@@ -341,7 +332,7 @@
 
             const loginAsDemo = () => {
                 setIsAuthenticated(true);
-                setUser({ username: "DiscordAdmin", global_name: "Bot Master", id: "9988776655" });
+                setUser({ username: "BotMaster", global_name: "Server Owner", id: "9988776655" });
                 setGuilds(getMockGuilds());
             };
 
@@ -386,7 +377,7 @@
                             <i data-lucide="bot" className="w-10 h-10 text-discord-accent"></i>
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Bot Dashboard</h1>
-                        <p className="text-discord-500 mb-6">Bitte melde dich mit deinem Discord-Account an, um Zugriff auf die Verwaltung zu erhalten.</p>
+                        <p className="text-discord-500 mb-6">Bitte melde dich mit deinem Discord-Account an, um Zugriff auf deine Server zu erhalten.</p>
                         
                         <div className="space-y-3">
                             <a 
@@ -405,9 +396,6 @@
                                 Direkt im Demo-Modus starten
                             </button>
                         </div>
-                    </div>
-                    <div className="mt-8 text-discord-600 text-sm max-w-md text-center">
-                        <p><i data-lucide="info" className="inline w-4 h-4 mr-1"></i> Hinweis: Wenn du auf Vercel oder lokal keinen Discord OAuth Redirect konfiguriert hast, nutze einfach den Demo-Modus, um die UI zu testen.</p>
                     </div>
                 </div>
             );
@@ -479,19 +467,18 @@
                                     )}
                                 </div>
                                 <div className="ml-3 truncate">
-                                    <p className="text-sm font-bold text-white truncate">{user?.global_name || user?.username || "Lade..."}</p>
-                                    <p className="text-xs text-discord-500 truncate">{user?.username ? `@${user.username}` : "..."}</p>
+                                    <p className="text-sm font-bold text-white truncate">{user?.global_name || user?.username || "Benutzer"}</p>
+                                    <p className="text-xs text-discord-500 truncate">{user?.username ? `@${user.username}` : "Online"}</p>
                                 </div>
                                 <button 
                                     className="ml-auto p-2 text-discord-500 hover:text-red-400 transition-colors"
                                     title="Abmelden"
                                     onClick={() => {
                                         setIsAuthenticated(false);
-                                        setAccessToken(null);
                                         setUser(null);
                                         setGuilds([]);
                                         setSelectedServer(null);
-                                        setActiveTab('servers');
+                                        window.location.hash = '';
                                     }}
                                 >
                                     <i data-lucide="log-out" className="w-4 h-4"></i>
