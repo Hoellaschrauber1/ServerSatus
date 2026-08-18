@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Bot Dashboard</title>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel für JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel for in-browser JSX compilation (only for dev/demo purposes) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Lucide Icons (React version) -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
@@ -24,68 +24,45 @@
                 extend: {
                     colors: {
                         discord: {
-                            100: '#f2f3f5',
-                            200: '#ebedef',
-                            300: '#e3e5e8',
-                            400: '#d1d3d6',
-                            500: '#b9bbbe',
-                            600: '#8e9297',
-                            700: '#72767d',
-                            800: '#4f545c',
-                            900: '#36393f',
-                            950: '#2f3136',
-                            bg: '#36393f',
-                            sidebar: '#2f3136',
+                            bg: '#313338',
+                            sidebar: '#2b2d31',
                             accent: '#5865F2',
-                            accentHover: '#4752C4'
+                            accentHover: '#4752C4',
+                            950: '#111214',
+                            900: '#1e1f22',
+                            800: '#232428',
+                            700: '#383a40',
+                            600: '#404249',
+                            500: '#80848e',
+                            400: '#949ba4',
+                            300: '#b5bac1'
                         }
                     }
                 }
             }
         }
     </script>
-    
     <style>
-        body {
-            background-color: #36393f;
-            color: #dcddde;
-            font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        
-        /* Custom scrollbar to match Discord style */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #2f3136; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #202225; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #18191c; 
-        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: #313338; color: white; }
     </style>
 </head>
 <body>
-    <!-- Root element for React -->
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1533341142119088229&response_type=code&redirect_uri=https%3A%2F%2Fserver-satus.vercel.app%2F&scope=identify+email+guilds.join+guilds+gdm.join+rpc.notifications.read+rpc.video.read+rpc.screenshare.write+messages.read+applications.store.update+openid+applications.commands.permissions.update+applications.builds.read+rpc.activities.write+rpc.video.write+rpc.voice.read+connections+guilds.members.read+role_connections.write+rpc+rpc.voice.write+rpc.screenshare.read";
+        const CLIENT_ID = "1533341142119088229";
+        // WICHTIG: Die Redirect URI muss mit der in Discord konfigurierten übereinstimmen!
+        const REDIRECT_URI = encodeURIComponent("https://server-satus.vercel.app/");
+        const SCOPES = "identify+email+guilds";
+        const OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
 
         // --- Shared Components ---
-        
+
         const Card = ({ title, children, className = "" }) => (
-            <div className={`bg-discord-sidebar rounded-lg shadow-md p-6 ${className}`}>
-                {title && <h3 className="text-lg font-bold text-white mb-4 uppercase tracking-wider text-sm">{title}</h3>}
+            <div className={`bg-discord-sidebar rounded-lg border border-discord-800 p-6 ${className}`}>
+                {title && <h3 className="text-lg font-bold text-white mb-4 border-b border-discord-800 pb-2">{title}</h3>}
                 {children}
             </div>
         );
@@ -96,7 +73,7 @@
                     <p className="text-discord-500 text-xs font-semibold uppercase mb-1">{label}</p>
                     <p className="text-2xl font-bold text-white">{value}</p>
                 </div>
-                <div className="text-discord-accent bg-discord-950 p-3 rounded-full">
+                <div className="text-discord-accent bg-discord-950 p-3 rounded-full flex items-center justify-center">
                     <i data-lucide={iconClass}></i>
                 </div>
             </div>
@@ -110,7 +87,7 @@
             }, []);
 
             return (
-                <div className="min-h-screen bg-discord-bg flex items-center justify-center p-4">
+                <div className="min-h-screen bg-discord-bg flex flex-col items-center justify-center p-4">
                     <div className="bg-discord-sidebar p-8 rounded-lg shadow-xl max-w-md w-full text-center border border-discord-800">
                         <div className="w-20 h-20 bg-discord-900 rounded-full mx-auto mb-6 flex items-center justify-center shadow-inner">
                             <i data-lucide="bot" className="w-10 h-10 text-discord-accent"></i>
@@ -125,132 +102,144 @@
                             Mit Discord anmelden
                         </a>
                     </div>
-                </div>
-            );
-        };
-
-        const OverviewPage = () => {
-            const [stats, setStats] = useState({ servers: 0, users: 0, uptime: "-", ping: "-" });
-            const [logs, setLogs] = useState([]);
-
-            useEffect(() => {
-                lucide.createIcons();
-            }, []);
-
-            return (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold text-white">Dashboard Overview</h2>
-                        <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-4 py-2 rounded transition font-medium flex items-center gap-2">
-                            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Aktualisieren
-                        </button>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <StatBox label="Servers" value={stats.servers} iconClass="server" />
-                        <StatBox label="Users" value={stats.users} iconClass="users" />
-                        <StatBox label="Uptime" value={stats.uptime} iconClass="clock" />
-                        <StatBox label="Ping" value={stats.ping} iconClass="activity" />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Status Panel */}
-                        <Card title="Bot Status" className="lg:col-span-1">
-                            <div className="flex flex-col items-center p-4">
-                                <div className="w-24 h-24 rounded-full bg-discord-900 border-4 border-discord-600 mb-4 flex items-center justify-center relative">
-                                    <i data-lucide="bot" className="w-10 h-10 text-discord-600"></i>
-                                </div>
-                                <h3 className="text-xl font-bold text-white">Wartet auf Daten...</h3>
-                                <p className="text-discord-500 mb-6">Status unbekannt</p>
-                                
-                                <div className="w-full space-y-3">
-                                    <button className="w-full bg-discord-800 text-discord-600 py-2 rounded font-medium transition cursor-not-allowed" disabled>
-                                        Stop Bot
-                                    </button>
-                                    <button className="w-full bg-discord-800 text-discord-600 py-2 rounded font-medium transition cursor-not-allowed" disabled>
-                                        Restart Bot
-                                    </button>
-                                </div>
-                            </div>
-                        </Card>
-
-                        {/* Logs Panel */}
-                        <Card title="Recent Activity Logs" className="lg:col-span-2">
-                            <div className="space-y-3">
-                                {logs.length > 0 ? logs.map(log => (
-                                    <div key={log.id} className="flex items-start p-3 bg-discord-900 rounded border-l-4">
-                                        <div className="flex-1">
-                                            <p className="text-sm text-gray-200">{log.message}</p>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div className="flex flex-col items-center justify-center py-8 text-discord-600">
-                                        <i data-lucide="inbox" className="w-10 h-10 mb-2 opacity-50"></i>
-                                        <p>Keine Logs vorhanden.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </Card>
+                    <div className="mt-8 text-discord-600 text-sm max-w-md text-center">
+                        <p><i data-lucide="info" className="inline w-4 h-4 mr-1"></i> Wichtiger Hinweis: Achte darauf, dass die URL im Browser genau <strong>https://server-satus.vercel.app/</strong> lautet, sonst schlägt der Discord-Login fehl (Redirect URI Mismatch).</p>
                     </div>
                 </div>
             );
         };
 
-        const ModulesPage = () => {
-            const [modules, setModules] = useState([
-                { id: 'welcome', name: 'Welcome Messages', description: 'Send messages when users join or leave.', enabled: true },
-                { id: 'mod', name: 'Moderation', description: 'Kick, ban, mute, and filter bad words.', enabled: true },
-                { id: 'music', name: 'Music Player', description: 'Play music in voice channels.', enabled: false },
-                { id: 'economy', name: 'Economy System', description: 'Global economy with shop and inventory.', enabled: false },
-                { id: 'tickets', name: 'Ticket System', description: 'Allow users to create support tickets.', enabled: true },
-            ]);
-
-            const toggleModule = (id) => {
-                setModules(modules.map(mod => 
-                    mod.id === id ? { ...mod, enabled: !mod.enabled } : mod
-                ));
+        const ServerSelectionPage = ({ guilds, onSelectServer }) => {
+            const inviteBot = (guildId, e) => {
+                e.stopPropagation();
+                const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&permissions=8&integration_type=0&scope=bot+applications.commands&guild_id=${guildId}`;
+                window.open(inviteUrl, '_blank', 'width=500,height=700');
             };
 
             return (
-                <div>
-                    <h2 className="text-2xl font-bold text-white mb-6">Module Configuration</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {modules.map(mod => (
-                            <Card key={mod.id} className="flex flex-col justify-between h-full">
-                                <div>
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-lg font-bold text-white">{mod.name}</h3>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input 
-                                                type="checkbox" 
-                                                className="sr-only peer" 
-                                                checked={mod.enabled}
-                                                onChange={() => toggleModule(mod.id)}
-                                            />
-                                            <div className="w-11 h-6 bg-discord-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-discord-accent"></div>
-                                        </label>
+                <div className="space-y-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white">Server Auswahl</h2>
+                        <p className="text-discord-500 mt-1">Wähle einen Server aus, den du verwalten möchtest. Du siehst hier alle Server, auf denen du Administrator bist.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {guilds.length === 0 ? (
+                            <div className="col-span-full flex flex-col items-center justify-center py-12 bg-discord-sidebar rounded-lg border border-discord-800">
+                                <i data-lucide="server-off" className="w-12 h-12 text-discord-600 mb-3"></i>
+                                <p className="text-discord-500">Keine Server gefunden, auf denen du Admin-Rechte hast.</p>
+                            </div>
+                        ) : (
+                            guilds.map(guild => (
+                                <div key={guild.id} onClick={() => onSelectServer(guild)} className="bg-discord-sidebar rounded-lg border border-discord-800 hover:border-discord-accent transition-colors cursor-pointer overflow-hidden group flex flex-col">
+                                    <div className="h-24 bg-discord-900 relative">
+                                        <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-discord-accent to-purple-600"></div>
+                                        <div className="absolute -bottom-6 left-6 w-16 h-16 rounded-full border-4 border-discord-sidebar bg-discord-800 flex items-center justify-center overflow-hidden">
+                                            {guild.icon ? (
+                                                <img src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`} alt={guild.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-white font-bold text-xl">{guild.name.charAt(0)}</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className="text-discord-500 text-sm mb-4">{mod.description}</p>
+                                    <div className="pt-8 pb-4 px-6 flex flex-col flex-1">
+                                        <h3 className="text-lg font-bold text-white truncate mb-4">{guild.name}</h3>
+                                        <div className="mt-auto flex gap-2">
+                                            <button className="flex-1 bg-discord-800 hover:bg-discord-700 text-white py-2 rounded text-sm font-medium transition">
+                                                Verwalten
+                                            </button>
+                                            <button 
+                                                onClick={(e) => inviteBot(guild.id, e)}
+                                                className="bg-discord-accent hover:bg-discord-accentHover text-white px-3 py-2 rounded text-sm font-medium transition flex items-center justify-center"
+                                                title="Bot zu diesem Server einladen"
+                                            >
+                                                <i data-lucide="user-plus" className="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button 
-                                        className={`w-full py-2 rounded text-sm font-medium transition ${mod.enabled ? 'bg-discord-800 hover:bg-discord-700 text-white' : 'bg-discord-900 text-discord-600 cursor-not-allowed'}`}
-                                        disabled={!mod.enabled}
-                                    >
-                                        Configure Settings
-                                    </button>
-                                </div>
-                            </Card>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             );
         };
 
+        const OverviewPage = ({ server }) => {
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center bg-discord-sidebar p-4 rounded-lg border border-discord-800">
+                        <div className="flex items-center gap-4">
+                            {server?.icon ? (
+                                <img src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`} className="w-12 h-12 rounded-full" />
+                            ) : (
+                                <div className="w-12 h-12 rounded-full bg-discord-800 flex items-center justify-center text-white font-bold text-xl">
+                                    {server?.name?.charAt(0)}
+                                </div>
+                            )}
+                            <div>
+                                <h2 className="text-xl font-bold text-white">{server?.name || "Unbekannter Server"}</h2>
+                                <p className="text-discord-500 text-sm">Server ID: {server?.id}</p>
+                            </div>
+                        </div>
+                        <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-4 py-2 rounded transition font-medium flex items-center gap-2">
+                            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Sync
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <StatBox label="Mitglieder" value="-" iconClass="users" />
+                        <StatBox label="Kanäle" value="-" iconClass="hash" />
+                        <StatBox label="Rollen" value="-" iconClass="shield" />
+                    </div>
+
+                    <Card title="Recent Activity Logs">
+                        <div className="flex flex-col items-center justify-center py-8 text-discord-600">
+                            <i data-lucide="inbox" className="w-10 h-10 mb-2 opacity-50"></i>
+                            <p>Die Bot-Logs für diesen Server werden hier erscheinen.</p>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ModulesPage = ({ server }) => (
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-white">Module für {server?.name}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card title="Willkommensnachrichten">
+                        <p className="text-discord-500 text-sm mb-4">Sende automatisch eine Nachricht, wenn ein neuer Benutzer beitritt.</p>
+                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-discord-800">
+                            <span className="text-sm font-medium">Status</span>
+                            <span className="bg-green-500/10 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/20">Aktiviert</span>
+                        </div>
+                    </Card>
+                    <Card title="Auto-Moderation">
+                        <p className="text-discord-500 text-sm mb-4">Filtere automatisch böse Wörter und Spam aus deinem Server heraus.</p>
+                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-discord-800">
+                            <span className="text-sm font-medium">Status</span>
+                            <span className="bg-red-500/10 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/20">Deaktiviert</span>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        );
+
         const SettingsPage = () => (
             <div>
-                <h2 className="text-2xl font-bold text-white mb-6">Bot Settings</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Globale Bot Einstellungen</h2>
+                
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
+                    <i data-lucide="alert-triangle" className="text-red-400 w-6 h-6 flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 className="text-red-400 font-bold">Sicherheitswarnung</h4>
+                        <p className="text-red-300 text-sm mt-1">
+                            Der Bot Token und Client Secret sind hier zu Demonstrationszwecken im Code eingetragen. 
+                            In einer echten, öffentlichen App dürfen diese niemals sichtbar sein!
+                        </p>
+                    </div>
+                </div>
+
                 <Card>
                     <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                         <div>
@@ -258,35 +247,24 @@
                             <div className="flex gap-2">
                                 <input 
                                     type="password" 
-                                    placeholder="Enter your Bot Token here..." 
-                                    className="flex-1 bg-discord-900 text-white rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800"
-                                    defaultValue="*****************************************"
+                                    className="flex-1 bg-discord-900 text-discord-400 rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 font-mono text-sm"
+                                    defaultValue="MTUzMzM0MTE0MjExOTA4ODIyOQ.GuLNmj..."
                                 />
                                 <button className="bg-discord-800 hover:bg-discord-700 px-4 rounded text-white font-medium">Reveal</button>
                             </div>
-                            <p className="text-xs text-red-400 mt-1">Never share your token with anyone!</p>
                         </div>
                         
                         <div>
                             <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Client ID</label>
                             <input 
                                 type="text" 
-                                placeholder="Enter Client ID..." 
-                                className="w-full bg-discord-900 text-white rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Client Secret</label>
-                            <input 
-                                type="password" 
-                                placeholder="Enter Client Secret..." 
-                                className="w-full bg-discord-900 text-white rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800"
+                                className="w-full bg-discord-900 text-discord-400 rounded p-3 focus:outline-none focus:ring-2 focus:ring-discord-accent border border-discord-800 font-mono text-sm"
+                                defaultValue="1533341142119088229"
                             />
                         </div>
 
                         <div className="border-t border-discord-800 pt-6 mt-6">
-                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Command Prefix</label>
+                            <label className="block text-xs font-bold text-discord-500 uppercase tracking-wider mb-2">Standard Command Prefix</label>
                             <input 
                                 type="text" 
                                 defaultValue="!" 
@@ -294,9 +272,8 @@
                             />
                         </div>
 
-                        <div className="flex justify-end gap-3 mt-8">
-                            <button className="text-white hover:underline px-4 py-2 rounded">Cancel</button>
-                            <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-6 py-2 rounded font-medium transition">Save Changes</button>
+                        <div className="flex justify-end mt-8">
+                            <button className="bg-discord-accent hover:bg-discord-accentHover text-white px-6 py-2 rounded font-medium transition">Änderungen speichern</button>
                         </div>
                     </form>
                 </Card>
@@ -304,73 +281,134 @@
         );
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState('overview');
+            const [activeTab, setActiveTab] = useState('servers');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             
             const [isAuthenticated, setIsAuthenticated] = useState(false);
-            const [authCode, setAuthCode] = useState(null);
+            const [accessToken, setAccessToken] = useState(null);
+            const [user, setUser] = useState(null);
+            const [guilds, setGuilds] = useState([]);
+            const [selectedServer, setSelectedServer] = useState(null);
 
             useEffect(() => {
-                // Prüft ob ein Code von Discord in der URL übergeben wurde
-                const urlParams = new URLSearchParams(window.location.search);
-                const code = urlParams.get('code');
+                // Lade Icons initial
+                lucide.createIcons();
+
+                // Token aus URL-Hash auslesen (Implicit Grant Flow)
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const token = hashParams.get('access_token');
                 
-                if (code) {
-                    setAuthCode(code);
+                if (token) {
+                    setAccessToken(token);
                     setIsAuthenticated(true);
                     
-                    // Bereinigt die URL optisch, ohne die Seite neu zu laden
+                    // URL im Browser aufräumen
                     window.history.replaceState({}, document.title, window.location.pathname);
+
+                    // User Info abrufen
+                    fetch('https://discord.com/api/users/@me', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                    .then(res => res.json())
+                    .then(data => setUser(data))
+                    .catch(console.error);
+
+                    // Guilds (Server) abrufen
+                    fetch('https://discord.com/api/users/@me/guilds', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // Zeige nur Server auf denen User Admin (0x8) oder Owner ist, oder Manage Server (0x20) hat
+                        const adminGuilds = data.filter(g => 
+                            g.owner || (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20
+                        );
+                        setGuilds(adminGuilds);
+                    })
+                    .catch(console.error);
                 }
             }, []);
 
+            // Icons nach jedem Render aktualisieren
             useEffect(() => {
                 lucide.createIcons();
-            }, [activeTab, isAuthenticated]);
+            });
 
-            const navItems = [
-                { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
-                { id: 'modules', label: 'Modules', icon: 'blocks' },
-                { id: 'settings', label: 'Settings', icon: 'settings' },
+            const navItems = selectedServer ? [
+                { id: 'servers', label: 'Zurück zur Auswahl', icon: 'arrow-left' },
+                { id: 'overview', label: 'Server Übersicht', icon: 'layout-dashboard' },
+                { id: 'modules', label: 'Server Module', icon: 'blocks' },
+                { id: 'settings', label: 'Bot Einstellungen', icon: 'settings' },
+            ] : [
+                { id: 'servers', label: 'Meine Server', icon: 'server' },
+                { id: 'settings', label: 'Globale Einstellungen', icon: 'settings' },
             ];
 
-            const renderContent = () => {
-                switch(activeTab) {
-                    case 'overview': return <OverviewPage />;
-                    case 'modules': return <ModulesPage />;
-                    case 'settings': return <SettingsPage />;
-                    default: return <OverviewPage />;
-                }
+            const handleNavClick = (id) => {
+                if (id === 'servers') setSelectedServer(null);
+                setActiveTab(id);
+                setIsMobileMenuOpen(false);
             };
 
-            if (!isAuthenticated) {
-                return <LoginPage />;
-            }
+            const renderContent = () => {
+                if (activeTab === 'servers') return <ServerSelectionPage guilds={guilds} onSelectServer={(s) => { setSelectedServer(s); setActiveTab('overview'); }} />;
+                if (activeTab === 'settings') return <SettingsPage />;
+                
+                if (selectedServer) {
+                    switch(activeTab) {
+                        case 'overview': return <OverviewPage server={selectedServer} />;
+                        case 'modules': return <ModulesPage server={selectedServer} />;
+                        default: return <OverviewPage server={selectedServer} />;
+                    }
+                }
+                return null;
+            };
+
+            if (!isAuthenticated) return <LoginPage />;
 
             return (
                 <div className="flex h-screen bg-discord-bg overflow-hidden">
+                    {/* Mobile Sidebar Overlay */}
+                    {isMobileMenuOpen && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-10 md:hidden" 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        />
+                    )}
+
                     {/* Sidebar */}
-                    <aside className={`bg-discord-sidebar w-64 flex-shrink-0 flex flex-col transition-transform duration-300 z-20 ${isMobileMenuOpen ? 'translate-x-0 absolute inset-y-0 left-0' : '-translate-x-full md:translate-x-0'} md:relative`}>
+                    <aside className={`fixed md:relative bg-discord-sidebar w-64 h-full flex-shrink-0 flex flex-col transition-transform duration-300 z-20 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
                         <div className="h-16 flex items-center px-6 border-b border-discord-800 flex-shrink-0">
                             <div className="w-8 h-8 bg-discord-accent rounded-lg flex items-center justify-center mr-3">
-                                <i data-lucide="bot" className="text-white"></i>
+                                <i data-lucide="bot" className="text-white w-5 h-5"></i>
                             </div>
                             <h1 className="text-white font-bold text-lg">Bot Control</h1>
-                            {/* Close button for mobile */}
                             <button className="md:hidden ml-auto text-discord-500 hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
-                                <i data-lucide="x"></i>
+                                <i data-lucide="x" className="w-5 h-5"></i>
                             </button>
                         </div>
                         
                         <div className="flex-1 overflow-y-auto py-4">
+                            {selectedServer && (
+                                <div className="px-4 mb-4">
+                                    <div className="bg-discord-900 rounded border border-discord-800 p-3 flex items-center gap-3">
+                                        {selectedServer.icon ? (
+                                            <img src={`https://cdn.discordapp.com/icons/${selectedServer.id}/${selectedServer.icon}.png`} className="w-8 h-8 rounded-full" />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-discord-700 flex flex-shrink-0 items-center justify-center text-xs font-bold text-white">
+                                                {selectedServer.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        <span className="text-white font-medium text-sm truncate">{selectedServer.name}</span>
+                                    </div>
+                                </div>
+                            )}
+
                             <nav className="space-y-1 px-3">
                                 {navItems.map(item => (
                                     <button
                                         key={item.id}
-                                        onClick={() => {
-                                            setActiveTab(item.id);
-                                            setIsMobileMenuOpen(false);
-                                        }}
+                                        onClick={() => handleNavClick(item.id)}
                                         className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
                                             activeTab === item.id 
                                                 ? 'bg-discord-800 text-white' 
@@ -384,54 +422,55 @@
                             </nav>
                         </div>
 
+                        {/* User Profile Area */}
                         <div className="p-4 bg-discord-900 border-t border-discord-800">
                             <div className="flex items-center">
-                                <div className="w-10 h-10 rounded-full bg-discord-800 flex items-center justify-center text-white">
-                                    <i data-lucide="user" className="w-5 h-5"></i>
+                                <div className="w-10 h-10 rounded-full bg-discord-800 overflow-hidden flex items-center justify-center text-white flex-shrink-0">
+                                    {user?.avatar ? (
+                                        <img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <i data-lucide="user" className="w-5 h-5"></i>
+                                    )}
                                 </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-white">Verbunden</p>
-                                    <p className="text-xs text-discord-500">via OAuth2</p>
+                                <div className="ml-3 truncate">
+                                    <p className="text-sm font-bold text-white truncate">{user?.global_name || user?.username || "Lade..."}</p>
+                                    <p className="text-xs text-discord-500 truncate">{user?.username ? `@${user.username}` : "..."}</p>
                                 </div>
                                 <button 
-                                    className="ml-auto text-discord-500 hover:text-white transition-colors"
+                                    className="ml-auto p-2 text-discord-500 hover:text-red-400 transition-colors"
                                     title="Abmelden"
                                     onClick={() => {
                                         setIsAuthenticated(false);
-                                        setAuthCode(null);
+                                        setAccessToken(null);
+                                        setUser(null);
+                                        setGuilds([]);
+                                        setSelectedServer(null);
+                                        setActiveTab('servers');
                                     }}
                                 >
-                                    <i data-lucide="log-out" className="w-5 h-5"></i>
+                                    <i data-lucide="log-out" className="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
                     </aside>
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col min-w-0 bg-discord-bg relative">
+                    {/* Main Content */}
+                    <main className="flex-1 flex flex-col min-w-0">
                         {/* Mobile Header */}
-                        <header className="md:hidden h-16 bg-discord-sidebar border-b border-discord-800 flex items-center justify-between px-4">
-                            <h1 className="text-white font-bold">Bot Control</h1>
+                        <header className="md:hidden h-16 bg-discord-sidebar border-b border-discord-800 flex items-center px-4 flex-shrink-0">
                             <button className="text-discord-500 hover:text-white" onClick={() => setIsMobileMenuOpen(true)}>
-                                <i data-lucide="menu"></i>
+                                <i data-lucide="menu" className="w-6 h-6"></i>
                             </button>
+                            <span className="ml-4 font-bold text-white">Bot Dashboard</span>
                         </header>
 
-                        {/* Main Content scrollable area */}
-                        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+                        {/* Content Area */}
+                        <div className="flex-1 overflow-auto p-4 md:p-8">
                             <div className="max-w-6xl mx-auto">
                                 {renderContent()}
                             </div>
-                        </main>
-                    </div>
-
-                    {/* Overlay for mobile sidebar */}
-                    {isMobileMenuOpen && (
-                        <div 
-                            className="fixed inset-0 bg-black/50 z-10 md:hidden"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        ></div>
-                    )}
+                        </div>
+                    </main>
                 </div>
             );
         };
